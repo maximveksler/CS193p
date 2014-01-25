@@ -602,16 +602,1125 @@ we're going to talk 48:58 about why properties are good and why it's better than
 	</div>
 </div>
 
+	<div class="row">
+		<div class="col-md-10"><h3>2. Xcode 5</h3></div>
+		<div class="col-md-2">
+	        <ul class="nav nav-pills">
+	          <li><a href="Lecture 2 Slides.pdf">Slides</a></li>
+	          <li><a href="http://a146.phobos.apple.com/us/r30/CobaltPublic/v4/c2/03/83/c20383e1-73b3-ece1-7429-b14b38ad4384/318-1013471239741048298-02_9_25_13_Wed_720p1500cc.mp4">Lecture</a></li>
+	        </ul>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<pre><span class="small">00:05 >> Stanford University.
+00:11 >> Paul Hegarty: Okay.
+00:11 Well, welcome to lecture number two of CS 193P for fall of 2013/2014 academic year.
+00:20 And today we're going to have some slides at the beginning, little more talking, and then I'm going to have quite a big demo that's going to try and hopefully synthesize all the things I've been talking about on the slides for the first two lectures, which is that we're going to start building our card game.
+00:36 Okay. This card matching game is going to be our substrate for the first two weeks of learning some Objective-C, learning about Xcode, learning about how iOS hooks up the controller, and the view, and the model to make a UI.
+00:52 So if you remember from last time, we did this card thing that -- we did the entire card.
+00:58 It was a very simple class.
+01:00 Got a couple of properties -- three properties there -- and one method.
+01:04 And that's pretty much it.
+01:05 And so today we're going to go on and do another class, which is a deck, okay?
+01:09 The deck of cards.
+01:11 And remember, that card and deck are generic; they're not specific to playing cards, right?
+01:17 A playing card, like the ace of clubs or the king of hearts -- something that has all that in it -- that's a playing card thing.
+01:22 These are general cards and decks.
+01:24 So this could be a deck of flash cards, a deck of foreign language words you're trying to learn or whatever.
+01:30 So we're trying to keep these deck and card classes somewhat generic.
+01:33 So here's deck.
+01:34 It should look familiar in terms of its basic structure, right?
+01:37 We're importing our superclasses framework there, and then obviously importing our own header file in our implementation.
+01:45 And the interface for deck is going to have these two kind of fundamental methods: One adds a card to the deck and one draws a random card out of the deck.
+01:55 Okay? And the add a card to the deck is a little bit new to you because you can see it has two arguments.
+02:03 Okay? This is the first method you've seen that has two arguments.
+02:05 So far you've only seen methods with no arguments or a method with one argument like that -- match -- match had one argument or the setters, they also have one argument.
+02:13 So notice that when you have multiple arguments and objectives, see they're kind of interspersed with the names of the methods.
+02:22 Okay? So the name of this method, this long method is add card colon at top colon.
+02:28 That's the name of this method.
+02:29 Okay? So the at top part is actually part of the name of this method.
+02:33 And the arguments, like the card that you're going to add and at top -- which is a Boolean whether to add it at the top of the deck or at the bottom of the deck -- okay, those arguments are interspersed.
+02:43 And we'll see how you call such a method in a moment here.
+02:47 And then draw a random card is like a, you know, similar to a getter in that it returns a value and it has no arguments.
+02:55 But this is not a getter because we didn't make this a property.
+02:58 And it's kind of important to understand you could have made this a property like a read-only property or something that reads it, but since draw a random card kind of does something, it has kind of an algorithm to it -- a mechanism -- you usually wouldn't make that a property.
+03:13 It's kind of an abuse of a getter to do that.
+03:16 A getter is really just setting and getting a value.
+03:18 It might have side effects, like setting it might update the UI or getting it might make sure it's initialized first -- those kind of things.
+03:26 You're not going to -- something that does something like drawing a card is not going to be a property.
+03:31 Now, if you want to have, like, that at top argument be optional, okay, the only way to do that in Objective-C -- obviously we need our header file there -- the only way to do that in Objective-C is to declare a new method, add card colon with no at top on it.
+03:48 So this is a totally different method, totally unrelated to the other method except for that in its implementation of this other method we're just going to call the other one, okay?
+03:57 So in add card we're going to say self add card at top colon, whatever we want the default to be, which I'm going to say is no.
+04:03 Okay? So just understand that, you know, in some languages, like, some arguments can be optional or you can kind of overload things to have the same method name have different arguments.
+04:16 No. In Objective-C every method is completely distinct and has a distinct name.
+04:21 And extra arguments are interspersed like that.
+04:23 Okay? So these would be two different methods.
+04:26 That make sense?
+04:27 All right.
+04:27 So let's talk about our implementation of our deck.
+04:31 So our deck is just going to contain a bunch of cards.
+04:34 We need some sort of internal data structure to store all our cards in.
+04:38 And what we're going do is we're going to get a mutable array.
+04:43 So you've already seen the class NS array, which is the foundation class array, which is an array of objects.
+04:49 Those objects, by the way, in array can be of any class.
+04:51 There's really no way to specify what kind of class of object is in an array.
+04:56 Some languages allow you to do that.
+04:58 You can specify "This is an array of strings" and it knows that.
+05:02 But in Objective-C you can't do that.
+05:04 And we're going to talk about how we deal with that.
+05:06 That's a little bit of the wild west of Objective-C, but there are ways to kind of check and see what the objects are if you want to be really safe about it.
+05:14 But in this case we just have this mutable array.
+05:16 And mutable means that we can add objects to the array.
+05:18 Normally an NS array is immutable.
+05:21 Okay? Once it's created, whatever objects enter it, that's the objects that are in it forever -- you can't take any out and you can't put any in.
+05:27 So if we want array where we can add stuff, we have to use this subclass of NS array called NS mutable array.
+05:33 Okay? You can see that it's a property.
+05:35 It's strong because we want this array to stay in the heap as long as we're pointing at it.
+05:40 And of course, we always put nonatomic there.
+05:42 Okay? So this is going to be an array of cards.
+05:45 Now that we have this, we could easily implement add card, for example, by just saying, "If at top, then insert object," the card, which is the argument to this method -- first argument -- "add index zero." So insert object add index is a method in NS mutable array, not in NS array -- only in NS mutable array because that would be mutating it -- that inserts the object at that index in the array and index zero is going to be the top that we're going to define.
+06:15 And then otherwise if we're not going to put it at the top, we're going to put it at the bottom, we're going to use a different NS mutable array method called add object.
+06:21 And that just adds something at the end of the array.
+06:23 So everyone cool with that?
+06:25 So I mostly just put this method in here just to show you there's a couple of different methods on mutable array and, you know, how we can use the arguments.
+06:32 It's no big thing here; it's just kind of to get more used to what's going on here.
+06:38 All right.
+06:38 So that's add card.
+06:39 Very, very simple.
+06:40 And there's a problem, though.
+06:43 In this add cards, if we just created a deck and then called add card, it would not work.
+06:52 Okay? It would do nothing.
+06:53 Why would it do nothing?
+06:55 Because the property cards, okay -- self.cards is how we're accessing our own property -- its getter looks like that by default.
+07:05 If we don't give a getter, that's what the getter looks like.
+07:07 It's just going to return this underbar cards instance variable.
+07:10 Well, that underbar cards instance variable's going to start out at zero because all instance variables in an Objective-C object start out zero.
+07:18 All of them.
+07:19 Okay? So including pointers.
+07:21 So that pointer will be zero, which is we call nil, which means it doesn't point to anything, which means there is no array, okay?
+07:29 We got a pointer to an array that doesn't point to anything right now.
+07:33 Okay? So that's a problem.
+07:34 So when we execute the code in add cards like self.cards add object card, that's going to not crash but not do anything, either.
+07:43 Okay? Because I told you that you can send messages to nil, send messages to pointers, to objects where it's not pointing to one at the time, and it will not crash.
+07:53 If you send a message that returns a value, that message will not execute any code but it will return zero.
+07:59 Okay? So a lot of zeros flying around here.
+08:02 Okay? So how are we going to fix this?
+08:04 How are we going make it so that add card works?
+08:06 Well, we could put something at the beginning of add card that says, "If self.cards is nil, then go allocate an array in the heap and point to it, and then we'll use it." Okay? But that would mean every single time we have to use self.cards we'd have to go around and check and make sure it's not nil.
+08:23 And that would be very annoying.
+08:25 Okay? That would be very error-prone, bug-prone, we forget to do it somewhere.
+08:29 All these things.
+08:30 So a great place to do that little if check is in the getter, okay?
+08:35 That getter that we have right there for cards -- that's the getter for our private property cards -- instead of just returning the cards, let's put a line right in front that says, "If the cards is nil, then let's go allocate one in the heap and assign it to the instance variable." Okay? So the way you allocate an array in the heap is you use NS mutable array alloc init.
+09:00 So that's two message calls nested inside of each other.
+09:04 The alloc allocates the member in the heap, and init initializes that memory so that it's a, you know, sensible array.
+09:10 And we're going to see how we build our own initializer in a couple slides here.
+09:15 So this way every single time you call self.cards, you can be sure that it's not nil; it's at least going to be an empty array.
+09:22 Does everyone understand this code?
+09:25 It's important to understand this.
+09:27 Yeah.
+09:28 [ Inaudible ]
+09:37 >> Paul Hegarty: Okay.
+09:37 So the question is: Instead of having this initialization code be in this getter, why don't I make an initializer like an init for deck and put this inside deck?
+09:48 Okay? And that is another option.
+09:50 And again, we're going to see initializer for playing card deck, we're going to make an initializer.
+09:55 And we could do that.
+09:57 But having the initialization of this thing be closer to the actual getting of the property is more -- it makes your init less full of a bunch of junk like that.
+10:08 And this is called lazy instantiation, by the way, doing it this way.
+10:13 We are lazily waiting to the last second until we instantiate.
+10:18 This pattern is something everyone in Objective-C is used to, and you should definitely use it rather than doing things in your init.
+10:23 In init you want to, you know, set things, set values that, you know, can't easily be defaulted like this.
+10:30 Okay? But that's a very good question.
+10:32 And we'll see init in a couple slides.
+10:34 Okay? So this way we're guaranteed self.cards is never nil.
+10:40 Yeah?
+10:40 >> [Inaudible]
+10:40 >> Paul Hegarty: Yeah.
+10:40 So the underscore is from last lecture.
+10:43 Remember that when we create a property, Objective-C automatically does this thing, assign synthesize: Cards equals underbar cards.
+10:51 So in other words, it assigns an instance variable called underbar name of property to be the storage space for that property.
+10:58 So that's why underbar cards are automatically created for us there behind the scenes.
+11:03 That at sign synthesizes a pop up in our code, but it's there behind the scenes.
+11:06 That's a very good question.
+11:09 Any other questions about this?
+11:11 Okay. So let's collapse down some of this stuff and look at draw a random card, okay?
+11:18 So draw a random card, all it wants to do is get a random card out of that self.cards, okay?
+11:24 So that code is very simple as well.
+11:27 So we just get a random integer.
+11:30 That's what arc 4 random does if you don't know.
+11:32 It's just a C library function.
+11:34 It gets a random integer.
+11:35 Then that little percent after it means mod -- okay, integer modulo -- and then self.cards.count is the number of cards in our self.cards.
+11:44 Okay? So we're just going to get a random index into self.cards, then assign a random card to be self.cards square brackets index, okay?
+11:55 So this is that same square brackets to access an array kind of syntax.
+12:01 And it's interesting, that self.cards square brackets index, actually, that's a message send believe it or not.
+12:07 That's same as self.cards object at index index.
+12:12 Okay? It's just some special syntax and syntactic sugar to make it so that you don't have to have long object add index.
+12:18 It's actually object at subscripted index or something with a real long method name.
+12:22 So this is just a beautiful, little simple syntax.
+12:26 But that is a message send to get the card at that index out of the array.
+12:30 And then we're also going to remove that card out of the array because this is draw a random card, okay?
+12:37 It's draw the card out of the deck.
+12:40 So it's not in the deck anymore, right?
+12:42 Now, there's a problem with this code as well, which is: What if the deck is empty?
+12:48 Okay? If the deck is empty, then that unsigned index is going to be zero, right, because it's going to be arc 4 random mod zero.
+12:56 That's going to be zero.
+12:58 And so you're going to say, "Random card equals self.card sub zero." Well, that's going to crash your program because if self.cards is an empty array, then there's no object at index zero and you're going to get array index out of bounds.
+13:12 Okay? So be careful of that.
+13:14 The index -- you cannot get the index -- if an array doesn't have an object of that index, you can't get it.
+13:20 So that's easy to fix, though.
+13:22 We're just going to say, "If self.cards count," in other words if there are things in the array, "then we'll do that.
+13:29 Otherwise we're just going to return random card," which I happily initialized to nil at the beginning of my method.
+13:35 And that's why I kind of like this thing of initialize it to the default value you want, then set it, and then return.
+13:41 And that way if the setting fails for some reason like this -- it fails because there's no cards in the deck -- it will return the reasonable default.
+13:48 That's just kind of a coding style thing.
+13:50 Okay? We did that same thing with score and match.
+13:53 Okay? Any questions about that?
+13:57 Yeah?
+13:58 [ Inaudible ]
+14:03 >> Paul Hegarty: Great question.
+14:04 So the question is: When do I use NS integer or NSU integer versus int or even NS number, which is an object which we haven't talked about yet?
+14:15 And the answer is it's a matter of style.
+14:17 And we'll talk a little bit about that style and when to use these things.
+14:20 Here I don't really want to use an NS number which is an object when I'm just using it, you know, as a little local thing like that.
+14:27 You would never do that.
+14:28 You're using NS numbers basically to pass them to methods.
+14:32 And even then you could pass ints, you know, and floats.
+14:35 So it will be become obvious as I talk about NS number, which we'll do next week.
+14:41 Okay. So that's it for deck.
+14:43 Deck, very simple class as well.
+14:45 So let's move onto another class, which is playing card.
+14:49 Okay? The reason I'm showing you playing cards, I just want to show you what it looks like to make a subclass of another class that you've written.
+14:54 So playing card is a subclass of card.
+14:56 And this is the specific card like king of hearts, three of diamonds, that kind of card, okay?
+15:02 Now, it has properties that are specific to a playing card, which is the suit and rank.
+15:08 Okay? The rank being like a three, four, a jack, king, right?
+15:11 And the suit being hearts, diamonds, clubs.
+15:14 And I'm going to represent the suit as a single character -- the hearts characters, the clubs character.
+15:19 Remember I typed the clubs character I think in the card we might have shown that.
+15:23 I don't know.
+15:23 But you can type a single character.
+15:25 Unicode has a character for each of the four suits.
+15:27 So that's what my suit is going to be.
+15:28 And then the rank is going to be a number between zero and thirteen.
+15:33 Is that king?
+15:34 Yeah. Representing the rank.
+15:36 So that's how I'm going to represent in my public API.
+15:38 And here I'm using notice NSU integer instead of unsigned int.
+15:43 So NSU integer and unsigned int are almost exactly the same thing.
+15:47 The only thing about NSU integer is it's typedef.
+15:50 It might be a little different on different platforms.
+15:52 For example, the new iPhone 5s are 64-bit processers.
+15:56 So NSU integer is going to be a 64-bit int, unsigned int on an iPhone 5.
+16:01 And it might only about a 32-bit one back on an iPhone 4 and before.
+16:05 Okay? So that's a little bit different.
+16:08 So a minor int.
+16:10 We were probably not representing integers.
+16:12 Certainly here we're only going zero to thirteen.
+16:14 Probably doesn't matter.
+16:15 But, you know, we're not representing integers that are so gigantic that we're going to be using the 33rd bit.
+16:21 So notice that in playing card we're overriding card method contents.
+16:28 Okay? We inherit contents from our superclass.
+16:30 And by default contents just returns the value of whatever the contents property is.
+16:36 But here in the playing card we're going to override contents to actually calculate our contents, based on these other two properties.
+16:43 Okay? So we're overriding the getter of contents so that it always returns a string -- the contents of this playing card -- that is calculated from the suit and rank.
+16:53 You see what we're doing here?
+16:54 So we're basically taking the storage of contents -- underbar contents -- from our superclass and ignoring it because we're overriding its getter.
+17:01 Okay? So this is a perfectly valid reason why we do these properties as well because we might have a better way to do things than the storage.
+17:10 Now, here's a way we could implement it: We can just return a string, okay?
+17:13 NS string, string with format just like printf-ing a string.
+17:17 Don't worry about that syntax too much.
+17:19 And I'm printf-ing a string with percent D and percent at sign.
+17:22 So percent D means integer; percent at sign means an object.
+17:26 Okay? A string representation of an object.
+17:28 And then I'm just using the rank and suit.
+17:31 So this would be one way to do my contents.
+17:32 It's not a very good way because, for example, the jack of hearts would say 11 hearts, okay?
+17:38 It's not going to say J at least; we want to say J, not 11.
+17:42 So this is not a very good way.
+17:44 So instead I'm going to make an array that has all the right things like an A for a one, and a J for 11, and a Q for 12, and a K for 13, right?
+17:55 So I'm just making this array here.
+17:57 In the middle there I had to cut out to make it fit, right?
+18:01 And I even made zero be question mark.
+18:03 So if your rank is zero, it's going to be, like, question mark, like, unset.
+18:07 You know, your rank is basically not set.
+18:09 And then I return a string, which is taking the rank out of that array and appending onto it the little suit string, the heart, or the club, or the diamond.
+18:20 Everyone understand this?
+18:22 I'm kind of giving you this so you can see how we're mixing in the array notation, and message sending, and it all kind of seamlessly mixes in there.
+18:31 Okay? So now contents returns J hearts, or 5 diamonds, or whatever.
+18:38 Notice that our rank is really nice because if our rank is zero, which it starts out being when we say new playing card -- all the instance variables are zero so rank would be zero -- we get this nice question mark.
+18:49 But our suit starts out as nil, and it would be nice if the suit also returned question mark if it was unsaid, if it was nil.
+18:56 So here I'm just overriding the getter of suit to say, "If return, if my suit is nil, then return the question mark, otherwise when my suit's not nil, then return what the suit is." Okay? So I'm just kind of protecting my API to make sure I always return question mark when the rank or suit is not set.
+19:17 Yeah.
+19:17 >> [Inaudible]
+19:18 >> Paul Hegarty: Sorry.
+19:19 All little at signs -- the red at signs, you mean?
+19:22 Yeah. Guess we didn't get to that in card.
+19:26 But we might have.
+19:27 But remember that all strings that we're going to work with in this class are string objects, not const care stars, right?
+19:35 They're string objects.
+19:36 And the compiler, if you put an at sign in front of a string, it will make a string object for you, okay?
+19:42 So that's what those at signs do, they make all those strings be string objects because we can't put a const care star in an NS array.
+19:47 NS array is for objects, so we have to put objects in there like NS strings.
+19:51 Those are objects.
+19:52 Okay? Good question.
+19:53 Yeah?
+19:55 [ Inaudible ]
+20:09 >> Paul Hegarty: Yes.
+20:10 Okay. That's a good question.
+20:11 If we had used that getter equals notation that we used for is chosen and is matched to change the name, then when we override we have to use the new name.
+20:21 We'd have to is whatever.
+20:23 Now, this is not the case here.
+20:25 But I know what you're saying, and yes, you would have to use the new name.
+20:29 Great question.
+20:30 Any other questions about this?
+20:32 Okay. So that helps the suit always return question mark if the suit is nil or not set.
+20:37 Let's also protect people setting the suit to something wrong.
+20:42 Okay? Let's only let people set the suit using this property, the public setter of the property.
+20:48 We'll only let people set the suit to be one of the four suits.
+20:53 So I just on the fly in the middle there created an array of those four suits.
+20:57 And then I use this method contains object; what class do you think contains object is from that bit on?
+21:04 Anyone? [Inaudible]
+21:04 >> [Inaudible]
+21:05 >> Paul Hegarty: It's an NS array method, exactly.
+21:10 So contains object is an NS array method.
+21:12 I'm sending it to the array that I create right in place there.
+21:15 The array that has hearts, diamonds, spades, and clubs in it.
+21:18 And I'm just asking: Do you contain this string?
+21:20 And that contains object is going to compare the contents of this string against all these using a method is equal.
+21:27 Actually, it's going to say is equal to all four of them with the suit as the argument; not is equal to string -- is equal.
+21:32 And in string is equal is implemented by calling is equal to string if the argument's a string.
+21:37 Anyway, more detail than you need probably there.
+21:39 But this is obviously protecting it.
+21:41 So there's no way we can set our internal suit storage variable to anything except for those four suits.
+21:47 Yeah?
+21:48 [ Inaudible ]
+21:59 >> Paul Hegarty: Great question.
+22:00 You guys are right on top of it.
+22:02 So every time I use the at sign open square bracket -- the blue one -- to create an array, that's actually creating a new array every time.
+22:10 Okay? Because I told you that that at sign square bracket and all this array stuff is really just calling methods?
+22:15 Well, that's calling a method like alloc init with array with objects or something like that.
+22:20 Right? So it is creating it.
+22:21 So it would be nice to move it out, and we're going to do that.
+22:25 Although, again, be careful not to preoptimize.
+22:28 It probably wouldn't make any different.
+22:29 I'm only going to move it out to make my code cleaner; I'm not going to move it out for any performance reason.
+22:37 Yeah?
+22:38 >> [Inaudible]
+22:38 >> Paul Hegarty: Yeah.
+22:38 >> [Inaudible]
+22:38 >> Paul Hegarty: The question is: Would LLVM just take care of that, optimize that out for you?
+22:41 And it probably wouldn't because that's a message send; it's not sure what there might be side effects of it.
+22:45 But in any case, we're just going to do it just to make our code look cleaner.
+22:49 And the performance would be negligible here.
+22:51 We're talking about UI.
+22:52 It's not even close.
+22:54 One thing to note, though, before we do that is since we've implemented both the setter and the getter of suit, we are now required to do the at sign synthesize.
+23:04 Okay? In other words, normally we don't have to do this at sign synthesize.
+23:08 It gets done for us.
+23:09 But if we implement both the setter and the getter, now we do.
+23:12 It's easy to do because it's always of this exact same form.
+23:15 But we do have to do it.
+23:18 Okay. So here's -- let's do what we were saying.
+23:21 Let's take that little array of suits we have in there and put it in another method.
+23:26 Now, again, I'm not getting any performance by doing this, okay?
+23:29 I'm just getting code cleanliness by doing this because I'm still -- every time I call valid suits, it's going to create it again.
+23:35 Now, I could use a static variable.
+23:37 This is C. I could store this array.
+23:39 Started out being nil.
+23:40 If it's nil, set it to this array, and then it would only create it once.
+23:44 But be careful.
+23:45 Again, code cleanliness and understandably ten times more important than performance like this.
+23:49 So unless you're going to call valid suits in the inner loop thousands of times, it's not really going to matter.
+23:54 But once I move that up into a different method, this kind of method that I moved it to is a little different.
+24:00 Notice it has a plus.
+24:02 You see a plus there instead of a minus starting it?
+24:06 Plus NS array valid suits?
+24:08 Okay. A plus method is a class method.
+24:11 Okay? That means you send it to the class, not to an instance of an object.
+24:17 All right?
+24:17 So since you're not sending it to an instance, you can't use any instance variables or anything like that.
+24:23 You can only just kind of do generic stuff.
+24:25 So the only thing we really use plus methods for, class methods, is two things really: Creating things like in the previous slide when we had string with format -- that's a class method that was creating a string for us; and then also utility methods like this, like the return constants and things that, you know, our class wants and utility methods.
+24:47 But here's an example.
+24:48 And the way we call the class method -- you've already seen me call a few of them -- but here's calling it here is we put open square bracket, the name of the class, the name of the method.
+24:58 And again, it could have arguments.
+24:59 It's just like any other method.
+25:00 But everyone understand this?
+25:02 Okay. And if you go back and look a couple slides and you see open square bracket NS string, string with format, same exact type of syntax.
+25:12 Okay? So that's what a class method looks like.
+25:13 Again, for creating things basically and for utility methods.
+25:19 And we'll talk about the difference of: When do we create something with a class method versus alloc init?
+25:23 We'll talk about that soon.
+25:25 I'm also going to make valid suits public.
+25:28 And that way people who are using my playing card know what the valid suits are.
+25:33 And all I need to do is put it in the header file.
+25:35 Boom, it's public now.
+25:36 Okay? So let's do a similar thing here with those rank strings.
+25:41 Okay? So I'm going to take those ranks strings -- that array of rank strings right up there -- and I'm going to put that in a class method.
+25:49 Okay? And again, this is for readability, not for performance.
+25:52 Because every time I call rank strings, it's still going to create that thing again.
+25:56 And then I call it instead up there.
+26:00 And I'm not going to make rank strings itself public, but I am going to make another class method called max rank, which just looks at how many strings are in rank strings.
+26:09 And I'm going to return that as a public method.
+26:13 So there's three class methods for you to sink your teeth into -- two of them public, one not.
+26:19 All right.
+26:20 And so they're all utility methods, right?
+26:22 We're not accessing any instance variables in any of those methods, okay?
+26:27 That's the only reason I'm showing those, is just so you see what a class method looks like.
+26:31 We also could override the setter of rank just to be complete here to make sure it doesn't allow you to set a wrong rank like set rank 15 -- there's no such card as 15.
+26:42 So let's make sure that the rank is less than the max rank, which is the utility method we just did.
+26:47 Okay? Does that all come together for you, make sense?
+26:50 So this is kind of reference material.
+26:53 You have these slides that have all the annotations of all the things I'm saying.
+26:56 So feel free to go back and look at it and remind yourself about all these NS array, syntax, and all the class methods, all that stuff.
+27:04 Okay. The last thing we're going to look at is the init method business.
+27:08 Okay? So we're going to have another class here called playing card deck.
+27:12 All right?
+27:12 And a playing card deck is a subclass of deck.
+27:14 All right?
+27:15 And it has no public API.
+27:18 It's just going to override a method that it inherits indirectly from NS object -- okay, NS object through deck, which doesn't touch it -- all the way to playing card deck.
+27:29 And that method is called init.
+27:32 Okay? So this is the same init, same kind of method that when we created that array -- that mutable array we said NS mutable array alloc init.
+27:41 So someone is going to call this playing card deck init method -- namely you in your homework are going to call this by doing playing card deck alloc, and then on the outside, init.
+27:52 Okay? And that's how you're going to create a playing card deck.
+27:55 And that is how we create most instances of objects -- not all.
+27:59 Sometimes we do things like the NS string, string with format.
+28:02 But most of the time -- more than half the time -- we do alloc and then on the outside init.
+28:06 Okay. Listen carefully: Never call that alloc thing without wrapping an init around it.
+28:13 Okay? Don't ever do that.
+28:14 That makes no sense to have an object allocated in the heap that's never been initialized.
+28:18 Always have that nested.
+28:19 And vice versa: Never call that init except for when you wrap it around an alloc.
+28:25 And definitely never call that init more than once.
+28:27 Okay? And if you obey my rule of only calling it wrapped around an alloc, you can't call it more than once.
+28:32 Okay? Init is not something like you can re-init.
+28:36 Init happens once right after alloc, and that's it.
+28:39 Okay? That is a hard and fast rule we never break.
+28:43 Okay? So you heard it here.
+28:45 Don't forget.
+28:46 All right.
+28:46 Let's look at the whacky return type to this init method, okay?
+28:50 You might think this init method should return a playing card deck star because it's kind of initializing and maybe it returns itself.
+28:58 And in fact, init does always return self, okay?
+29:02 So init is always going to return self.
+29:04 Okay. More whackiness there, which I'm going to describe.
+29:07 Just for convenience, it always returns self so that you can do, like, playing card deck alloc init, sent it a message.
+29:14 Okay? So it's just convenience that it returns self.
+29:17 But it can't really have its return type being playing card deck star because it inherited this from NS object.
+29:23 And NS object already defined it as NS object star.
+29:28 You see? So it's kind of weird that you're inheriting a method whose return value would have to change every time you, you know, overrode it.
+29:36 So they invented this new thing -- this is new for iOS 7, by the way -- called instance type.
+29:42 And what instance type means is this is going to return an object that is of the same instance -- same type, same class type -- as the object you sent this message to.
+29:52 Okay? Which makes perfect sense for inits.
+29:54 And in this class that's probably all you're going to use this for right here.
+29:58 So if you don't really understand what I just said -- it's explained in the slides -- but if you don't really understand it, just know that whenever you do an initializer, it's going to return instance type as its return type and you're always going to return self.
+30:10 Okay? Now, also just take my word for it.
+30:14 We're going to do these next lines of codes as well because they are really strange.
+30:18 That first line, self equals super init, that is weird.
+30:21 That is super weird.
+30:23 Okay? Assigning something to self in Objective-C -- just never do that, except for this one time and that's in your init.
+30:30 Okay? You take self and you assign it to calling your superclasses initializer so that your superclass gets initialized.
+30:37 Why do we assign the result to self?
+30:41 It's kind of ancient history as to why this has been done for a long time.
+30:45 Basically we're checking the return of our superclasses init to make sure it properly initialized.
+30:50 Because at any time if your initializer cannot initialize itself, it should return nil.
+30:57 Okay? And that lets everybody know any of your subclasses or anyone trying to alloc and initialize you, you could not create a well-formed object.
+31:05 Okay? So you can see how this code, strange as it is -- self equals super init, and then if self, I'm going to initialize myself, return self -- that's going to ensure that I don't even try to initialize myself if my superclass, when I call its init, you know, can't initialize itself.
+31:21 Okay? So just do it.
+31:24 If you don't understand it, don't worry about it too much.
+31:27 Just do it.
+31:27 Now, one thing here is we're talking about init with no arguments.
+31:31 It is possible to have initializers with arguments because sometimes you need arguments to properly initialize a class.
+31:36 And we're going to talk about that a little more on Monday.
+31:40 Okay? So today we're just going to kind of bare bones init.
+31:43 So what does this init need to do?
+31:45 What do I need to do to have a well-formed initialized playing card deck?
+31:48 Well, a playing card deck has 52 cards in it, one of each kind of card.
+31:53 Okay? King of clubs, three of diamonds -- all 52 of them.
+31:57 So I just need to iterate to all the suits, and then iterate through all the ranks, and create a card, and add it to myself.
+32:06 So here's me iterating through the suits, iterating through the ranks.
+32:09 Everyone cool with that?
+32:12 Then I'm going to import playing card because I'm going to create a playing card, playing card alloc init.
+32:20 Then I'm going to set that card's rank, set that card's suit.
+32:23 Rank and suit are my little iteration variables there.
+32:28 And then I'm going to add it to myself.
+32:31 I'm a deck, so that's perfectly fine.
+32:35 Everybody cool with that code?
+32:39 So now I'm a well-formed playing card deck and I can be used to draw random cards and all that stuff, which you will need to do for your homework.
+32:47 Okay? And in fact, for your homework you're going to have to type all four of these classes in.
+32:51 I want you to get experience entering classes, typing a thing, watching as Xcode complains at you as you mistype things, and stuff like that.
+32:59 And then you're going to be using playing card deck and playing card.
+33:03 Well, playing card deck and card really are the two main ones you're going to be using to do your homework.
+33:08 Okay? Questions about that?
+33:11 Okay. So that's it for the slides.
+33:14 So now I'm going to do a big old demo.
+33:16 And this demo is going to integrate everything you've seen so far, okay?
+33:21 Most notably that MVC stuff we talked about, like target action, you know, dropping the target and shooting the action or the green arrow outlet that points the other way.
+33:30 Okay? We're going to show you what that actually looks like in Xcode.
+33:34 I think when I asked who of you have done Xcode, almost every single one of you raised your hands.
+33:39 So I'm not going to spend too much time talking about all the buttons in Xcode.
+33:42 I think I'll quickly pass over those.
+33:44 But if you haven't used Xcode, it's in very much detail in the lecture slides.
+33:49 There's kind of this walkthrough.
+33:51 By the way, if you're following along in the lecture slides, my demo's not going to be exactly like what's in the slides.
+33:57 The slides cover a little bit more than I can cover in forty minutes here.
+34:00 And it's also reference material.
+34:03 Okay? So if I do something today in this demo and you're like, "Oh, how did he do that?" if you go look in those slides, it will tell you.
+34:10 So do not feel like, "I got to furiously write down every button click he's going to do in the next forty minutes." No way. Okay?
+34:16 Follow along in those slides if you want, or just close your laptop, and watch, and let it sink in because you're going to have to reproduce what I'm doing in the next forty minutes for your homework.
+34:28 And those slides are going to walk you through step by step how to do it.
+34:31 So do not feel like you need to do anything right now but let this all sink in.
+34:35 Get a feel for what's going on.
+34:37 Okay? And then when you sit down to do it, you'll be guided through it.
+34:43 Next week we're going to talk a lot more about Objective-C, answer some of these more detailed questions like NS number and some of these other things people are asking.
+34:50 And we'll talk about some of the specific things about Objective-C like dynamic binding, and protocols, and things that you don't generally see as much in other languages or don't exist in other languages.
+35:02 So we'll try and cover all that.
+35:04 So by the end of next week you're up to speed in Objective-C.
+35:07 You're starting to really run with Xcode.
+35:10 And so the week after that we can really start doing some, you know, high power iOS 7 stuff.
+35:18 Okay. So demo here.
+35:21 [Inaudible] that.
+35:22 All right.
+35:23 So the demo I'm going to run in Xcode.
+35:25 So I'm just going to launch Xcode.
+35:27 So Xcode you get by running -- going to your Mac app store.
+35:32 That's this thing down here, right?
+35:34 Get the app store on your Mac, and you just search for Xcode, find it.
+35:37 It's free.
+35:38 You download it and you run it.
+35:39 Okay? It's as simple as that.
+35:40 This is what it's going to look like when you first bring it up, this splash screen here.
+35:45 As the quarter goes on, this will fill up with all the projects that you're doing.
+35:50 You're probably used to that if you know Xcode.
+35:52 And what we're going to do today is create a new project.
+35:55 You can either check an existing project out of source control or you can create a new one.
+36:00 And so we're going to create a new one.
+36:02 So when we create a new one, it wants to give us a little bit of help by offering to create a template for different kinds of applications like an openGL game.
+36:11 Okay. It will create some framework for that for you.
+36:16 Master detail applications, something we're going to do later in the quarter, although we're going to build all the code ourselves; we're not going to use this template.
+36:23 And this single view application one right here is basically a single MVC, which is how we're going it start all of our applications in this classroom -- with a single MVC.
+36:33 Then we're going to add more MVCs and build up.
+36:35 Okay? So this is your basic single MVC app.
+36:39 So I'm going to click that.
+36:40 And here it's going to ask for some information about it like what do you want to call this app?
+36:45 This is a card matching game I have decided to call Machismo, okay?
+36:49 So that's going to be the name of our app just for fun.
+36:53 And organization name can be anything you want.
+36:55 It's going to appear in the headers of all the classes that you create.
+37:00 So I make mine be Stanford University.
+37:01 You can make yours be Bob's Game House or whatever.
+37:05 This identifier should be unique to you.
+37:09 So I have edu.Stanford.cs193p.instructor.
+37:13 You might have edu.Stanford.cs193p dot your SUNet ID.
+37:16 That will be completely unique.
+37:19 These reverse DNS is a really good way to create a unique name.
+37:23 And it's going to create a unique name for this app by combining this with the names.
+37:28 So you can see it's done that here, this bundle identifier.
+37:31 And then this class prefix -- this template is going to create a view and a controller for us.
+37:38 And this is saying, "What do you want the name of your controller class to be?" By default it's going to be called "view controller," okay?
+37:45 But if you type something here like "card game," now it's going to be called "card game view controller," which is a little better name for us.
+37:53 So that's just the prefix it's going to put on the name of your controller that it creates for you.
+37:56 And then finally here we can create an app here just for iPad, or just for iPhone, or a universal app that will run on both platforms.
+38:05 Now, when you create a universal app, you still have to design your UI's separately because if you have more screen rules, you're just going to design a different UI.
+38:13 Okay? iPad is not just a big iPhone.
+38:15 You can do a lot more stuff if you have more screen real estate.
+38:18 But you still might have a lot of your MVC's shared, right, because that iPad might have little subareas that are in MVC that are exactly the same as on an iPhone or very, very similar.
+38:29 So totally supported in iOS 7 to build apps that target both platforms and has great tools for letting you build your two UI's separately and share all the MVCs underneath.
+38:40 Okay? We're going to do iPhone only here just because it keeps the screen small and I only have so much real estate here.
+38:46 [ Inaudible ]
+38:52 >> Paul Hegarty: Yeah.
+38:52 So the question is: If I'm on my iPad and I run an app that's iPhone only, yes, there's an emulation mode essentially that will kind of make a big iPhone-shaped thing on the iPad screen.
+39:04 So we're going to do iPhone here.
+39:05 So that's it.
+39:06 I'm going to hit next.
+39:07 Next it wants to know, "Where are you going it put this project?" I strongly recommend putting it in your home directory -- in a directory called "developer" in your home directory.
+39:17 Okay? Unless maybe we're working on different class.
+39:19 Maybe you have the CS 193P in your home directory and then other class.
+39:23 But bottom line: Put it in your home directory; do not put it, like, in root or somewhere like that.
+39:28 That has in the past caused problems.
+39:31 But a great place to put it here.
+39:32 This is my home directory, CS 193P there.
+39:34 I see home directory, developer.
+39:37 This is where I'm going to put it.
+39:38 I don't have any projects yet.
+39:39 This little thing down here, source control, we will be talking about that.
+39:43 It's really nicely integrated into Xcode, but we're not going to talk about it today.
+39:47 So leave that unclicked.
+39:51 And so here's our new project.
+39:53 You can see it shows us this screen, which you get to by clicking on this very top thing up here.
+39:58 So this is kind of like our project settings.
+40:00 And there's a whole bunch of settings here.
+40:02 We'll be talk being all this stuff as the quarter goes on.
+40:04 But today we're not going to talk about any of it because we want to focus on our MVC.
+40:10 And our MVC, this right here, main.storyboard, is our view.
+40:15 Okay? That's our view of our MVC.
+40:17 And then you see this card game view controller M and H?
+40:21 That's our controller.
+40:23 There's no model here.
+40:24 Your model is going to be those four classes -- deck, card, playing card, playing card deck -- that's going to be your model.
+40:31 So you'll have to enter that in.
+40:32 I'll show you at the end how to do that.
+40:35 This little thing here, card game [inaudible] dot H and M, we'll talk about that briefly, especially when we start talking about things like multitasking.
+40:44 But I like to just move those out of the way.
+40:46 So I often put them down here in this supporting files folder.
+40:49 And you can just pick up any file, by the way, and move them anywhere you want here to kind of clean up your view.
+40:55 So here I've got my view and my controller only showing here.
+41:00 Okay? So let's go straight to the view and see what that looks like.
+41:04 So here's my view.
+41:05 It's a blank iPhone 5 sized, right?
+41:09 A tall and thin view.
+41:13 And it's blank.
+41:14 Nothing new.
+41:14 It's white.
+41:15 This area on the left, by the way, where we clicked on these files, that's called the "navigator." And you can not only navigate all your files here, but you can navigate your break points, and build problems, and your class hierarchies.
+41:28 All that stuff up here.
+41:29 So again, most of you know Xcode, so you probably know most of this stuff.
+41:32 We'll be demoing all this as the quarter goes on.
+41:35 And this area over here is called the "utilities area." And this is where you basically find out detail about what's going on here.
+41:43 So inspectors for attributes, and dimensions, and connections, and things like that go here.
+41:50 And this is also where you can drag out the things that you're going to use to build your user interface because we're going to build our view entirely graphically.
+41:59 Okay? We're not going to write code, for the most part, to build our view.
+42:02 As the quarter goes on, we'll learn a little more about how to build our view in code, but we're going to start out just purely doing our view by graphically dragging things out and wiring them up.
+42:12 And we'll put our code in our controller.
+42:14 This two sides can be hidden and shown with these two buttons.
+42:21 See? You can hide those.
+42:24 [Inaudible] This might appear also, this area right here, this little button down here.
+42:29 This is called the "document outline." This is really handy dandy.
+42:32 But again, we're not going it talk about that today.
+42:33 We can only talk about so much at once.
+42:35 The document outline.
+42:37 This just shows you all the instances of objects in your view in a common outline form.
+42:42 So you can really easily find them and their relationships to each other.
+42:45 The other thing you can do is I don't want this iPhone 5 sized thing because my screen is low resolution here so it works on the projector.
+42:54 So I'm going to click this little button down here, which reduces me down to iPhone 4 size.
+42:59 Okay? Or iPhone 4S.
+43:01 Now I'm tall and thin.
+43:03 But you can click back and forth and move them back forth.
+43:06 And I'm just trying to make everything fit on screen here.
+43:11 Okay. So let's just dive right into building our view here.
+43:14 What our view is going to be today is a single card with an ace of clubs written on it.
+43:21 Okay? That's going to be it.
+43:23 And I'm going to be able to click on the card and it will flip over, show the back of the card, and then click on it again, it will flip back to show me the ace of club again -- back and forth, back and forth.
+43:31 Okay? And your homework is going to be to make it so when the card flips up it doesn't show the ace of clubs, it shows a random card drawn from the deck.
+43:38 Okay? That's going to be your entire homework that's due on Monday.
+43:42 Okay. So let's do this.
+43:43 Really simple.
+43:44 We go to this area right here, this object library.
+43:47 Okay? That's the third button over here, show object library.
+43:50 And this is where all our objects are.
+43:52 If you look in here and you don't see these objects, it might be worth clicking on your view.
+43:56 Sometimes Xcode wants to know what the destination is that you're going to be dragging things into.
+44:02 So if you click on it, then you'll see these things.
+44:04 And we're just going to grab one of these buttons right here.
+44:06 So I'm going to pick this button up and drag it out.
+44:09 And notice, as I drag it out, these little blue lines appear -- these guidelines.
+44:13 Okay. These guidelines are super important.
+44:16 They seem just like a convenience for helping you put it right in the middle or right in the right-hand corner.
+44:21 And they are, but they're really important for making sure that all the things in your view are kind of, like, standard space apart, right?
+44:30 And lined up against edges.
+44:31 So that as the users go from one app to another, things will all be separated by predictable spaces and everything will be consistent.
+44:38 It's really important.
+44:39 And there's a mechanism -- you can see this switch right here, use auto layout, which was introduced in iOS 6 and vastly improved in iOS 7, especially in Xcode -- that allows when your user interface changes size, like it goes from being an iPhone 4 to an iPhone 5, or it rotates from being vertical to being horizontal, or it's on an iPad in a bigger space.
+45:02 For all the buttons and everything to kind of move to a new position that makes sense or at least most of them, right?
+45:08 And then maybe you might have to move a few of them by hand, depending on what's going on.
+45:11 But it mostly automatically lays it out.
+45:14 And this is really important because I'm sure devices will continue to be differing sizes as new, you know, devices come out over the years.
+45:20 So doing auto layout is important, and these blue guidelines are the number one most important thing for auto layout.
+45:26 We're going to cover auto layout in detail, and there's a lot to it.
+45:29 All these buttons down here have to do with auto layout.
+45:33 But getting those blue guidelines, making sure you drop things with at least one blue guideline somewhere is really important to kind get you going down the right path with the properly auto laid out UI.
+45:43 So we have this button here.
+45:45 But before -- and of course, we can go over here to this is the attributes inspector and click on it.
+45:50 And we'll see all kinds of attributes.
+45:52 In fact, if I hide this, tons and tons of attributes for this button.
+45:56 Okay? Not just the button itself, but actually its superclass has attributes.
+46:00 Control is its superclass, and then view is control's superclass and it has attributes.
+46:05 Okay. So this is an objective-oriented inspector that will show all the attributes of all the things through the inheritance hierarchy.
+46:14 And what's happening here is we're actually editing an instance of a button here.
+46:20 So we are not -- and I know in some systems you layout the button, you set the size, and you set the attributes.
+46:25 And then, you know, behind the scenes a bunch of code is being generated to create the button.
+46:30 That's not what we're doing here.
+46:31 We're actually editing live objects.
+46:33 They're essentially going to be freeze dried.
+46:35 And then when your app runs, add water, they come to life, okay, with their attributes set, and all their sizes and positions, and all their auto layout information in the object.
+46:44 Okay? So it's a little different than you might be used to in some other systems.
+46:50 So anyway, before we edit the attributes of this button, though, let's change our background because this is a card game.
+46:56 And most card games are on, like, green felt, right?
+46:59 So let's make our background be more like a green felt.
+47:01 So I'm just going to click on the background, which is this view right here, and you can see its properties.
+47:06 So I'm going to change a couple -- or just one of its properties -- which is the background.
+47:10 You see this background white color right here?
+47:12 So if I click on this, I have some recently used colors.
+47:15 I have all these kind of black and white colors.
+47:18 And I also have other.
+47:19 And I bring up other, brings up the crayons, okay?
+47:22 It also brings up other ways to choose colors, but I like the crayons.
+47:26 Okay? And so where are my crayons?
+47:29 There they are.
+47:30 So let's pick a green, like, moss is a good green.
+47:34 Clover. I kind of like moss better.
+47:36 So that's kind of a card game background.
+47:39 And that's it.
+47:39 So we've set the background color of our views.
+47:43 Okay? And all the attribute setting is just like this: You just set it and forget it.
+47:48 So let's go back to the button and its properties.
+47:50 Okay. The button I want to look like a card.
+47:53 Well, a button in iOS 7 basically looks a lot like a hyperlink on a web page, just like that button does right there.
+48:00 Okay? That blue button.
+48:02 That's not really appropriate for what we want.
+48:04 We want it to look like a card with a little rounded rect and a white background, right?
+48:08 And I want the back of the card to look the same but have some kind of design on it or something like that.
+48:13 So the way I'm going to do that is I'm going to set a background image for my button.
+48:18 Okay? A background image that's like a rounded rect.
+48:20 So let's take a little aside here and talk about: How do we get images into our app?
+48:25 Okay. We want to use images in our app; it's very common to want to use images in a graphical application like on a phone.
+48:31 So how do you do it?
+48:32 And the answer is you go down here to this place called the "image asset library" -- images.xc assets or Xcode assets.
+48:40 And you can see there's already a couple of slots for icons here.
+48:43 They're not set, but this is the app icon.
+48:45 And also you can have a launch image that will appear instantly when someone launches your app.
+48:49 And then as you're initializing, having behind the launch image, and then it will show you are actual UI.
+48:54 So it's kind of quick launch image.
+48:56 And we'll talk about this on Monday.
+48:58 We'll set the app background for Machismo here.
+49:00 But I'm going to actually drag in some other image.
+49:04 So I have some images here.
+49:05 And for example, I've got this Stanford logo right here.
+49:11 So I'm going to drag that Stanford logo in because I want to use it.
+49:15 And that's it; you just drag it in here.
+49:16 It says Stanford.
+49:17 But notice that it kind of has this weird thing here, this 1X and 2X.
+49:21 You see that?
+49:21 And that's because every image that you're going to use in iOS wants to have a normal resolution version that's going to be used like on the iPhone 4 -- nonretina displays basically.
+49:33 And then a 2X, twice as high resolution -- one that will be used on retina.
+49:38 And it will automatically pick the right one, depending on what you're running on.
+49:41 Okay? You don't have to do anything about it.
+49:43 But you do want to provide these higher res ones.
+49:45 And these higher res ones aren't just necessarily the same exact image, just, you know, made more high resolution.
+49:53 They might allow you to do -- for example, here I've got a Stanford logo with the little tree.
+49:57 See? See the tree in there?
+49:58 So maybe this is too low resolution to really get a good-looking tree.
+50:01 But I can get the tree in at a higher resolution, so I put it in there.
+50:05 So it's not that common that the two ones would be actually different-looking but they could be.
+50:09 Certainly allowed they could be.
+50:11 I also don't want to really call this "Stanford." I'm going to use this as my backup card.
+50:17 Instead of having, you know, some kind of design, I'm going to have the Stanford logo be the back of my card.
+50:21 When my card's flipped down and I see the back, I'm going to see the standard logo.
+50:24 So I'm going to call this "card back." I can call it anything I want.
+50:29 I also have things for the front here.
+50:32 This one right here.
+50:33 This is blank card with a rounded corner.
+50:35 There it is.
+50:36 You can't see it.
+50:38 Because it's a white card so you can't see it.
+50:40 But I'm going to use that.
+50:41 I'm going to call this "card front." And I'm also going to have a high-res version of that as well.
+50:48 Okay. So that's good.
+50:50 So as much as we can see of it.
+50:53 Okay. So now I got some images.
+50:56 And now I want to use them in my view.
+50:58 I kind of want to set this card to use this.
+51:00 So I'm going to start with my card here being face up when it runs.
+51:05 When my app runs, the card's going to start face up.
+51:08 In your app when you get your homework you're probably going to want to start it facedown.
+51:12 The reason for that is my app only shows one card: Ace of clubs.
+51:16 So it's fine if it comes up with ace of clubs.
+51:19 But you don't want your card to come up ace of clubs for sure.
+51:22 And it might be a little more work for you coding-wise to initialize it to come up with some random card.
+51:27 So I'll just have it come up facedown.
+51:29 Make it a lot easier on you.
+51:30 Okay? So how do we set that?
+51:33 Really simple.
+51:34 I've got the button selected here.
+51:36 Here's its properties.
+51:37 One of its properties is its background image.
+51:40 Okay? So I'm just going to click here, and you can see that all images that are in my assets library will be here.
+51:45 Okay? And if there was a really lot of them, you can type and it will match it.
+51:48 So I'm going to make it be the card front.
+51:51 So it made it the card front, but I don't see -- where's the rounded rect?
+51:55 Okay? I can't see the rounded rect.
+51:56 And that's because it's too small to see the rounded corners very well here.
+52:01 So you can just take this thing and resize it.
+52:04 Okay? And I'm going to make it -- I want it to be about two to three [inaudible].
+52:10 So I'm going to make it 64 by 96.
+52:12 I know this happens to be a very good size, and I've resized it.
+52:15 And now you can see the little rounded corners.
+52:18 You see? So this is that image I dragged in with button written on top of it.
+52:22 And of course, I moved it a little so I can put it back in the middle using my blue guidelines, right?
+52:27 And of course, I don't want my card to say "button" it; I want the ace of clubs on here.
+52:31 So I'm going to just double-click on it.
+52:33 I could also edit that up here.
+52:34 You see right here where it says "button"?
+52:36 Click it here.
+52:36 I'm just going to double-click directly on it.
+52:38 I'm going to type "ace." And how do I type clubs, anyone know?
+52:42 Alt something or other.
+52:44 I like to do this way.
+52:45 I go to edit menu, special characters, get this magic thing.
+52:49 You ever seen this, kind of cool?
+52:51 Just double-click -- find the clubs and double-click.
+52:55 All right.
+52:56 So there's my ace of clubs.
+52:58 Now but, you know, that's not quite right, either.
+53:00 I don't really like that blue A.
+I really want the A to be black.
+53:04 And it could be a little bigger.
+53:05 There's more room for it.
+53:06 So I can go over here, for example, and change the font.
+53:09 I can change it by clicking this little thing to make it bigger, or I can actually click on this T and even set which font it is.
+53:16 One thing that's really important in iOS 7 is the typography.
+53:20 Okay? Picking the right text styles is really, really important in iOS 7.
+53:25 And we're not going to really talk about it here; we're just going to use the system font.
+53:28 But that's something we'll talk about in lecture, is making sure you pick the right fonts in the right places to make the UI look really nice.
+53:36 I can change the size here, maybe 24 point or something like that.
+53:40 That will still fit.
+53:41 And then I don't want this blue, so that's this text color.
+53:44 So let's go ahead and make that black.
+53:46 All right.
+53:46 So I got the card looking the way I want.
+53:49 That's good.
+53:49 All these properties that we're setting, by the way, if you look at button, you see this state config right here?
+53:55 Default? We can actually set all these things differently for the highlighted state of the button, or a selected state, or disabled state.
+54:03 But we're setting these as the default.
+54:05 So all our buttons always going to be displaying the default state.
+54:09 Okay? So buttons are pretty powerful.
+54:11 You can have them look different as they highlight or whatever, but we're going to be working all in what's called the "normal" or "default" state of the button.
+54:18 You'll see that when we get to the code.
+54:20 So we can actually run this right now.
+54:22 So running.
+54:22 You've all -- most, again, done Xcode.
+54:24 You know how to run.
+54:25 It's this little play button.
+54:26 You can actually hold it down, and there's other things you can do like test and analyze.
+54:30 But we're just going to run.
+54:31 So I click run, and it's going to run this in a simulator.
+54:36 Okay? And here it is.
+54:38 And you can see that the simulator's so big it doesn't even fit on my screen.
+54:42 So I kind of have to scroll around in it.
+54:44 And when I click it, it doesn't do anything.
+54:48 Okay? So that's not good.
+54:49 All right.
+54:50 Because I haven't put any code in my controller to respond to that thing being touched.
+54:54 So that's what we're going to do next.
+54:57 So let's go back here and stop.
+55:04 Okay. So how do we do that?
+55:05 Well, it's pretty interesting how we do that, actually.
+55:07 I'm going to make some more space here.
+55:09 And what we need to do is connect up to our controller.
+55:14 And we do that by putting our controller's code side by side with our view.
+55:18 All right?
+55:19 So I'm going to click this little button right here, this button icon, and that puts side by side.
+55:25 And by default if you have a view up here on the left, it's going to put that controller's code on the right.
+55:31 And you can move this to get more space for the code if you want.
+55:34 You can also switch between the header if you want to do public stuff or the implementation.
+55:40 Okay? So that's good.
+55:43 Now, this code right here is part of the view controller lifecycle, which we're going to talk about in two or three weeks.
+55:48 But today we're not going to talk about it.
+55:53 So we can just get rid of it.
+55:55 And let's just start by saying, "When this button gets touched, we want it to flip over." So we need to make a connection between our view and the controller.
+56:04 And we're going to do that thing where we hang the target out and shoot the arrow.
+56:08 Okay? Called "target action." And this is going to be kind of whacky.
+56:11 You're probably not even going to believe this when you see it.
+56:14 The way to do this is you hold down the control key.
+56:16 So I'm holding down the control key, and I'm dragging a line from the view directly into our code.
+56:25 All right?
+56:26 Okay? And I let go.
+56:28 And it says, "Oh, you want a connection between your view and your controller, do you?
+56:33 Here's what I need to know." So it's asking us, "What you do you want to call this connection?" So this is going to be the name of the method.
+56:38 It's actually going to create a method here that gets called when the button gets touched.
+56:42 I'm going to call it "touch card button." That's a good name.
+56:45 Here it's saying, "What you do you want the type of the argument to be?" We'll talk about this later, but for now we obviously want the argument to be the button that is sending us this action, okay?
+56:54 Which is going to be nice because then we're going to talk back to it and tell it to flip itself over.
+56:58 There's other things we can set here like: What kind of event do you want to send this action?
+57:03 And you can actually set it so there's no argument, it just sends touch card button with no arguments.
+57:08 But here we want it to have the argument of the sender, the button sending this message.
+57:12 You can even send the touch event along, but we almost never do that -- a tenth of a percent of the time.
+57:17 So here I'm going to have the sender.
+57:18 So when I click connect, it creates a new method.
+57:21 And that method is wired up to that button.
+57:24 In fact, you see this little round circle?
+57:26 If I mouse over it, it will show you that's what it's connected to.
+57:31 Okay? So this is just some pretty normal-looking method right here.
+57:35 The return type, IB action, that's actually typedef void.
+57:40 This method actually returns void.
+57:42 The reason that Xcode puts IB action there and typedef's IB action to void, it's just so that it can tell which methods are target action so that it can do stuff like this.
+57:52 Okay? The mouse over.
+57:54 But the compiler ignores it.
+57:55 The compiler sees it as void because it's typedef to void.
+57:58 It's purely an Xcode thing to this IB action thing.
+58:01 And then you can see this method has one argument, which is the sender.
+58:05 That's the button sending us this message.
+58:06 And it's going to send this message every time a touch goes up inside the button.
+58:11 Touch up inside, right?
+58:12 That was the event.
+58:13 So that's when it's going to send this message.
+58:15 So that's perfect.
+58:16 That's what we want.
+58:17 So every time this happens, what do we want to do?
+58:19 Well, we want to flip the card over.
+58:22 Okay. So let's start by just flipping it over to the back.
+58:24 And the way we're going to do that is we're going to create a local variable called "card image." Okay. And you noticed it was trying to help me type there, and you're going to see a lot of helping here.
+58:34 And UI image is another class in iOS, okay, just like UI button is a class.
+58:39 UI image is the class, as you can imagine, stores an image.
+58:42 Could be a JPEG image, could be an animated GIF, it could be a TIFF image, whatever.
+58:47 Okay? So it's very powerful image holding class.
+58:50 And it has a class method called "image named," and you give it a string like card front or card back, right?
+59:00 And it will look in the assets library and give an image of the right resolution, depending on whether it's going to be go on -- actually, it will give you an image with both resolutions.
+59:08 And then depending on where you display it, it will, you know, pick the right resolution, whether it's on a retina or not.
+59:13 So that's cool.
+59:14 We got the image.
+59:15 So now we're just going to tell the button to set this as its background image instead of whatever's on it right now.
+59:22 So to talk to the button, we do open square bracket sender.
+59:26 Right? You see that the sender is the button sending us this message.
+59:30 Okay? Set.
+59:32 Okay, I'm going to start typing set background.
+59:36 And you see as I start to type, Xcode is suggesting to me what I might want.
+59:41 Now, it knows that the sender's a UI button, so it's only suggesting button methods here that start with set B -- set background color, set background image, and set bounds.
+59:51 Okay? Notice I'm also getting some help at the bottom.
+59:54 See, isn't that cool?
+59:55 A little one or two lines of help?
+59:57 And I could click on this link and it would take me to the documentation.
+59:59 We're not going to do that for time reasons.
+01:00:01 But I can also just click one and it picks that one and immediately selects the first argument.
+01:00:08 So I can take that.
+01:00:10 Okay? So I'll do that.
+01:00:11 Card image.
+01:00:12 And notice here when I type CA, there's a lot of things that start with CA that could go there.
+01:00:18 But Xcode's pretty smart.
+01:00:20 It knows that a local variable is much more likely what you want here than all these other CA -- functions that start with CA.
+01:00:27 So it automatically selects that for me.
+01:00:29 And if I hit tab, by the way, it's going to basically escape complete it.
+01:00:34 [Inaudible] And if I hit another tab, it goes over here.
+01:00:37 This little four state thing is just what I was talking about where you can set this for the highlighted state, or the selected state, or disabled state.
+01:00:45 We're just going to do the normal or default state of this button.
+01:00:49 Okay? So we're setting the background image for this button.
+01:00:52 And we also need to set the title because we don't want to see that ace of clubs when we flip it over backwards.
+01:00:58 So I'm just going to set it to that.
+01:01:01 Okay. That's the empty string.
+01:01:02 I could also say nil there.
+01:01:04 Okay. But I'm saying empty string just to see what empty string looks like.
+01:01:07 So actually if we run this, command three.
+01:01:14 Okay, let's try that.
+01:01:14 Oh, cool. [Inaudible]
+So there you go.
+01:01:19 So there's a miniature version of it.
+01:01:21 Okay. So here's our card.
+01:01:22 And if I click on it, oh yeah, it flips over.
+01:01:26 Yes. Stanford logo with the tree.
+01:01:29 But now if I click, it doesn't do anything else; it always flips over to the back, which is exactly what our code does, right?
+01:01:35 So that's good.
+01:01:36 So let's fix it so that it flips both ways.
+01:01:39 Okay? And I'm going to do that by saying if the -- actually, I'm going to do one other thing first to make this code a little simpler is instead of having this local variable, I can just take this and pop it right in there.
+01:01:52 Okay? And that's very common to do that.
+01:01:55 And if I wanted to wrap it, it will automatically wrap if I make this too short.
+01:01:58 But I can also put a return in there.
+01:02:00 And when I do, look what it does with the colons.
+01:02:02 See how it lines the colons up?
+01:02:05 It will always do that.
+01:02:06 If you press return in the middle of a message send that has multiple arguments, it will line the colons up for all the arguments.
+01:02:12 Really cool.
+01:02:12 So you can see all the arguments lined up left and right.
+01:02:16 So anyway, I'm going to check to see if the current title -- okay, that's a button method -- if it's a string.
+01:02:25 If that length, okay, is nonzero, okay -- so that's testing there to see if the length of nonzero -- that's a cool way to do it because that will work if the button title is nil or it's if the empty string.
+01:02:41 Because the button title starts out nil.
+01:02:43 If you don't set it to anything, it starts out nil.
+01:02:45 So here with one line of code I've checked both the initial state possibly -- not in our case because we set the title to the A club -- but in your case it might be.
+01:02:53 Then we'll set it to one thing, else we'll set it to the other thing.
+01:02:57 So we just wanted to set this to this.
+01:03:00 All right?
+01:03:01 So if there's a title on the button, in other words it has the ace of clubs, then we're going to switch over to the back.
+01:03:07 And if there's no title on the button, then we're going to switch back to the front.
+01:03:13 Okay? Ace of clubs.
+01:03:17 Okay? So now when we run, our card will flip both ways.
+01:03:27 Okay? So really simple to wire stuff into your controller to do what you want.
+01:03:32 The next thing we're going to do is in the -- okay, I'll show you really quickly here.
+01:03:40 If you hold down the option key, a very important key, do you see how it puts a question mark and starts highlighting things?
+01:03:45 That's going to allow to you to transition into the documentation.
+01:03:49 So if I want to know more about this current title, if I hit option, click on it -- see, I get a little bit of help right here.
+01:03:55 It's a property.
+01:03:56 It's read-only, it's nonatomic.
+01:03:58 By the way, if you see "retain" in the documentation, that's the same as "strong." Okay? Retain is the same as strong basically.
+01:04:04 Little bit of description here but also hyperlinks.
+01:04:07 And if I click on one of these hyperlinks, like this one, it takes me into the documentation.
+01:04:11 This is a separate window right here.
+01:04:13 And you can navigate around in this documentation.
+01:04:16 You really want to get familiar with all this.
+01:04:18 I can't really show it all to you today for time constraints, but you can do things like search, like I can go find UI button here.
+01:04:26 Okay. There's UI button.
+01:04:27 I might scroll down and go to, for example, set background image or set background image for state, which we just saw.
+01:04:35 Maybe I'll click to go UI image.
+01:04:37 You see all this.
+01:04:38 There's nice descriptions of the class in the beginning and then all the methods, etc., etc. So definitely want to become a master of that documentation.
+01:04:46 You can also option double-click on things and it will send you straight to the documentation.
+01:04:49 If you don't want to get the little help one first, you can go straight in.
+01:04:52 So option is the key one for that.
+01:04:57 Let's go ahead -- okay.
+01:04:58 Notice that this little space along the bottom here appeared when we ran the application -- you see that?
+01:05:05 This is the debugger on the left, and this is the console on the right.
+01:05:10 Okay? And you are definitely going to be using the debugger and the console both in this class.
+01:05:15 And actually, I might have time to do a quick -- show you how to do the console.
+01:05:19 But anyway, you can hide it by dragging it down or also by clicking this thing [inaudible].
+01:05:23 All right.
+01:05:25 So the next thing we're going to do is we're going to put a little label on our UI that counts the flips.
+01:05:31 Okay? A little incremental thing that increments every time there's a flip.
+01:05:35 And we do that by going back to here and grabbing ourselves a label.
+01:05:43 So a label is a read-only piece of text, noneditable text.
+01:05:47 And I'm just going to drag it over here and put it in the lower left.
+01:05:50 I'm going to double-click on it to call it "flips colon zero." This is what I want it to look like when my UI first launches.
+01:05:57 Now here, I'm never going to be tapping on this and causing a message to be sent like the button; it's the other way around.
+01:06:04 My controller wants to talk to this and tell it when the flips changes all the time.
+01:06:08 Okay? So you might think that you would drag from your code down to this flips, but unfortunately you don't do that.
+01:06:15 You still hold down control and drag from here.
+01:06:19 But instead of dragging it down into your implementation area, you drag it into the interface area because you're going to create a property that connects to that label basically.
+01:06:28 So we do that.
+01:06:29 We get a thing here.
+01:06:30 It's asking us a little bit different questions: "What's the name of this property?" I'm going to call it "flips label." Okay? Notice that this property is weak.
+01:06:38 Okay? When I click connect, it's going to make a property here and it's going to be weak.
+01:06:43 This is the first time we've seen weak versus strong.
+01:06:46 The reason this is weak is because this label is held strongly by the view itself.
+01:06:53 So we don't need to have a strong pointer to it, to keep it in the heap.
+01:06:56 The view will.
+01:06:57 And if this label ever leaves the view, it will get cleaned out from the heap.
+01:07:02 And this property -- this pointer to it -- will get set to nil, which is exactly what we want.
+01:07:06 Because if that flips label's not in the view, we don't want to be updating it and sending messages to it.
+01:07:11 So it's a great use of weak right here.
+01:07:15 This is normal property that you're used to except for maybe this IB outlet.
+01:07:19 That's just like IB action.
+01:07:21 It's a meaningless thing the compiler ignores that Xcode is using.
+01:07:26 Okay? So that it can do this -- show you what it's connected to when you mouse over it.
+01:07:31 Okay? By the way, you can see all the connections by also right-clicking on things.
+01:07:36 So here I just right-clicked on the button and you can see its connections.
+01:07:40 If you ever want to rename -- like if I don't like touch card button, I want to rename it to something, you can't just rename unfortunately.
+01:07:47 You have to go in here, right-click, use this little thing to disconnect it, and then control drag again.
+01:07:55 Okay? Everybody got that?
+01:07:57 It's unfortunate.
+01:07:58 It would be really nice if Xcode could track that for you but it can't.
+01:08:00 So if you ever want to rename something, you have to disconnect it here by right-clicking on it, and then control drag a new one and set the name that way.
+01:08:10 You can also right-click on this little guy and it will show you all the connections for your controller.
+01:08:16 Brings up this window.
+01:08:17 And I can see the label.
+01:08:18 You see? I'm mousing over the button.
+01:08:21 Label. There's also this little property here, which is something you haven't seen, which is basically a property that points to the entire view from your controller.
+01:08:29 So this is the connections to your controllers.
+01:08:31 See, it says "card game view controller"?
+01:08:33 Okay? So that's right-clicking.
+01:08:35 I'm right-clicking over here.
+01:08:37 All right.
+01:08:38 So how are we going to make this flips label work?
+01:08:40 We are going to put it aside for a second.
+01:08:45 Let's not think about it.
+01:08:46 Let's instead do another property.
+01:08:49 Property. Which is nonatomic, which is just going to be an int, which I'm going to call "flip count." Okay? So flip count is just an integer that's going to keep the count of flips.
+01:09:02 And watch this.
+01:09:05 Some more space here.
+01:09:06 Go there. I'm just going to go down here and say self.flip count plus plus.
+01:09:14 Okay? Now, does that call the setter or the getter for flip count?
+01:09:20 Both. Exactly.
+01:09:21 That is calling both the setter and the getter.
+01:09:23 It's calling the getter to get the flip count, then it's plus plussing it; and then it's calling the setter to set it back.
+01:09:29 Okay. So that's kind of a funky lining of code right there.
+01:09:32 That's the same as saying self.flip count equals self.flip count plus one.
+01:09:34 So it's calling the getter and the setter.
+01:09:36 Okay. So now we've got this nice flip count.
+01:09:39 It's keeping track of the count; how do we hook that up to this thing over here?
+01:09:43 Which I'm going to make a little bigger, by the way.
+01:09:45 Okay. How do we hook that up so that says flips colon one, flips colon two, flips colon three?
+01:09:50 Well, we're going to do it using the setter for flip count.
+01:09:57 Okay? So normally a setter for flip count would look like this.
+01:10:00 Okay? And here's another great use of setters and getters, which is to keep UI in sync with a property.
+01:10:08 And I'll just do this by saying self.flips label -- flips label.text equals -- oops, sorry.
+01:10:18 It's hard to type standing up.
+01:10:20 Equals NS string, string with format, which you've seen before, flips colon percent D self.flip count.
+01:10:30 Okay? So now every time flip count is changed we're going to update the UI.
+01:10:35 Make sense?
+01:10:36 Any questions about that?
+01:10:39 Okay. So let's run.
+01:10:45 Okay. Here's our thing.
+01:10:45 So click, flips over, flip count updates.
+01:10:49 Flip, flip, flip, flip.
+01:10:50 Back and forth working, and the flip count is keeping track of how many flips we're doing.
+01:10:54 Okay? So you can see this stuff is really simple to wire up.
+01:10:58 Okay? And, you know, when you get into building even complicated applications, because you're always going to use these same mechanisms with target action and outlets and you're going to be using setters and getters to keep things in sync, it's going to be easy for people to understand how your code works.
+01:11:11 They know where to look to see where UI updating happens, etc. I'm going to do one other thing here.
+01:11:17 Take a minute and show you NS log.
+01:11:19 Okay. I told you that you could log something in the console.
+01:11:22 So let's do every time this thing changes, let's do an NS log.
+01:11:25 So it's just a C function.
+01:11:27 And you give it a format string like printf.
+01:11:29 So I'll say flip count equals percent V self.flip count.
+01:11:36 Okay? So you just put that NS log in there, and now when we run you're going to see it in the console.
+01:11:42 It's going to come up when I click, and it's going to say what happened here.
+01:11:45 By the way, of course, I can make that wider.
+01:11:48 And go back to the simulator.
+01:11:52 Let's see.
+01:11:53 Okay. So NS logging -- awesome way to debug.
+01:11:57 Okay? Sometimes a lot easier than setting a breakpoint and then when you get there looking at the variables and stuff.
+01:12:01 It just prints out what's going on and you can watch it.
+01:12:03 Especially in the UI things are sometimes animated, they're happening over time.
+01:12:07 It's sometimes hard to set a breakpoint in the middle of an animation to see what's going on.
+01:12:11 But if you do some NS logs, you can kind of see how things progress.
+01:12:14 All right.
+01:12:14 The last thing I'm going to show you here is how to add a new class to your app because you're going to need to do that.
+01:12:21 You're going to add four classes to this.
+01:12:22 Okay? You're going to start with this, okay, and then you're going to add four classes -- card, deck, etc. And the way you add a class is you -- and in fact, the way you add any file to your project -- is you go to the file menu, new file.
+01:12:41 Okay? And there's all different kinds of things you can add here, database file, schema files and everything.
+01:12:46 But you want this one top-left Objective-C class.
+01:12:51 Okay? Here you're just going to type the name of the class.
+01:12:53 So for example, if I'm going to add card and the name of the superclass.
+01:12:58 Okay. If you are doing playing card, you can type card here.
+01:13:01 It doesn't have to be something that's chosen from this list, okay, which are the iOS ones.
+01:13:05 So here I'm going to make card.
+01:13:08 I could put card right here.
+01:13:09 It's asking where to store this.
+01:13:10 I could put it right in the same place that my card game controller is, you see?
+01:13:15 But I'm actually a big fan of putting your model in its own directory.
+01:13:20 So you would use new folder down here.
+01:13:23 Let's create like a model directory, and that creates a model directory here.
+01:13:28 There's a controller, here's the model directory.
+01:13:31 And so create.
+01:13:32 So that's going to create card dot H and M. Here's card dot H and M, okay, kind of blank versions of them.
+01:13:39 You can switch back and forth between them here.
+01:13:41 Notice that if I switch the left, the right changes to match.
+01:13:44 You see? Change this, this matches.
+01:13:47 That's because I have counterparts chosen right here.
+01:13:49 If you go to manual and pick this file manually, then it won't be doing that magic anymore.
+01:13:54 But you can always go back to counterparts and it will keep them in sync.
+01:13:57 Okay. So you can have -- some people like their header file on the left, some on the right, whatever.
+01:14:02 Also, notice over here it would be nice if I can also group these things in the navigator.
+01:14:07 And I can by having them selected right-click new group.
+01:14:12 Say model.
+01:14:13 Right here.
+01:14:14 And now I've put my model in its own little place right here.
+01:14:17 I can even move this around, put it down here, whatever.
+01:14:20 I could put all my four classes in there.
+01:14:22 It is possible to link this group to the file system.
+01:14:27 In fact, if you just click on a file and bring up the inspector on it right here, you can see that it's got this location where you can specify whether it's an absolute path, or relevant to the group it's in, or whatever.
+01:14:38 So you can control that.
+01:14:41 And that's it.
+01:14:42 So I think that's all you need to do your homework.
+01:14:44 You're just going to type in all your code here for card and add your three other ones.
+01:14:48 Type all that code in.
+01:14:49 And then all you got to do is make that card instead of showing ace of clubs all the time, needs to go through the deck, okay?
+01:14:55 There's a detailed homework write up posted.
+01:14:58 It has all kinds of hints and help, and tells you about what the required tasks are, and evaluation criteria, and all that stuff.
+01:15:04 So definitely read that thing in detail, okay?
+01:15:07 Don't skip that stuff and just try to go straight to doing it.
+01:15:09 And if you have questions, I'll be here.
+01:15:11 That's it.
+01:15:13 >> For more, please visit us at Stanford.edu.
+			</span></pre>
+		</div>
+	</div>
+</div>
 
 <ul>
-<li>
-	<h6>Lecture 2. Xcode 5</h6>
-	<a href="Lecture 2 Slides.pdf">Slides</a>
-	<a href="http://a146.phobos.apple.com/us/r30/CobaltPublic/v4/c2/03/83/c20383e1-73b3-ece1-7429-b14b38ad4384/318-1013471239741048298-02_9_25_13_Wed_720p1500cc.mp4">Video</a>
-	<p>
-		Xcode 5
-	</p>
-</li>
 <li>
 	<h4>Lecture 3. Objective-C</h4>
 	<a href="Lecture 3 Slides.pdf">Slides</a>
