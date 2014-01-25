@@ -1,0 +1,666 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:08 >> Okay, well welcome to CS193p, Lecture 12 of fall 2013 and 14, and today we have one topic and one topic only, which is core data.
+00:19 And, as someone was asking earlier, assignment 5 is due on Wednesday and then your last assignment, assignment 6, will go out then and be due a week later.
+00:29 ON Wednesday, I'm going to be going over the final project requirements and we're going to continue with core data a little bit, talk about core data with table, UI table view.
+00:40 And then I'm going to do a big demo.
+00:42 So today's lecture is going to be all slides.
+00:45 I don't usually like to do that just because it's an awful lot of slides all at once, but it makes sense in this case and I'll be doing the demo for today's stuff on Wednesday, and then next week we'll start talking about advanced segwaying and maybe we'll do some map kit, multitasking, I'm not quite sure what I'm going to cover next week because you won't have a homework assignment ton that.
+01:03 This core data stuff that we're covering today and Wednesday, that's going to be the topic of your last homework assignment that goes out on Wednesday.
+01:12 So, core data, what is core data?
+01:15 Core data is an object-oriented database.
+01:17 Why do we need it?
+01:18 Because in any kind of significant application where we have a lot of data to crunch on, we can't be storing it in NS user defaults or not storing it at all, or always fetching it down from Flickr, right?
+01:30 So your current assignment, for the Shutterbug demo that we did last week, we're just always [pause]
+fetching our entire model, 01:37 basically, every time we want it from Flickr, but what if we had a very large database of photos, thousands or tens of thousands of little pieces of information about photos, we couldn't be fetching that down every time and we couldn't store it in NS user default so we need a real database.
+01:52 Plus, a read database allows us to make really smart queries about what's, our data is right now.
+01:58 We can't really query it at all, or almost not at all, we're just kind of displaying it all in tables, so to take the next level of sophistication in our app, we need to do that.
+02:07 So, core data is a very, very powerful framework in iOS7, one of the most powerful in terms of what it can do.
+02:15 I can only just barely scratch the surface in a lecture, in a little bit.
+02:21 This week, I'm just going to try and get you the basics and you're going to have to, you know, if you want to do a serious database app in your future, maybe for your final project or beyond, you'll need to do a little bit of extra reading up because core data is massive, okay?
+02:35 But fundamentally, it's a base, it's a way of creating objects, objective C objects that you are going to deal with that are mapped, or linked, to SQL, or XML, databases, okay?
+02:50 So, it's kind of a bridge between object-oriented land and database land, and database land is dominated by things like sequel.
+02:59 Okay? How many people here know what SQL is?
+03:01 Not know how to program SQL, but know what it is?
+03:04 Yeah, so everyone, pretty much.
+03:05 So that's mostly what core data is hooked up is, is sequel backend.
+03:10 So how does core data work?
+03:12 First, you create a visual map using a tool in Xcode.
+03:16 Okay? So dragging and dropping and all that stuff, so creating a mapping between an object-oriented view of your data and the sequel or tables and rows [pause]
+version of your data.
+03:30 And core data allows really that to be pretty seamless once you've created this mapping, and we'll talk all about that and how it does that, but let's start by looking how we create this visual map in Xcode.
+03:43 Okay? So, first, we create the map by doing new file, anytime we want to add something new to our project, we're going to do new file, but in new file, instead of doing like Cocoa Touch, objective C class, we're going to go down to where it says core data, see that?
+03:58 And pick data model, don't accidentally pick mapping model, its data model that you want here, okay, the data model is the mapping between the object-oriented world and the database world.
+04:08 So you click that, it's going to ask you where, what you want to call it and where you want to put it.
+04:12 Some people like to call their model file, model, if they only have one.
+04:17 Some people like to name it the name of the application.
+04:20 So like of last week, if we were doing core data we might have called Shutterbug, the name.
+04:24 Sometimes you might have multiple mappings, and it is totally possible and in a big application you might well have multiple databases, multiple mappings, and so you would have multiple files, so you want to pick names for your mappings that kind of correspond to what their purpose is inside your application, so here we're going to take the default, which is just model, and you can see there, it creates this new file.
+04:46 If you look over in the navigator over there, model dot xc data model d. Okay?
+04:51 And this is our mapping, our visual mapping file, and you can see here that it has some components, and we're going to talk about most of them.
+05:01 The components are entities, attributes, relationships, and fetch properties.
+05:05 Okay?
+05:06 So entities are kind of like objects, they're going to map to our objects.
+05:10 In the database world, they are tables, okay?
+05:14 Attributes are kind of like the columns in a table in database.
+05:18 In our object-oriented world, they're going to be properties on objects, okay?
+05:22 Relationships are also properties on objects, but they are pointers to other objects in the database, okay, or pointers to a bunch of other objects, okay, so this would be kind of like joins between tables in the database sense.
+05:36 Fetch properties are kind of a calculated way to have a pointer to some other properties.
+05:41 I just have to cut something for time, so we're not going to talk about fetch properties, they're really not that complicated once you understand how fetching works, much later in this lecture then you'll kind of get the idea.
+05:53 Oh, I can see how maybe fetch properties would work and then you can read the documentation and figure it out.
+05:56 So, that's what the data model consists of, entities, attributes, relationships.
+06:01 That's what we're going to talk about.
+06:03 Let's, for our example today, let's say we had a Shutterbug-like application that had photos and photographers.
+06:13 Okay? So your homework is going to be more places and photos.
+06:16 Our demo here, and the demo I do on Wednesday, and the slides, are going to be photos and photographers.
+06:21 So those are the two things that are going to be in our database, photos and photographers.
+06:25 So, let's create an entity for the photos.
+06:28 So we click add entity down there at the bottom and we get this entity.
+06:31 I'm going to change the name from entity to photo, so this is going to be my photo object in the database.
+06:38 And then I can add attributes to my photo object by clicking on that little plus underneath where it says attributes there.
+06:45 And when I add one, it adds one called attribute, I'm going to change the name of that to title, so photos have a title, so I'm going to put a title in there.
+06:52 And you notice as I do this, I get an error, a little red error warning up there.
+06:57 Why is that?
+06:58 That's because the type of my title is undefined.
+07:02 You see where it says type, undefined next to title there?
+07:06 So that's not allowed.
+07:07 You have to specify the type of all the properties in your database, and so you just click on that undefined, I'm going to set this one to be a string, the title, obviously, is a string.
+07:17 Now, what can some of these things be, besides strings?
+07:21 Well they can be numbers, either integers or floating point numbers, those are all representing the database as, in your object world rather, as NS numbers.
+07:30 Okay? All your properties, in fact, all the attributes in your objects in the database, all their properties are going to be objects of some sort.
+07:38 So NS string objects if their strings.
+07:40 NS numbers if they're integers, floats, or double, or bullions.
+07:45 NS date if they're dates.
+07:47 NS datas if they're binary data, that's the second to the bottom.
+07:51 And then transformable is kind of an interesting one, those will be NS data objects, which will provide a little transformable object that will convert them to some other type, like even a [inaudible]
+struct, or something like that, 08:02 and we're not going to talk about transformables, but it is possible to store really any data type in the database as long as you provide a transformation object that will convert them back and forth between NS data.
+08:13 Okay? So here, title is a simple one, it's a string, I'm going to add a whole bunch of other attributes here that you kind of look, no more error there right now, that I set it as string there's no more error.
+08:23 If I add a whole bunch more, you can see I've added an upload date that I got from Flickr, so that's a date.
+08:30 Even thumbnail data, so let's say I downloaded the thumbnail image data, the image date for a little thumbnail of my photo from Flickr, I can actually put that data in the database as an NS data.
+08:42 Some people ask, how big an NS data could I put in there?
+08:45 For example, could I put an NS data that is the real photo, the big, you know, maybe a megabyte-size photo, and the answer is absolutely, you can put them in here, in fact, there's a little switch that you can turn on that says I'm going to put something big here, store it in another file.
+09:01 Okay? But even if you store it in the sequel file, it can usually manage it, it's probably not the best, most efficient way to do it, but yes, you can store big data blobs in core data, as well.
+09:13 So, there's some example attributes.
+09:15 Let's look at this a different way.
+09:18 If you see down at the bottom there where it says editor style, right, I clicked on that and it switched over to showing the same thing, but in a graphical format.
+09:26 So you see, here's my photo entity, I can see the attributes, see them there, listed there?
+09:31 And I can still create an entity in this view, so I'm going to create another entity, which is my photographer.
+09:36 I create that, entity, I'm going to change the name to photographer, it changes it.
+09:42 Okay? I can also add attributes in this view.
+09:45 So I just go down to this button here, add attribute, I'm going to add an attribute here and I'm going to call it name, so that's the name of the photographer.
+09:54 You can also edit these attributes, here in this view, by clicking on them.
+09:58 Alright, by clicking on the name, and then going up to this attributes inspector up here, okay?
+10:04 So this is kind of like the attributes inspector in other environments inside of Xcode, so if I click on that, you can see I get a bunch of attributes of my attributes.
+10:14 So here's the name one, and you can see there's the name of it and there's the attribute type, which you can see is undefined, that's why we have the error up there.
+10:22 It's the attribute type undefined.
+10:24 So I'm going to click on that popup right there and change that undefined to be string.
+10:28 The photographers name is also a string.
+10:31 Okay? So we got that.
+10:32 I can also create relationships between these objects, photos and photographers, clearly a photo and a photographer have a relationship, right?
+10:39 A photographer takes photos.
+10:41 A photo is taken by a photographer.
+10:43 So I can create relationships between them by control, dragging, that's how we like to do things in Xcode, we control, drag.
+10:50 So I'm going to control, drag between the photo and the photographer.
+10:53 And it's going to create this new relationship between them.
+10:57 Now, the relationship will have a different name on each side.
+11:01 On the photo side, we're going to call this relationship who took, because this relationship is for the photo, who took it.
+11:08 And on the photographer side, we're going to call to photos, because a photographer can take multiple photos, so we'll call it photos.
+11:16 Okay? So this is the same relationship, but it's going to have a property on each of these two objects, photos and photographers, it's a little different.
+11:23 Now, notice that from a photographer's standpoint, this relationship is not just a one-to-one, because a photographer can take multiple photos, and you can see them in the inspector for photos, on photographer, there's a type that says 2, 1, okay?
+11:37 That means it's a 1, 2, 1, relationship.
+11:40 I can actually change that to too many, and when I do that, you're going to see that I get a double arrow head, on that side of the pointer there, that's saying a photographer can have multiple photos.
+11:53 Now, we talked about how title is a string and upload date is a date, what type is who took and photos?
+12:01 What type are those?
+12:02 Because they're just properties, as well, of these objects, but what's their type?
+12:06 And it turns out that something like photos, which is a too many, is an NS set.
+12:13 Okay? That's going to be its type.
+12:15 Just like title is a NS string, photos is an NS set.
+12:19 What about who took?
+12:21 Who took turns out to be a NS-managed object star, so it's a pointer to an NS-managed object.
+12:28 NS-managed object is the super class for all objects in the database, okay, so photo is going to be an NS managed-object, a photographer is going to be a NS-managed object.
+12:39 In our objective C code, they're all going to be NS-managed objects, so, of course, the who took pointer, which is a pointer to a photographer, is going to be an NS-managed object star, and we're going to see how we can subclass NS-managed object to add all these properties, and all this stuff, and then it would be a photographer star, but that's what who took is.
+12:57 It's going to be exactly what you would expect, it's a pointer to an object, which is that other object.
+13:02 Okay? [Pause] This little delete rule right there, I'm not going to go into detail about this, but the delete rule specifies what to do to who took, okay, this is the delete rule for photos, you see I'm inspecting photos there, this is the delete rule that says if I delete a photographer, what happens to who took?
+13:22 Okay? Because who took was pointing to this photographer and if I delete that photographer from the database, and the answer here, this delete rule is nullify, which means who took would be set to nil.
+13:32 Okay? But there are other rules, for example, cascade, which means delete, when you delete the photographer, delete every single photo that it points to.
+13:42 Alright? Cascade the delete throughout the database.
+13:45 So, you really want to know what you're doing here.
+13:47 The safest one is usually nullify, set things to nil, but if your database doesn't make sense if a pointer points to nil, you might need more complicated delete rules there, but, in your homework, you won't need anything more complicated than that.
+13:59 So that's basically how we build this map between objects and the database, okay?
+14:05 So, there's a lot of things that you can do once you have this map.
+14:08 We're going to focus on the creating entities, attributes, and relationships, and then setting their attributes and then querying for them and things like that.
+14:17 But there's a lot of other things you can do in core data, I'll mention some of them at the end and you can go read up on it if you want to do more sophisticated database things.
+14:25 So, how do we access all of this stuff in our code, once we've created this map?
+14:30 And the answer is we need an NS-managed object context.
+14:34 Okay? An NS-managed object context.
+14:36 This context is kind of the hook we need to go create objects in the database, set attributes of objects in the database, query for objects for the database, we all do these through this context.
+14:48 So, how do we get a context?
+14:50 Well, there's really two ways to do it.
+14:52 One is you use this class UI managed object, which I'm , or managed document rather, which I'm going to talk about.
+14:59 And the second way, which I'm not going to talk about, is that you can alloc init a NS-managed object context.
+15:05 The reason I'm not going to talk about it is, you got to know a little bit about context and how they work and how they do thread safety and things like that, that I really don't want to get into the details of, and that UI-managed document takes care of it all for us.
+15:18 Okay?
+15:19 So that's why I'm going to focus on the UI-managed document way.
+15:22 If you want to see how the way of alloc initing an NS-managed object context, because there's more then that you need to do, like you've got to specify where the file is, the persistent store for it, you got to get this map into the picture.
+15:34 All that stuff you'd have to do manually if you don't use UI-managed document.
+15:38 If you go when creating a new project and say master detail instead of single view controller, it'll actually have a button that says use core data and when you create that new one, you'll see a whole bunch of core data code that does all this business in there.
+15:53 Okay? But, there's no need for you to go look at that, UI-managed document is a much simpler, cleaner way to get yourself a UI, or an NS-managed object context, which is what we're trying to do.
+16:04 So let's talk about UI-managed document and how that works.
+16:07 It inherits from a class called UI document.
+16:10 UI document is a whole bunch of mechanism for managing some storage, okay?
+16:15 UI-managed document puts a core database in some storage.
+16:20 So you're managing the storage of your core data database, so you can think of UI-managed document as just like a thing that contains your core data database for you.
+16:29 And all you ever really do is open, or save, or open and create, a UI-managed document and then grab its managed object context, and then use it to do your database.
+16:40 That's it.
+16:41 Okay? So that's what we're going to talk about.
+16:43 How to open, or create, a UI-managed document, and then get its managed object context and we'll dive back into now that we have a context, how do we do core data?
+16:52 So here's how you create a UI-managed document.
+16:55 You alloc init it.
+16:56 Its designated initializer is init with file URL, you have to give it the URL where this core data database is going to be stored, okay?
+17:06 I've put these four lines of code that are in white, that are before the yellow here, they describe how you would create a document called My Document in the users documents directory, okay?
+17:19 So when you're, we haven't really talked about storing files, right?
+17:23 We haven't accessed the file system at all, in anything we've ever done.
+17:27 We do this with this class NS file manager.
+17:30 I'm not really going to cover that this week.
+17:32 Suffice it to say the file manager can give you the URL of the documents directory, for the user, that's what the second line of code there is, and then you can just append whatever you want the name of your document to be, like my document or Flickr database, or whatever you would want to call it.
+17:49 This is going to be the URL where it's going to put that core data database for you.
+17:53 So now you have the URL, you just say alloc init to create a UI-managed document.
+17:59 Okay? So, this UI-managed document though, you've only alloc init it, you haven't actually created it on disk, it doesn't exist.
+18:05 It doesn't exist on disc yet, okay?
+18:08 So, we've got some work to do to make this thing exist on disc, and how do we do that?
+18:14 Well, we have to create it if it doesn't exist, and we have to open it if it does exist.
+18:21 In other words, we've used it before.
+18:23 So to find out whether it exists on disc, we have to do this file manager thing, file exist that path.
+18:30 So you have the URL to it, you say, NS file manager default manager, that's like a shared file manager.
+18:35 File existed path, it returns a bullion whether the file already exists.
+18:39 If it does exist, in other words the file exists, then we're going to open it, and the way we're going to open it is with the UI-managed document method open with completion handler.
+18:48 If it doesn't exist, then we're going to create that document on disc with save to URL.
+18:56 For save operation, UI document save for creating is the argument we want there, because we're creating this file, completion handler.
+19:04 Okay? What's that completion handler business all about?
+19:07 Okay, why do these open and save and create this, it says save to URL, but really it's create at URL.
+19:14 Why do they have this completion handler?
+19:16 Well, it's because these are asynchronous.
+19:20 These two methods open and create, basically, are asynchronous, they don't happen immediately.
+19:26 When you ask the UI-managed document please open this or please create this for me, it might take it a little bit of time.
+19:34 Okay? Why might it take some time?
+19:36 Well, it's possible it could take some time because the file system takes a certain amount of time, but, yeah, there's other things involved that we're not going to talk about, like iCloud, where maybe it needs to go check something with some network cache or something like that, because this document is going to be on iCloud, okay, in other devices.
+19:56 Now, one great thing about UI-managed document and using that to do your core data database, is you're on the fast-track to iCloud.
+20:04 Okay? iCloud much easier, more straightforward if you just start with UI-managed document.
+20:09 But anyway, suffice it to say, these two things, opening a document and creating document, are asynchronous, which means that completion handler, that little syntax there, but that completion handler gets called back on the thread you called these methods on, which has got to be the main thread because this is UI-managed document, this is a UI kit object, you have to call these methods on the main thread, the main queue.
+20:32 So that completion handler will get called back on the main queue when it's done.
+20:38 Okay? No matter how long it takes, it'll get called later when it's done, and then in that block, you just start doing what you want to do.
+20:44 Alright? So let's talk about what you might, how this might look to [pause] see if the file exists and if it does open it and if it doesn't, create it, it looks something like this.
+20:55 And inside that completion handler, if you successfully opened or successfully created it, you're going to call some method of yours, I've called it document is ready, you can call that method anything you want, that says okay, the documents ready to go, now you can go use it.
+21:11 Alright? And I'm doing the same thing in either case.
+21:13 It's a little bit of a bummer that there's no method like open or create, and it just does it all in once, that you have to do this file exist business, but you do, so you're going to have this little sequence of code in almost any app that uses a UI-managed document, okay?
+21:28 It's kind of silly, because it's all very, very simple, similar, if then there, but that's what it looks like, okay?
+21:35 So now, what does that document is ready method look like?
+21:38 It looks something like this.
+21:40 One thing I might do at the beginning of my document is ready is check the state of the document to see if it's in the normal state, normal state means this guys is ready to go.
+21:50 Okay? What other states could it be in?
+21:52 Well it could be in the state closed, closed means you haven't opened it yet or you haven't created it yet.
+21:59 Either case it's going to be closed.
+22:01 You cannot use a document once in the closed state.
+22:03 Some of these other states, like there was a saving error or editing is temporarily disabled because someone else is editing this document in iCloud and its updating, for example.
+22:13 You're not going to run into those in this class, but you should know that they are there.
+22:18 So, checking that, at the beginning to, you know, it's a bit mask there, that's why I'm using that ampersand, right, I'm just checking that bit, do my documents stay normal?
+22:27 Just to see if the document is ready to go.
+22:28 So that might be the first thing I do is check its state to make sure it's ready to go, if it's not, like if it was closed, then I might go back and try to open it, or create it again.
+22:36 If it's got an error, I might wait awhile and try this again, or something like that.
+22:41 So anyway, let's say I have this document in a normal state, now what am I going to do?
+22:46 Now I'm going to grab that NS-managed object context and go start doing some core data stuff.
+22:51 And that's it.
+22:53 Okay? So this is how we get started.
+22:56 Now, before we dive into what we're going to do with that NS-managed object context, a couple more things about UI-managed document, one is that it is auto saved, okay?
+23:06 You do not have to save it.
+23:09 And you can save it using this method you see here, but generally we don't, we let it auto save.
+23:15 Okay? The way we save it is with the same method that we used before, but we say UI document save for overwriting, but generally, we don't call this method.
+23:22 We let it auto save.
+23:24 Okay? So that's an important thing to understand.
+23:27 Okay? Second thing, closing the document.
+23:31 Well, it kind of auto closes, as well.
+23:34 When does it close?
+23:35 When there are no more strong pointers to it.
+23:37 In other words, when there are no more strong pointers to it, when it's going to leave the heap, it gets closed automatically.
+23:44 So you generally don't call a close either, but you can do that as well.
+23:47 And close, just like saving, are asynchronous, and you got to implement these completion handlers to do whatever you want when they're done closing or done saving.
+23:56 Question?
+23:57 [ Inaudible Background Question ]
+24:01 Correct. Yes.
+24:01 So the question, does it auto save before closing?
+24:04 Absolutely.
+24:04 If you say close, or if you stop having a strong pointer to it, it will save and then close.
+24:10 Okay? One thing I will say about saving, the auto saving, when you're in debugging, you know, when you're in development mode and you're debugging, sometimes students will get a little confused, because they'll go and they'll do something, update their database, and then they'll stop in the debugger, made a code change and run again, and the data won't be there.
+24:30 Well, because it didn't have a chance to auto save.
+24:32 So when you're in develop mode, you might want to throw in some explicit saves if you're going to be hitting stop in the debugger all the time.
+24:40 Okay? Alright, so let's talk about multiple instances of UI-managed document on the same document.
+24:47 Am I allowed to alloc init file URL to create a UI-managed document, and then somewhere else in my code, alloc init file URL, the same URL, and have two of them looking at the same document, you might think, oh that can't work, but actually it does, it works perfectly fine.
+25:03 Okay? It works absolutely no problem, the two have their own managed object context that are different, but they're both, contexts are looking at the same database and when they both make changes, it's going to save.
+25:15 There is the possible problem that one set of changes in this instance of the UI-managed document, and this one might conflict.
+25:23 They might be trying to, one's trying to delete an object, but another one is trying to set an attribute of it at the same time.
+25:28 So, if you do have this, it is possible to get conflicts, but usually if we have multiple instances, it's because we have one writer and many readers.
+25:36 It's pretty rare to have two separate controllers or something, each having a document and their both making changes, that's pretty rare.
+25:44 Okay? Especially both making changes at the same time, there's only so much screen for changes to be being made on.
+25:51 One thing to be careful of here is that if one document changes the database, the other one doesn't automatically see those changes.
+26:01 Okay? It's not like oh I added an object in one managed document, oh, I don't see it in the other one.
+26:07 Why don't you see it?
+26:08 Well you don't see it because they have different context, different NS-managed object contexts, but you're still modifying the same database.
+26:14 So how could you find out, if you wanted to find out if another document is doing, and the answer is, the radio station.
+26:20 Okay? We could use NS notification.
+26:23 And so, here's an example of having a controller, when it comes on screen, start listening at, to the managed object context, there, of a different document.
+26:35 Not the document it has open, but some other [pause], some other instance of a UI-managed document, and it's looking for the radio station, NS-managed object context did save notification.
+26:46 So whenever that other document auto saves, then it's going to get a NS notification saying oh, it changed.
+26:53 Alright? And I'm going to call this method context changed or whatever.
+26:57 And what would I do when that happens?
+27:00 Well, two things, one, I could just refetch all my objects.
+27:05 Okay, I know the database is changed, I'll just refetch them all, we haven't talked about fetching, but I could refetch and get a fresh set of everything.
+27:11 But, actually this context change did save notification, gives you an array, inside of its user info is a dictionary, with three arrays that are a list of all the objects that changed.
+27:24 Okay? And you can merge those changes into your context using this NS-managed object context method, merge changes from context did save notification, you just give it the notification, and it'll automatically merge all those changes into your context, which is pretty cool.
+27:39 This is a very cool method.
+27:41 Very underappreciated coolness of this method, okay?
+27:44 So you're watching some other context that's on the same database as yours, but it's a different context, you get a notification, you can merge those changes into yours, as if you had made those changes.
+27:53 And it's all going to be fine when both documents save because you're merging in the same changes and this is, core data automatically deals with when the same change is being made by two different contexts, only when conflicting ones happen is it a problem for you.
+28:08 Okay? So this all kind of just magically works.
+28:11 So that's watching another context.
+28:12 Probably not going to be necessary in homework, because you're probably going to take a different strategy, which is have one managed document, UI-managed document, and you use its context everywhere in your app.
+28:23 That's kind of a simple way to do it, and that's what I recommend for your homework.
+28:27 And we'll see in the demo, I'm going to do that in the demo.
+28:31 Alright. So now we have an NS-managed object context that we got from our document, what can we do with it?
+28:36 Well, we can insert and delete objects, we can change attributes, and we can query for objects.
+28:41 So let's talk about doing all those things.
+28:43 Let's start with inserting.
+28:45 So let's say I want to put a new photo, or put a new photographer into the database, I do that with this method right here, it's a class method on NS entity description called insert new object for entity for name in managed object context.
+28:58 So you can see, I can't insert an object without having a context.
+29:02 The context is the hook that lets you insert things in the database or query or anything, so you have to have a context.
+29:09 And, that first argument, at sign photo, that is the name of the entity.
+29:15 So remember in the mapping thing when I made a photo entity and I made a photographer entity, this is a string which is the name.
+29:22 So here I am making a photo.
+29:24 And what does it return?
+29:26 It returns NS-managed object star photo, and I told you that all of the objects in the database are NS-managed objects or subclasses thereof.
+29:35 And, in fact, that's exactly what happened.
+29:36 So this is just going to make one for you and return it.
+29:39 It's going to be blank, or empty.
+29:42 Now, that could mean that all of its attributes are nil, but we didn't see this in Xcode, but it, when you inspect a property in Xcode, you can actually specify a default value, and it'll have that value.
+29:54 So maybe you want it to have the upload date by default be the date the object was created or something, you can go in and create [pause] some fixed date or you want the title to always be at least the empty string or something like that, you can set defaults, they have to be constants basically, in Xcode, to do that and NS object will come back with those defaults set in those fields, and otherwise nil, okay?
+30:20 But if you don't do any of that default setting, all the properties in this photo will be nil.
+30:24 So the title will be nil, subtitle will be nil, the who took will be nil, it'll all be nil, okay?
+30:30 So, great, now I have an object, how do I set those attributes?
+30:36 I want to set the title.
+30:37 I want to set the subtitle, I even want to set who took?
+30:40 How do I do that?
+30:41 You do that using the key value coding protocol.
+30:45 And you've already used this protocol actually.
+30:47 It is value for key, set value for key, value for key path, and set value for key path.
+30:55 Okay? So this protocol, which is implemented by NS dictionary, for example, that's how we used value for key path in those NS dictionaries, to do the things like description dot under bar contents, remember that, from Flickr?
+31:10 This is how NS-managed object works.
+31:12 It implements all these and you can say value for key, at sign quote title, and you can get the title of a photo.
+31:20 Or you can say set value, whatever you want, for key at sign quote title, and set the value of a title, simple as that.
+31:27 Okay? Value for key, set value for key.
+31:29 Any questions about that?
+31:32 Okay. So, the, the key is obviously just a string, the name of the property in your visual map that we built earlier.
+31:39 The value would be just an object, like an NS string, if it was a title, and NS date if it was the upload date and NS data if it was the thumbnail UR, thumbnail data or whatever.
+31:51 You can also set, string set value for key, the relationships.
+31:55 So if you had a photographer, which maybe you inserted with that entity description thing, so now you have photographer, as well, you can just say the, the photo set value, quote who took, set the value, the photographer, for the key quote who took.
+32:10 Alright? Now, what' really interesting is that if you set that value who took, the photo set, in the photographer, will automatically be updated.
+32:21 You do not have to set both sides of the relationship.
+32:24 And vice versa.
+32:25 If I have a photographer and I add a photo to its photos set, it'll automatically set who took.
+32:34 Okay? And that's because this database has to maintain self internal consistency and so core data does that all for you, which is really cool?
+32:43 Okay? So you can set either side and it'll automatically set the other side.
+32:46 As I said before, the too many ones are NS sets, and the non-too many ones are just NS-managed object stars.
+32:56 Okay? Now, all these changes that you're making, inserting objects, setting all those properties, those only happen in memory.
+33:04 They're not happening on disc, until the context is saved.
+33:08 Now the context has a save method.
+33:10 Okay? If you go look in NS-managed object context, it has a save method, but you're not going to call that, because you're going to let UI-managed documents auto save, save the context.
+33:20 Alright? So if you save the document or you can actually send a message to the context to save itself.
+33:25 Either way, it will save out to disc, but until then, all the changes you're making are just in memory.
+33:32 Okay? Now, core data has an incredible undo and redo built into it.
+33:37 To, you make some changes, you say undo, it undoes them, okay?
+33:41 And you can batch them up and you can undo things as a group and can undo just the last chain, I can't, I don't have time to talk about any of that, but it's really, really cool, okay?
+33:49 So anytime you have a situation where you're changing database and the user wants to be able to maybe undo, core data's awesome for that.
+33:58 [Pause] Just like you get UI, or NS-managed object did save notifications, you can also get UI-managed document did save notification.
+34:06 So you can sign up for that radio broadcast and find out when the whole document did save.
+34:10 Kind of six, one-half dozen in the other in this case, because if the documents get saved, then definitely the context is going to be saved, as well.
+34:20 Okay. [Pause] Calling value for key and set value for a key like this though, it kind of results in some ugly code.
+34:26 Because it's not type checked, right, value for key and set value for key, that should be set value colon for key colon, that just takes ID.
+34:36 Right? Returns ID, so it's really not type checking any of that stuff, and also, you end up with a literal strings, like at sign quote thumbnail URL and if you ever changed the name of that in your visual map, all your code would just stop working silently and you wouldn't know, so, really what we want here is properties.
+34:55 We want to be to set the title and subtitle and thumbnail URL and all that stuff in my photo using properties and dot notation.
+35:03 So, all we need to do to do that is create subclasses for photo, and a subclass for photographer.
+35:10 Subclasses of NS-managed object, right?
+35:12 And the subclasses will implement all these properties, and, of course, because Xcode is so nice, it's going to do that for you, so let's talk about now how in Xcode we can make it generate subclasses for photo and photographer.
+35:26 So I'm going back to my visual map, I'm going to select photo and photographer, and then I'm going to, from the editor menu, I'm going to pick this all important menu item called create NS-managed object subclass, okay?
+35:38 Because that's exactly what's it going to do.
+35:40 And when I do that, it's going to say okay, which of your models, okay, we only have one, model dot xc data model d, but you could have multiple, which of your models do you want to generate managed object subclasses for?
+35:54 So we'll just pick model, and then, it says okay, well, which of the classes, which of the entities you want to create a subclass for?
+36:00 We'll pick them both, both photo and photographer here, and, it's going to say where do you want to store them, we'll store then where we store everything else, and then, bingo, photo dot m and h, and photographer dot m and h, you see those there, that got created for us?
+36:17 So, those are subclasses of NS-managed object, and when you insert an object in the database, or get one back on a fetch, which we haven't talked about, if you insert an object in the database, when it comes back, instead of being an NS-managed object star, it's going to be a photo star, or a photographer star, okay?
+36:33 It's just going to automatically work, that insert entity for, for entity for name method, which I can never remember the name of, that will return, if there's a subclass to be had, the subclass.
+36:46 Alright, so let's look at the code of this, let's look at photo dot h, for example, so you can see, that photo dot h has made an at sign property for all of my database properties for photos, see title, photo URL, they're the right type, NS date, NS data, even who took is the right class.
+37:03 You see who took is a photographer star.
+37:05 Now, sometimes you'll just, do this and who took will still be an NS-managed object star.
+37:11 Why does that happen?
+37:12 That's because this is a one-pass generation, and if it happens to generate photo before it generated photographer, it won't know about photographer and it won't be able to do this.
+37:21 If that happens, just go back to your map and generate them again, and this time they'll both exist, beforehand, and so it'll, it'll make the right thing, okay?
+37:29 So you can regenerate as many times as you want, and, in fact, we're going to be regenerating as we change scheme, add more entities, add more properties, we're going to be redoing that regenerate all the time.
+37:38 Question?
+37:39 [ Inaudible Background Question ]
+37:57 Yes. So, let's, the question is tell me about that at sign class photographer towards the top there.
+38:02 Why is that not pound sign import photographer dot h, well, in objective c, if all you want to be able to do is declare that something is of a certain type, and you don't need all the methods, you're not going to call any of the methods or anything like that, then you can just do this at sign class directive, you can do the same thing for protocols, you can say at sign protocol, whatever, and just declare that protocol exists, so I don't, I'm not going to call any of the methods in it or implement any of the methods.
+38:33 So it's kind of a forward declaration because eventually anyone who's going to use this is going to start calling photographer methods and they're going to import it, but this is just a way to suppress that compiler warning, so it doesn't say unknown class photographer, without having to import photographer [inaudible].
+39:04 That kind of keeps them independent, that way you wouldn't have to generate photographer dot h if you didn't want to, you just wanted photo and then that could be, although, that wouldn't be true because then it would be NS-managed project, but anyway, if you have NS-managed object, there, then just generate them again.
+39:26 Alright, so let's look at photographer dot h, you can see it has name and photos, right, as promised.
+39:33 Photos is an NS set, you see that?
+39:36 It also gave me a whole bunch of methods here for adding photos to the photo set, because that NS set, that's an NS immutable set, so if I wanted to set the list of photos, I'd have to create a mutable set, put all the photo objects that I wanted in there, and then set the whole thing.
+39:53 You know, say, you know, my photographer dot photos equals a whole set.
+39:58 With add photos object, or remove photos object, I can just add one photo at a time.
+40:02 Right? So it's just kind of, those are convenience methods for adding photos to that photoset.
+40:06 So let's look at the dot m's of these though.
+40:08 Okay? And what do you imagine these dot m's look like?
+40:09 Like set setters and getters?
+40:10 Or, at sign synthesizes or something like that?
+40:11 And the answer is none of that, okay?
+40:12 The implementations of these just say at sign dynamic for all of the properties.
+40:14 Now, what the heck is at sign dynamic, we never seen that before?
+40:16 At sign dynamic basically means hey I know what I'm doing, don't generate a warning for this, okay?
+40:18 And what does NS-managed object do, in this case, since there's no at sign synthesize, there's no setters and getters here, the implantation just suppresses the warning, basically, and the answer is objective C, the run time, has a trapping mechanism where if you send a message to an object, and it doesn't understand that method, right, it doesn't implement that, it can trap.
+40:28 And go try to figure out something else to do.
+40:29 Okay? Without crashing or saying does not respond to selector.
+40:31 And, NS-managed object, when it gets sent a message it doesn't understand, it tries to do value for key, or set value for key on it.
+40:39 Alright? And if that doesn't work, then it says does not recognize selector, but if it does work, then it just works.
+40:46 Okay? So that's what's going on here, NS-managed object traps when setters and getters or any method is sent to it and it tries to do value for key and set value for key, and if it can, all is good, and if it can't, then it says, does not understand selected.
+40:59 Everyone understand that?
+41:01 So this at sign dynamic just says don't generate a warning that I don't implement the setter and getter, because I know what I'm doing.
+41:09 Okay? Alright.
+41:11 So, so now that I have these subclasses, how do I use them to access my attributes using dot notation, and so now when I say NS entity description, insert new object for entity for name, in managed object context, instead of saying NS-managed object star photo equals that, I say photo star photo equals that, insert a new object for entity for name, by the way, returns an ID, so the complier is not going to warn you or give an error in either case.
+41:40 But if you say photo star photo equals that, then you can just say photo dot title equals, whatever you want the title to be, like if I'm downloading this Flickr, I might say Flickr data object for key Flickr photo title, get it out of that dictionary that came from Flickr and I'm just setting that title in my database.
+41:57 Okay? Exactly 100 percent what you would think it would be.
+42:01 Here's a whole bunch of other examples of what you would do, you can also obviously call the getter, so I could NS string star my thumbnail equals photo dot thumbnail URL, okay?
+42:11 Get that thumbnail URL out of there, that, notice that you can't put URL's in the database, you have to put strings and convert them to URL's.
+42:19 I could say photo dot last view date equals NS date date, okay, the date method in NS date gives the current date and time, I could set that as the photo's last viewed date.
+42:29 I can even, I can obviously do photo dot who took equals some photographer object, but I can even say photo dot who took dot name equals the name of the photographer.
+42:41 So if I have a photo, a photo star, I can actually set the name of the photographer who took that photo.
+42:49 Okay? So I'm just using dot notations and normal dot notation, it's just that photographer implements name and photo implements who took and who took is a photographer, therefore, photo dot who took dot name.
+42:59 Question?
+43:00 [ Inaudible Background Question ]
+43:05 Alright, so the question is would it auto create, if, if photo dot who took was nil, would it automatically create a photographer in the database, so that it can say dot name equals whatever.
+43:16 And the answer is no.
+43:17 This is normal properties.
+43:19 If photo dot who took is nil, then the set name will just be sent to nil, it will do nothing.
+43:25 So the only way to get things in the database is insert for entity for name, the thing we saw above there, insert new object for entity for name, okay, it doesn't auto create the [inaudible].
+43:36 Okay. So that's how I access my attributes.
+43:39 What if I, though, wanted to add code to my photo or my photographer classes?
+43:45 I could put that code in photo dot m and h, but that would be a problem.
+43:51 And why is that?
+43:52 Well, that might be a problem because, well, first of all, why would I want to do that?
+43:57 Let's say I wanted to add a class method to photo that took a Flickr database, a Flickr dictionary as an argument and created a photo in, in the database, that would be an awfully convenient utility method to have in photo, right, I could open square bracket photo, make a photo with this Flickr data, in a context, and it could do it, right, so that would be cool.
+44:19 Or if I want to derive a property, like, I've got this nice property thumbnail URL, but unfortunately it's a string, what if I wanted to have a UI image which was the thumbnail UI image, then I could have a little method in photo that just self dot thumbnail URL, turn it into URL, go look it up somewhere, preferably not on the internet, but maybe, maybe it would just be a blocking, a method that would block, I don't know.
+44:44 So that would be cool to add to photo, as well, so in other words, it would be nice if we could put all our photo-related stuff in photo dot m and h, not just the setters and getters for all our properties.
+44:54 Why this is a problem though, the problem is as you change your visual map, you're constantly calling in that regenerate method, you know, menu item, the create NS-managed object, so it's called always rewriting them, okay, it's always blasting what's in there, so we can't do it.
+45:10 Okay? If we edit photo m and h then we can no longer go into Xcode and say create managed object subclasses for me anymore, and that's a bummer.
+45:18 Because, especially in development, we're iterating, we're adding some properties, we're adding some entities, changing some relationships, we want to constantly be going back and regenerating those things, okay?
+45:27 Question?
+45:29 [ Inaudible Background Question ]
+45:45 Yeah, so, the question is could I set the default for the who took property to be photographer alloc init, basically, so the, the default would always default to creating a photographer and unfortunately you can't do that, but that'd be cool.
+45:57 The defaults all have to be kind of like I say, static, [inaudible].
+46:04 Alright, so, what are we going to do then, because we want to add methods to photo dot m and h, and we want to add methods to photographer at m and h, but we don't want to have to touch those files.
+46:13 Well, we're going to use a new objective C language feature.
+46:16 The last one I'm going to teach you, okay?
+46:19 I think you know them all after this, called categories.
+46:22 Okay? Categories, let's you add a method to a class without sub classing it.
+46:31 Okay? And, you don't even have to have the source for that class that you're adding the method to.
+46:39 Okay? So what are some of examples of this?
+46:41 Well, in the UI kit, there's a method NS attributed string, draw at point, okay, well NS attribute a string is in foundation, it's not a UI kit thing, it's just a generic attributes on a string thing, but UI kit adds all these, you know, draw at point, and it defines all these other attributes that can be on there, and it does all that in UI kit, and it doesn't even need the source for NS attributed string.
+47:04 Okay? It just needs to know that class exists.
+47:06 Same thing, NS index path.
+47:08 I told you NS index path only had two methods on it, row and section, but actually NS index path has a whole bunch of methods on it, it's in foundation, it's just a generic index pointer into an arbitrary, you know, linked list of items, it's just that UI table view wants to call it row and section, so it adds the property's row and section to NS index path, even though, again, table view is in UI kit, NS index path is in foundation, not even the same framework, okay?
+47:36 So, how does this work?
+47:38 And it looks like this.
+47:40 You have an interface and implementation, just like the class, but you say, instead of saying at sign interface, name of class, colon, superclass, you say at sign interface, the name of the class I want to add methods to, and then in parentheses, what I'm going to call this category, and you can call it anything you want.
+47:57 SO here I've called it add on, but you could call it Flickr, you could call it Create, whatever you wanted to do.
+48:02 And then you just list all the methods you want to add to this class, and they can be properties, here I have a read-only property and another method.
+48:10 You just add, put them on there, and then at sign end.
+48:13 Okay? So that's all you need to do.
+48:15 Now anyone who wants to call these methods just has to import this header file that has this in there.
+48:20 Now, there's a big restriction on categories, gigantic restriction, you can't use any instance variables.
+48:27 Okay? So the implementation of your methods cannot use an instance variables, or any stored data at all.
+48:34 Okay? There are ways kind of around it, but they're hacks, okay?
+48:37 So generally, categories is four methods, they have no state, well what good is that?
+48:42 Well, the object that you're adding the methods to, it has a lot of state and so these methods would be all implemented by using the state of the object you're adding the methods to.
+48:51 Okay? So, like let's at an example for these two methods.
+48:55 So here's the implementation, the at sign implementation of photo, photos add on category, so I'm adding these two methods to the photo class, which is that thing we generated in Xcode, image, you see it just uses self dot photo URL, self, is the photo, because these methods are being added to photo class.
+49:13 So, self is a photo, dot photo URL gets that attribute, gets that, that data.
+49:19 That's probably, it actually probably would be self, it would NS URL from string, self dot photo URL string, because we can't put URL's directly in the database, but anyway, and then it would say return UI image, image with data, and return the image.
+49:35 Okay? So no instance variables there, it's not using any [inaudible], same thing with is old, it might say self dot upload date, time interval since now is greater than a day ago.
+49:44 Okay? Question?
+49:46 [ Inaudible Background Question ]
+49:51 No I mean you cannot declare any new ones.
+49:54 Okay? So you cannot use any instance variables here, you could only use instance variables in the class, you're adding a two if they make them public, via properties or whatever.
+50:01 [ Inaudible Background Question ]
+50:09 Okay. You can't have any instance variables in a category, period.
+50:12 Okay, you cannot declare any.
+50:14 If you want to use instance variables of the class you're adding the methods to, right?
+50:19 Then they have to be public because all you can do is see the public header file, you don't see the implementation of photo, you're adding these methods to it blind, you don't know anything about its implementation.
+50:29 So anyway, so this is called categories, I don't teach this to you early on because this is easily abused, alright?
+50:37 You could add methods to UI kit classes, there's no reason you couldn't.
+50:40 You could add methods to, you know, foundation classes, completely unrestricted.
+50:45 The only thing is when you start doing that, you're code can kind of get a little obfuscated, people are like what, I didn't know that, you know, this UI kit class had that method, and it's because you've added it as a category over here and so it's just kind of hard to understand, but sometimes like this, we want to do that because it kind of it, it collects our code and it makes things look nicer.
+51:04 Question?
+51:06 [ Inaudible Background Question ]
+51:10 So the question is can I override or overwrite, really, a method that already exists?
+51:16 And the answer is don't do that.
+51:19 Okay? That is really hard to understand for people reading your code, what you mean by that.
+51:24 So only add methods, don't try to replace or otherwise, you know, use the same method.
+51:31 That's a good question.
+51:33 Alright, so, here's a common category method we add for subclasses of NS-managed object, which is creation.
+51:40 So, imagine I had this category called photo create, and I'm going to have this method that I'm going to add to photo called photo with Flickr data in managed object context, and it's going to query that database, see if that photo already exists, it's going to return it if it does, if not, it's going to insert new object for entity for name, initialize the photo from the dictionary you sent, etc. etc. etc. It's going to do all the work, all in one method.
+52:06 So that if someone wants to create a new photo using Flickr data, they can just call this one method, class method in photo.
+52:13 Okay? So this is a classic reason why we would do this.
+52:17 Okay? So, how do we create a category.
+52:20 So we go to objective C, new file, of course, and instead of saying objective C class, right, you see objective C class there, you say objective C category, and instead of asking you the class and the super class, it's going to say what class do you want to add a method to and what do you want to call this category.
+52:36 So I'm going to add methods to photo, and I'm going to call the category Flickr.
+52:41 And then it creates photo plus Flickr dot h and photo plus Flickr dot m. Now, this is kind of the standard naming convention, for a category.
+52:51 You call it name of the class you're adding the methods to plus the name of the category.
+52:56 Okay, the plus as a separator, and also because plus means you're adding these methods to it.
+53:01 So it's kind of a naming convention.
+53:02 You could call those header file and the implementation file anything you want, really, but this is what we one hundred percent of the time call it.
+53:09 Okay? Name of class, plus category.
+53:11 And you can see that it's created a dot h for me and a dot m, and I just put the methods I want to add in the dot h and then I implement them in the dot m, it's just that I can't, unfortunately, have any instance variables.
+53:23 [Pause] Okay?
+53:24 Yeah, question.
+53:25 [ Inaudible Background Question ]
+53:34 Yeah, so the question is instead of using new file, category, if I just created an empty file and started typing this stuff in, how does objective C know this is a category, well, the, when you go new file in category, that's just a convenience, it's just creating this for you as a convenience.
+53:51 You could certainly just type this stuff in, it knows it's a category because it's at sign interface photo, parentheses Flickr, right, it knows that that parentheses thing, if you have at sign parentheses with some word in there, it knows that means a category, and then same thing on the implementation side, you say okay, I'm providing implementation of that category.
+54:08 So the answer is yeah, you can do that, new file is just making it easy for you so it does this, that's all.
+54:15 Okay, any question about this?
+54:16 And we'll see this in the demo on Wednesday where it will add a category, to photo.
+54:22 Okay. So now you know how to insert an object, you know how to change their properties.
+54:26 We know how to create the custom subclass, so we can do all this with dot notation, what about deleting objects from the database, okay?
+54:32 This is all too easy, okay, as Darth Vader would say, all too easy.
+54:36 You just call delete object on the context, give the object, bam, it deletes it.
+54:43 Now, deleting the object can have ramifications.
+54:46 Right? You delete a photographer, it's going to set that who took to nil, okay?
+54:50 Assuming you don't do that cascade delete rule in which case it would delete the photographer, but, okay, so deleting, you know, has ramifications, you got to know what you're doing and deleting, it's very easy to do.
+55:01 Two things to think about this.
+55:02 One, remember it doesn't actually delete the photo or delete the object until you save, so the auto save comes around and it'll be deleted.
+55:09 That's just a minor point, it's kind of obvious.
+55:11 Same thing with all the changes you make, that they don't happen on the database until that auto save happens, or until you explicitly save.
+55:18 But the second thing with deletion, you got to be really careful is, see that argument photo?
+55:22 Delete object colon photo?
+55:24 If that photo is a strongly-held two pointer, you better set it to nil right after this.
+55:30 Okay? Because you cannot access that photo anymore, it is invalid.
+55:36 Right? After you hit delete photo, or delete object rather, that thing you deleted, get rid of all your strong pointers to it, because it's no good.
+55:44 Right? It's been deleted.
+55:46 So if you tried to say photo dot title equals something on the next line, I don't even know what would happen, something bad, don't do it.
+55:54 Okay? I mean, that's completely obvious, right?
+55:55 But, it's something people forget and then they're like, wow, it's not working,.
+56:00 Okay? One of the things about deletion that's kind of cool.
+56:04 Core data will send the method, send a message, prepare for deletion to all objects when you send delete object.
+56:16 Okay? So if I say delete object photo, that photo will be sent, if it implements it, prepare for deletion.
+56:21 And the cool thing is, you can put this prepare for deletion in a category.
+56:25 So you can add the prepare for deletion method to photo, or photographer, in a category.
+56:31 Now what would you do in that prepare for deletion, well, you don't need to do anything with the who took or the photos or anything that, that's all taken care of you for you, but what if you had another property somewhere in the database, which was counting the photos, or something like that, and deleting this photo would change that count, and why would you have such a thing?
+56:51 Because it's possible to just query the counted photos, that a photographer has, for example.
+56:56 Maybe, you know, it's your, its account, for efficiency, you're checking something about the photo and keeping this count.
+57:02 And maybe if you delete the photo you need to update that count.
+57:05 Well you can do that, all that kind of stuff here and prepare for deletion.
+57:08 Okay? You can basically do anything in the database you want to prepare, prepare for deletion, and the thing that's being deleted is not yet deleted.
+57:15 Okay? So it's still it the database that this is called.
+57:18 But after you return from this method, then the object's going to be deleted, so you have better have updated the database however you need.
+57:25 Okay? Got that?
+57:29 Alright. So, now you can create objects with insert, you can get inside the properties, you can delete the objects.
+57:35 One last thing to want to do in a database, query, okay, which means go out into the database and get me objects that match some criteria.
+57:44 Okay? So, we do this, in core data, with an object called NS fetch request.
+57:51 Alright? It's exactly what you think it is, you're requesting to fetch some objects from the database.
+57:55 You need four things to make an NS fetch request.
+57:58 The entity to fetch, and this is an interesting one because when you fetch from the database, you can only fetch, fetch, when you execute it, it returns an array of objects, an array of NS-managed objects, or subclasses thereof, as you might imagine.
+58:12 That array all have to be the same type of entity.
+58:16 Okay? So there are no way to do a fetch in a database that gives you an array back, some of the things are photos and some are photographers.
+58:22 They all have to be photos, all have to be photographers.
+58:25 So you have to specify the entity that you're trying to fetch, okay?
+58:30 Understand what I mean by that?
+58:32 That's the most important thing, in fact, the, the way you create the fetch request is by specifying what kind of entity you're trying to fetch.
+58:39 Then you can specify, optionally, how many of those objects you're willing to accept and how big a batch, if, if you're fetching a whole bunch of them, you can specify how many to get at a time, because it's not going to, if you say get me these photos and it matches 10,000, it's not going to load 10,000 things out of the database and into memory.
+58:59 Okay? It's going to kind of give you 10,000 placeholders and then it's going to fetch them in little batches, and you can specify the batch size depending on how you're going to use the object, if you use the information, if you're displaying it in a table view, well you can set the batch size real small, like 10 or 20, however many, you know, would scroll around on a table view.
+59:17 We can only see, you know, 10 or 20 at a time, so you've got a small batch size.
+59:22 So you control that.
+59:23 Sort descriptors, which we're going to talk about, which is how to sort the results, because the results are an array, not a set.
+59:30 So the array means it's ordered, so you got to specify what order to give those objects back in.
+59:35 And then, most importantly, the predicate, and the predicate says which of those entities you want, which photos?
+59:42 Which photographers?
+59:44 Okay? So let's look at these four things.
+59:46 Here's what a fetch request looks like.
+59:48 You create it with fetch request with entity name, that tells you what you're fetching out of there, and then you can set things like the batch size and the batch limit, they're just properties on the request, and then the sort descriptors is an array of sort descriptors, we'll talk about why that's an array.
+01:00:03 And then the predicate is, is NS predicate.
+01:00:05 So this is how you would set up a fetch request.
+01:00:08 Okay? Very simple.
+01:00:10 So, you can look up in NS fetch request how batch size works, how fetch limits works, I'm not going to get into detail about that for time reasons, but I am going to focus on sort descriptors and predicate because those are really important, so let's look at the sort descriptor.
+01:00:23 You create a sort descriptor using this class NS sort descriptor.
+01:00:28 And it has quite a number of class methods to create it, so you should go look at the documentation and familiarize yourself, but they're generally of the form sort descriptor with key, so that's the key you want to sort by, so if I were fetching for photos, I want to get the result sorted by the title of the photo, that would be a classic thing.
+01:00:47 Ascending is whether it's alphabetical order or reverse alphabetical order, and then the selector is interesting there.
+01:00:53 That is the method that will be used to compare photos, while it's sorting them.
+01:01:02 Okay? So, it's going to sort the results by the title, and it's going to be using the method here, localized standard compare to compare the titles to know how to sort them, okay?
+01:01:17 Now, A, what is localized standard compare?
+01:01:20 Localized standard compare means sort them like they would look in the Mac finder, basically.
+01:01:26 Or, that's kind of a local way of saying it, but basically, sort them how real people think things should be sorted, not case insensitively, do the right thing with diacritic marks, if it's a language that has a lot of diacritics, that kind of thing, okay?
+01:01:40 That's what localized standard compare is.
+01:01:42 There are other selectors that are sensible if it was a string type property, like localize case insensitive compare, which sounds the same, case insensitive sorting, but the diacritics are handled differently in that case.
+01:01:57 So that's why you would want to use standard compare.
+01:01:58 So you can look up in sort descriptors, see what kind of methods are kind of built in.
+01:02:04 If you were, you can sort by things besides strings, you can say sort descriptor with key upload date, and then the selector would want to be compare colon.
+01:02:13 Compare colon is a method most things, if not all, except for NS data maybe, things in the database will respond to, compare colon, it's kind of the default compare, but it's not going to do what you want, usually with reverse string, so you want a better one, but it will work for dates and things like, and numbers, things like that.
+01:02:32 So that's the selector.
+01:02:34 You can leave that selector off, when you create the sort descriptor, just say sort descriptor with key ascending, close square bracket, and you'll get compare, okay?
+01:02:44 So, compare is kind of the default one you get.
+01:02:48 Why do we give an array of these things to the fetch request?
+01:02:52 Okay, when, we saw request dot sort descriptors, it was an array of these, well that's the old last name, first name thing.
+01:03:00 If I said hey, I'm going to fetch some people, some employees out of an employee database, and I want you to sort it by last name.
+01:03:08 Well, of course, all the Smith's would all sort to the same thing.
+01:03:12 So, you want to then sort those by the first name.
+01:03:15 So you provide sort descriptors, one that sorts by last name, that's the primary sorting, and then one by first name is the secondary sorting.
+01:03:22 Another common one is a table view, pay attention, because your homework, you might have to do this, is maybe I'm doing the table view like you're doing your current assignment, and I'm sorting, you know, basically by the name of the place, in the place one, but I'm supposed to do it by countries, sections by country, so really I need to sort first by country, then I sort by the name of the place in the country.
+01:03:45 Okay? So, that's an example where you might use two sort descriptors.
+01:03:50 Country sort then the place.
+01:03:52 That's so that I can get them in order so that the, their by country first.
+01:03:56 Okay? That make sense?
+01:03:59 Alright, predicates, so this is the guts, this is the thing that says which photos do I want, which photographers do I want, and, and this predicate looks a lot like NS string when it comes to creating them.
+01:04:12 So just like we have NS string, string with format, we actually have NS predicate, predicate with format, okay?
+01:04:18 And you can specify this arbitrary string.
+01:04:20 Now, this is good and bad.
+01:04:22 The good news is this is incredibly flexible and you can specify unbelievable kinds of [pause] criteria for finding what things you want in the database.
+01:04:32 The bad thing is, it's a little bit for you to learn, because it's almost like you have to learn a little bit of a language here, the predicate language for how you specify what you want to choose.
+01:04:40 The basic format [pause]
+allows you to do the percent 01:04:46 at sign replacement, just like you could with NS string, so here, for example, I'm looking for all the thumbnail URLs that come off of Flickr five server.
+01:04:54 So I'm saying predicate is thumbnail URL contains Flickr five, but I don't put the Flickr five right in there, I use percent at sign, and it's an argument.
+01:05:03 So I can use percent at sign for replacement, and I can replace not only the right side, what's contained, but I can replace the left side, like which property I want to search to see if it contains Flickr five, okay?
+01:05:14 And we'll talk about contains in a second, question?
+01:05:18 [ Inaudible Background Question ]
+01:05:25 Correct. Yeah so, this is not just, the question is that just making a string and passing it off and the answer is no, NS predicate is actually looking at what you're par seeing and, now it's, it can't know what database you're doing a fetch into, so it won't be until fetch time that it might fail.
+01:05:42 If you say thumbnail foo, contains whatever, its predicate is going to let you create that predicate, but then when you go to do the fetch it's going to say no property thumbnail foo in this database.
+01:05:53 Okay, so, you see this one's contained.
+01:05:56 Contains means, you know, that string is contained in the other string, exactly what you want, so contains is one of the words in this little language for setting up predicates.
+01:06:04 Here's a whole bunch of other examples.
+01:06:05 I'm not going to teach you all of predicate today, you're going to have to look at NS predicate documentation, see what it can do, but here's a bunch of examples.
+01:06:12 Obviously, you have equals, so you can say unique ID equals percent at sign, maybe the Flickr object, the Flickr photos, unique ID, you can say name contains with square bracket C, that means contains case insensitively.
+01:06:30 Okay? So that's part of the, you can have greater than and less than, so if I had a, a date property called viewed, I could say if viewed is greater than a certain date, like today's date, for example, or, it would be, I guess, less than today's date or less than today's date minus 24 hours, whatever, so you can use greater than or less than.
+01:06:47 You can use dot notation to follow relationships.
+01:06:51 So you can say who took dot name equals CS193p instructor, right?
+01:06:56 So you could have, this would be a query or a predicate for searching in the photos, entities, so you're trying to get photos entities, but you want photos entities where the who took name is some photographers name.
+01:07:10 So, the things you're getting are photos, but the query, the predicate you're using to find them, is looking over at the photographer using dot notation, you understand this?
+01:07:22 Okay? You definitely need to understand this for your homework.
+01:07:24 And you can do really powerful searches like give me any photo who's title contains, sorry, give me, this would be a photographer query, so let's say I'm searching photographers, give me any photographer where any of its photos title contains this.
+01:07:41 Okay? So that any is kind of a special thing, and that means I'm the photographer, look at all my, look at, in the database at all the photographers, look through their, their photos set, to look at all their photos, look at all the titles of all those photos, see if it contains this string, and if it does, return that photographer.
+01:08:01 Okay? Now this seems, I'm sure you're like whoa, that is going to take a lot of computing power if I had thousands of photos and hundreds of photographers, but actually, databases know how to do this really, really well.
+01:08:13 Okay? And all this stuff that you're doing is generating stuff that happens on the sequel side, so you're going to get a big sequel statement generated here to join these tables, do these searches, it's going to be incredibly efficient, and one thing to understand about core data is it's very efficient, okay?
+01:08:30 The sequel it generates is totally tuned to the max.
+01:08:34 Okay? Having said that, there are certain queries that are more efficient than others that can accomplish the same goals.
+01:08:40 So, if you get to be a core data expert and you start building big databases and you're making a lot of big queries on big data sets, you will eventually learn what makes a good query, what makes a not so good query, etc. For your homework, you don't have to worry about that yet.
+01:08:55 Okay? Let's get the basics first.
+01:08:57 [ Inaudible Background Question ]
+01:09:04 So the question, you mean like the greater than and less than, can I pass that in as a percent sign?
+01:09:09 [ Inaudible Background Comment ]
+01:09:14 Yes. You can't do sequel, the question is can I do sequel injection by using the percent at sign to, to basically make the operator be, you know, configurable, and the answer is you can't do that.
+01:09:24 NS predicate would complain about that.
+01:09:27 NS predicate does know when a percent at sign is a right-hand or a left-hand of one of these expressions, so the answer is no.
+01:09:34 You can't do that.
+01:09:36 Okay, so there's a bunch of examples, again, I'm just trying to give you the examples, we're not, we're not trying to teach you predicate here.
+01:09:44 There's also a compound predicate.
+01:09:46 In the NS predicate, you can say and or or.
+01:09:50 So you could say name equals percent at sign or title equals percent at sign, okay, if you had an object that had a name and a title.
+01:09:56 Or you could say who took dot name equals blah, or title equals blah, it kind of wouldn't make much sense, but you could.
+01:10:03 You can also create compound predicates in code by doing, using and predicate or or an predicate in NS compound predicate.
+01:10:11 And it just takes an array of other predicates and makes a compound one, okay?
+01:10:16 That's like if you want the and-ing and or-ing to kind of be if then, okay, in code, as opposed to just built into the string.
+01:10:25 Advanced querying, for time reasons I'm going to skip this, but key value coding, which is the thing that lets you use dot notation to search down inside of a dictionary, right, it's the value for key path business.
+01:10:38 You can kind of do value for key path in the database, and there is, we didn't talk about this, but there is a really cool thing in key value coding, which is functions, and one of the functions, which you probably will need for your homework, so pay attention, is at sign count.
+01:10:55 So, if you put at sign count in the thing you're querying for, as long as the thing to the left of it is an array, or a set, sorry, a set, one of these NS sets, then it will replace that with the count of how many things are in that set.
+01:11:12 So, for example, if I wanted to find out all the photographers, give me back all of the photographers who have taken more than five photos, my predicate would be photos dot at sign count is greater than five.
+01:11:24 Okay? And there are other at signs, at sign average, at sign, you can look through and find out what there is, I put a link in here, you know I don't, I usually don't put links in my slides, but this one is worth looking at.
+01:11:34 And, this also works, it works for any key value coding things, like for dictionaries, so go back to the shutter bug and try doing property list results, value for key path, photos dot photo dot average dot latitude.
+01:11:49 Anyone hazard what that returns?
+01:11:54 [Pause] Yeah?
+01:11:56 [ Inaudible Background Comment ]
+01:11:59 Correct. It returns the average latitude of all the photos, okay?
+01:12:04 So, that's something for you to, to have fun with.
+01:12:07 You can build even more complicated expressions and there's a mechanism to query into the database and not get back an array of NS-managed objects, but to actually get, you know, kind of data that's been calculated from, from what's in there, and when you do that, instead of getting an array of NS-managed objects, you get an array of NS dictionaries, and those dictionaries contain keys and values, which is the data you look for.
+01:12:29 This is all super advanced, see the title of this thing, advanced querying, not going to talk about it in this class, but just so you know, that fetch request can be used to create something that's actually fetching data rather than just fetching managed objects, okay?
+01:12:44 Alright. So, let's put it all together for the request.
+01:12:48 So I created, this is a request, okay?
+01:12:51 That's going to get all the photographers, so I say fetch request [mumbling] photographer, who have taken a photo in the last 24 hours, so I get yesterday, which is NS date, date with time interval since now minus 24 hours.
+01:13:03 Predicate, any photos dot upload date greater than whatever, okay?
+01:13:09 Yesterday.
+01:13:10 And then I'm going to sort it by the photographer's name, so an array of one sort descriptor, where the sort descriptor's the name, it's going to be using compare here, which is probably not good, I probably want to say selector at sign localized compare.
+01:13:23 Okay? So that's I would create a request.
+01:13:26 Now that I have a request, how do I execute it?
+01:13:29 And the answer is we use the method execute fetch request in NS-managed object context.
+01:13:34 So I told you NS manage object context is the hub of everything and it's the hub of querying, as well.
+01:13:40 And you can see it has a little extra argument there, error colon, at sign error, which will return an NS error and tell you what went wrong if things went wrong, and you can tell things went wrong with the fetch request if execute fetch request returns nil.
+01:13:54 Okay? If execute fetch request returns nil, something went wrong, and that at sign error will be filled out with some error.
+01:14:00 If it returns an empty array, [pause] that's not nil, empty array, that means nothing matches what you're requesting.
+01:14:09 So no error.
+01:14:10 It's just that you requested objects and there aren't any that match that predicate.
+01:14:14 Okay? Otherwise, it's going to return an array of NS-managed objects.
+01:14:20 Okay? Or, subclasses thereof, photos stars, photographer stars, whatever you set as the entity name, it's going to pass an array of them.
+01:14:28 Okay? That's it.
+01:14:29 It could not be simpler to query.
+01:14:32 One thing about the query results, by the way, if you query 10,000 things, you're not going to get 10,000 things, you're going to get 10,000 placeholders and as you start looking at the attributes, then it'll start faulting them in from the database.
+01:14:46 Okay? So there's a lot of performance optimization going on behind the scenes that you don't really need to know about, but faulting is happening, for those of you who are database heads and you're probably worried about this, no worries, it's not actually pulling all that data out of those tables, it faults them in as you access them.
+01:15:03 Quick thing about core data thread safety.
+01:15:06 NS-managed object is not thread safe, in other words, you can't just use it in multiple threads, but you can safely access them.
+01:15:15 Most managed objects, we create them with this kind of thread containment, thread concurrency mechanism.
+01:15:22 There's a method in NS-managed object context, which you will want to use, called perform block, it just takes a block with no arguments.
+01:15:29 Anything you want to do on a context, inserting objects, querying, anything, do it inside a perform block.
+01:15:36 Why do you do that?
+01:15:38 It'll do it on the safe queue for that context, and it'll guaranteed to be safe, thread safe.
+01:15:44 Now, that safe queue might be the main queue, so this will not necessarily give you multithreaded, okay?
+01:15:50 But it will be safe, so get in the habit of doing this, because if you do come, come to a day when you're using NS-managed object context and you're creating them on different queues, so you can load the database in one queue while you look at another, whatever, which is all doable, you need to be doing this performed block, it doesn't hurt to do it, so might as well do it.
+01:16:07 And parent context I don't have time to talk about.
+01:16:10 There is a ton other stuff, actually, in core data I don't have time to talk about because we're at the end of lecture today.
+01:16:15 Optimistic locking, rolling back unsaved changes to, you know, states that make sense, undo and redo I talked about.
+01:16:24 Staleness, you do a fetch and it sits around for a long time, the data could be stale, it might need to be refetched, thrown out and refetched.
+01:16:31 It just, a massive amount of stuff, can't talk about it.
+01:16:34 When you walk out of here, what you really want to be comfortable with is you know how to create the visual map, insert objects, make the subclasses, use dot notation to access them, delete objects, and query for them.
+01:16:46 Okay, that's the fundamentals of core data, that's what we talked about today, that's what you should, need to know how to do for this class.
+01:16:53 And then outside of that, you just need to know that there's a lot more, and if you're going to do serious database work, you need to some reading up on that.
+01:17:00 Okay, so that's it.
+01:17:02 Sorry to keep you a couple minutes over and I will see you on Wednesday with a big demo of all this stuff.
+01:17:08 >> For more, please visit us at stanford.edu.

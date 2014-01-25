@@ -1,0 +1,767 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:07 [ Silence ]
+00:10 >> Okay, well, welcome to Lecture number 8 of Stanford CS193P, Fall of 2013 and 14, and today, we are going to talk about a couple of "objective-C" things first.
+00:23 Language features, basically, and then we're going to talk about animation.
+00:28 So animation is our topic of the day, I'll be starting a demo, at the end, which we'll finish on Wednesday.
+00:34 And I'm going to demo pretty much everything I talk about, including the objective-C things, and even including some of the things we talked about last week, so it's going to be a very big, comprehensive demo, that's why it runs over into two things.
+00:45 So the first objective-C thing we're going to talk about is protocols.
+00:48 I hinted at this earlier in the quarter.
+00:51 This is a way that we're going to make ID a little more useful by making it a little safer, okay?
+00:57 And we already have introspection to make ID safer.
+01:00 When we have something that's an ID, we know it's a point or do some object, we don't know what kind of object, we know how to use introspection to ask at run time, "What kind of object are you?" "What kind of methods do you respond to?" That's nice, but it would be better if, in our code, we could document in a way that both the reader of our code can understand and also that the compiler can understand what it is we intend, okay, with that ID.
+01:23 What methods we plan to call on, on that ID.
+01:26 And so that's what protocols do.
+01:28 It's basically syntax, it's just syntax in the compiler, nothing more than that.
+01:32 It's just kind of the same thing in a string star versus ID, that's really just syntax in the compiler, it makes no difference at run time.
+01:39 And the fundamental part of the syntax is right here, ID angle bracket protocol obj.
+01:44 So that's declaring a variables type "obj" which is an ID, but it's got this additional little thing, my protocol, which tells the compiler and readers of your code a little bit more.
+01:55 So let's talk about protocols and how this all works.
+01:58 The first thing we're going to talk about is how to declare a protocol.
+02:02 And declaring a protocol looks almost exactly the same as an at sign interface statement.
+02:07 At sign interface is where you put all your methods and properties that are public, or you can have an at sign interface at the top of your implementation and have private methods and protocols - or, and properties.
+02:18 And the same thing for protocol, with just you say at sign protocol instead of at sign interface.
+02:23 Now, a protocol is just a declaration of the methods.
+02:26 There's no implementation, so there's no at sign implementation for an at sign protocol.
+02:30 We're just talking about the methods.
+02:32 And the methods in a protocol by default are all required, okay, so that means if someone wants to say that they implement this protocol, they have to implement all these methods, and so those are all the methods in my little sample protocol here.
+02:46 You can make some of them optional by putting at sign optional in there.
+02:51 And now, all the rest of those are optional, so now in this example, some method is required, but all the rest are optional.
+02:56 And you can put at sign required, again, down a little lower.
+03:00 Now, all of these are required except for method with argument is optional.
+03:04 Okay? So, we're basically defining a little pile of methods, some of which are required, and some of which are optional, okay, that's what a protocol declaration is all about.
+03:13 Now you see how I've added X-Y-Z-Z-Y and angle brackets after protocol FOO there?
+03:19 So what that says is, if you want to implement, if you want to say you implement protocol FOO, you also have to implement all the required methods of protocol X-Y-Z-Z-Y.
+03:28 Whatever that is.
+03:29 Okay? So it's basically a way of kind of like super protocol, it's not really inherent or anything, but just kind of adds to the methods that is required by a protocol, and in fact, you can have multiple ones, so here's protocols now requiring you implement the X-Y-Z-Z-Y protocol and a protocol called NSObject.
+03:47 Okay, now, let's talk about this NSObject protocol because it's a very common protocol.
+03:51 You're used to the NSObject class, right?
+03:54 And NSObject protocol is basically a protocol that includes almost all the methods in the NSObject class.
+04:01 Okay. And why do we do this?
+04:04 Why do we have a protocol named NSObject and a class named NSObject, and they have pretty much the same methods in it, is equal, is kind of class, description, perform sector, all those NSObject things.
+04:14 The answer is because we sometimes want to declare a protocol where some methods are required, but we also want to require the thing that implements the protocol to essentially be an NSObject.
+04:25 Okay. We want it to be an NSObject, we want to be able to maybe use introspection, things like that.
+04:30 Well, the only way to do that is to have the protocol have like a super protocol, you know, an additional protocol, and so we just took all the methods in NSObject, we put them all in a big protocol and have NSObject implement that protocol.
+04:42 Okay. So NSObject protocol and class, all the same methods pretty much.
+04:48 Okay. It's just that NSObject the class is an actual implementation of those methods.
+04:53 So where do these protocol declaration - oh yeah, sorry, question?
+04:56 >> In Java, all class is automatically inherit from object, is that not the case with NSObject here?
+05:02 >> Yeah, so the question is, in Java, all class is pretty much inherit from object, and that's not true in objective C, you could have a class where it just says at sign interface, name of class, no colon super class.
+05:14 In which case, it inherits no methods from anywhere.
+05:17 Okay, will only have its own method.
+05:18 We never do that, however.
+05:20 In iOS we always inherit from NSObject.
+05:22 Because we want the introspection in all these things, but it's by convention rather than by some sort of enforcement for the compiler.
+05:31 Alright, so these at sign protocol declarations of these methods, where do they go?
+05:35 They go in header files, they can go in their own header file, okay so like have a FOO.H for my protocol FOO, or they can go in the header file of some related class, like some class that wants somebody to implement that protocol, you could put it in there.
+05:47 So, for example, iOS has scroll view class, right?
+05:51 For scrolling.
+05:51 We're going to talk about that next week.
+05:53 It has a protocol called the UIScrollView delegate, which is a bunch of will scroll, did scroll things, methods, and it's only good for UIScrollView, so that delegate, that protocol is defined in UIScrollView dot H, not in its own header file.
+06:10 Okay? So you can kind of do which ever one you want, and you'll see them both ways.
+06:15 Alright, so now we have the protocol declared, we defined this little bundle of methods, including the setters and getters of properties, perhaps, now some class has to promise to implement that protocol.
+06:27 And how do you promise to implement a protocol if you're a class?
+06:31 You just put angle brackets, the name of the protocol, on your at sign interface line.
+06:36 Okay? So here, it's my public at sign interface line, my class, inherits from NSObject, angle brackets FOO.
+06:42 That means my class is promising to the compiler and to readers of this code, I'm going to implement all the required methods in FOO.
+06:49 Okay? So I'm just making that promise.
+06:52 And you can make the promise publicly like that, or you can make the promise privately by putting it in your at font sign interface my class parentheses parentheses thing that goes in your implementation, okay, you can just put it there if you want.
+07:04 That's if you only need to be able to implement that - you're only required to implement that protocol for something that's in your implementation only, okay, not on your public thing.
+07:15 Okay, so now I've got a protocol, I've got an object, at least one that signs up to implement it, now what?
+07:22 Well, now I can declare variables that are IDs with the additional requirement to implement the required methods of a protocol.
+07:31 So ID angle bracket FOO obj, hopefully, you understand what that means now, that means obj is a variable, it's an ID, I have no idea what class it is, okay, it's ID, it's completely blind, however, I know it implements all the private or the required messages in FOO.
+07:47 Okay? And it might implement some of the optional ones too, but I know at least the required ones.
+07:52 So if I say ID angle bracket FOO obj my class alloc - in it, that looks good because on the previous slide I just said that my class promised to implement FOO.
+08:00 So the compiler is going to love that.
+08:02 But if I said ID FOO obj NS equals NS array, that compiler is not going to like that because arrays clearly don't implement a protocol FOO.
+08:10 They don't implement those methods.
+08:12 Okay? So the compiler will warn you in that case.
+08:16 Okay, so the compiler here will warn you if you do this, it will also warn you if you sign up to do a protocol, you promise to do something, and you don't implement the methods that are required, it will warn you about that too, okay, so it will warn you both coming and going.
+08:29 In addition to declaring variables, like local variables under the examples there, you can also pass these around, these IDs that are modified by the protocol, as arguments to methods.
+08:42 And as properties.
+08:43 Okay? So, it's really just another type, it's not quite an NSString star where you know exactly the class and all the methods exactly that it does, but it's not quite an ID, where you know nothing about it - it's in between.
+08:56 Right? It's an ID, but you kind of know some of the methods in FOO.
+09:03 Okay? Just like static typing, this is all just syntactic sugar in the compiler, makes absolutely no difference at run time, no code is generated any differently by the compiler because of these things.
+09:14 The compiler is just able to warn you now.
+09:16 That is the only difference.
+09:17 Okay? Some people had a little difficulty accepting this, but it's true.
+09:21 No code generation is any different by the compiler because of these protocols.
+09:25 Same thing with NSString star versus ID.
+09:26 It's all exactly the same stuff, gets generated by the compiler.
+09:29 It's just the compiler can warn you because they know what you intend.
+09:33 Okay? The number-one use of protocols in iOS is delegation and data sources.
+09:39 This is back to - remember Electra 1, I had the MVC and I told you that the views could talk to their controller with blind structured communication, and we talked about will do this, did do that, or the data source, which is data at count, that kind of stuff.
+09:53 All of those, remember that communication?
+09:55 This is how we do that.
+09:57 So it's blind, because they're IDs, the views are talking through IDs.
+10:01 But it's structured because there's a protocol that the view uses to talk to that object blindly, so it knows what's in there.
+10:09 So let's talk about, for example, the data source protocols of views.
+10:14 If it was a table view, let's say, a table view is a generic view for showing a table of information, it's protocol for accessing its data source is how many rows are there, and now give me the data at row 7, give me the data at row 500.
+10:29 Okay? That's its protocol.
+10:31 Those methods.
+10:32 Count, and data at, it has other ones, but those are the basic ones, okay?
+10:37 And we really need those data source protocols because views can't own their data.
+10:41 That table view can't grab all its data and display it, it has to keep asking someone else, but it doesn't want to be tied to any source of the data, so it wants to be an ID, it wants to be blind.
+10:51 Okay? And we'll see all this next week when we talk about table views.
+10:55 There are other uses of protocols besides that blind structured communication, and we're going to see one today which is animation, and I'll let that speak for itself, but basically we're going to have IDs out there that are animatable, and we're going to know they're animatable because they're going to implement a certain protocol, and that's how we're going to know that they're animatable things, and UIView is going to implement that protocol and that's how we're going to animate our views.
+11:19 Alright, the second objective-C thing I want to talk about today is blocks.
+11:23 Okay, it's a totally different thing that protocols.
+11:25 Blocks very important, used throughout iOS, in fact, sometimes I have difficulty getting all the way to week 5 here or 4 without putting blocks because it's so much in the API of iOS.
+11:36 What is a block?
+11:38 A block is a block of code.
+11:40 Okay? Why do we define this term block, just to mean block of code, we already know that, it's because it's a block of code that can be embedded inside other code, passed as an argument, stored in an array, okay?
+11:53 So it's a block of code that we manipulate and move around our API.
+12:00 So what does it look like?
+12:01 Here's an example of a method that takes a block as an argument.
+12:04 Okay? This is the calling of this method.
+12:06 There's an NSDictionary method, it's a real method, it's called enumerate keys and objects using block.
+12:12 Okay? The argument is a block that has no return value and takes three arguments, two of the arguments are IDs, which are they keys and values in the dictionary, and a third one is actually a BOOL star, a pointer to a BOOL, it's an outgoing BOOL.
+12:28 Okay? And basically when you call this method, Dictionary will execute that block of code, repeatedly, for every key-in value, until you set the stop, star stop, to yes, or until it runs out of keys and values.
+12:45 Okay? And it's actually going to implement that code that's right there, embedded, inside that message call.
+12:49 You can see the open square bracket for enumerate keys and objects, before a dictionary, the close square bracket is down after the curly brace.
+12:57 Okay? So the code, the actual curly brace, we put right in there, in the middle of our message call.
+13:02 Other languages, in computer science in general, we call this a closure.
+13:06 Okay, how many people know the name closure, ever heard that before?
+13:09 Okay, so you guys generally know what this is, it's a closure.
+13:13 Blocks in objective-C always start with the carrot.
+13:16 That's the magic block character.
+13:18 And then there might be a return type, possibly specified, and maybe some arguments, possibly, and then a curly brace, and some code, and an end curly brace.
+13:27 Now, of course, to make this really interesting, the compiler knows how to do things like have local variables that are declared before the block is used, work inside the block.
+13:39 Okay? So if I had that block and I wanted to stop not just when I see the key enough but also when I see the value, stop value, which is a local variable defined in the scope that's calling the method enumerate keys and obj using block, I can use it.
+13:54 The compiler makes sure that the value of that gets properly passed in.
+13:58 However - you have a question?
+13:59 >> Now is this statically scoped for using things outside?
+14:03 >> Uh...yeah, it is the loc - whatever scope the A dictionary enumerate keys and objects, that call, whatever scope there, that's the scope in which the variables can be used, which is pretty much the local stack, right?
+14:16 The stack from your thing, now, those variables though are read only.
+14:22 Okay? So if I had another one, a BOOL stopped early and I tried to set that inside my block, that would be an error, compiler would not allow that okay?
+14:33 Because stopped early is read only.
+14:35 However, there's actually a way to make it so it's not read only, which is to put underbar, underbar, block in front of it.
+14:41 If you put underbar, underbar, block in front of a local variable, then the compiler will generate code that transfers stopped early off the stack into the heap so that it can be used by the block, and then when the block is finished, it will copy the information back into the heap and then back onto the stack.
+15:00 Okay? All happens magically.
+15:02 So if you have underbar, underbar, block, it knows to do that.
+15:05 So that's the magic you put in there, and now your variables can go both ways, and now stopped early is yes is legal.
+15:10 Okay? This also works if the variable is an instance variable.
+15:15 We don't really access instance variables except for setters and getters, but that's because instance variables, of course, are in the heap.
+15:22 Because all objects are stored in the heap.
+15:25 What about objects that are messaged inside of a block?
+15:28 Because there's a little special thing to think about there.
+15:30 So if I had a string stop key, which was enough, and I wanted to use stop key inside that block, like this, I have to make sure - well not I have to make sure, the compiler has to make sure - that it generates code and the runtime has to make sure it works, so that stop key, that there's a strong pointer to it, otherwise it could leave the heap by the time this block executes.
+15:51 Because this block could execute at any time.
+15:53 Okay? This block happens to execute immediately, when you call this, but it's legal for the dictionary to grab this block and store it somewhere and execute it sometime later than it wants to.
+16:04 Okay? So every time you - listen to this carefully, every time you send a message to an object inside a block, a strong pointer is created to that object, and it stays around until the block goes out of scope, until the block no longer exists.
+16:20 Okay? As long as that block exists, a strong pointer to every single object in there that's message will exist.
+16:25 Before I talk about that, I want to talk about some shorthand.
+16:28 If the block has no arguments, like this block, see?
+16:32 No arguments there.
+16:33 You do not need to put the parentheses, okay?
+16:36 You can just leave those off.
+16:37 And similarly, if the return value of the block, so this block which is the first time you've seen a block with a return value, it returns a BOOL, see that BOOL?
+16:45 If the return value can be inferred from the contents of the block, right?
+16:50 So in this case, return obj is kind of class UI class, definitely going to return a BOOL, you do not need to put the BOOL there.
+16:58 In other words, if it can be inferred, it will figure it out for you, okay?
+17:03 So just to clean up the syntax, you don't have to put the BOOL in there all the time or whatever.
+17:09 Okay. Now.
+17:10 Let's talk about how blocks sort of act like objects.
+17:14 Blocks are not objects, okay they're not, but they sort of act like objects in the only in this fine really small way, which is, they can be stored.
+17:24 Okay? And they are reference counted by the automatic reference counter.
+17:28 So storing them means they can be stored in variables, in properties, and in dictionaries and arrays.
+17:36 Okay? So they can be stored just like they're objects, but they don't understand any messages like an object.
+17:41 Actually, they understand one message which is copy, which is kind of an important message because that copies them in the heap, and if you want to keep a pointer to a block around, you probably want to copy it, okay, so it doesn't just go off the stack somewhere.
+17:53 So for example, here I am putting a block into an array, so I have a property in my class my blocks, a mutable array of blocks, and I just say self dot my blocks at object colon a block.
+18:08 Okay? I know this looks weird, and it is weird, because blocks are not objects, but they act like objects for this purpose of storing them in things.
+18:17 Okay? So pretty neat.
+18:19 And by the way - I have not talked about basically how you would call this block.
+18:24 Like if I grab this block out of this array and wanted to invoke it, how would I do it?
+18:28 I'm not going to talk about that today, but I'm going to show you so that you can see it.
+18:33 Really, you're not going to have to do that in this class, because you're going to be passing blocks to iOS and it's going to be executing them, but if you wanted to know, that's the syntax, it's kind of like C-function syntax, you can look offline, I just don't have time to cover it unfortunately.
+18:48 But there's a real danger lurking here.
+18:52 Okay? In this code, above.
+18:54 Okay, this self, do something, thing.
+18:56 And what is it?
+18:57 Well, it's called a memory cycle.
+18:59 How many people know what a memory cycle is?
+19:01 Okay, not very many, that's good so I'll cover this.
+19:03 A memory cycle, it's caused because all the objects inside that block have a strong pointer to them, as long as the block exists.
+19:15 Okay? So, for example, in this code, self - a strong pointer will be held by that block to self.
+19:23 You see why?
+19:24 Because the block, as long as it stays around in that array, it needs to be able to call self do something, so it needs to always keep a strong pointer to self, as long as the block exists.
+19:33 However, the problem is that self has a strong pointer to the block.
+19:39 Through it's my block array.
+19:40 Right? Self has a strong pointer to my block, which is an array, the array always hold their things strongly, so now both of them are pointing strongly to each other.
+19:48 The block is pointing to self, self is pointing to the block.
+19:51 Neither of them can ever leave the heap in that situation because there's always going to be a strong pointer to them - each other's - right?
+19:58 One of them can't leave first and make it so there's no pointer to the other, because they are keeping each other in.
+20:03 That's called a memory cycle.
+20:05 Okay? And we have to break these cycles.
+20:08 Okay? This is a serious problem, you definitely want to be able to break these cycles, and here's how we do it.
+20:12 We're going to do it with a local variable.
+20:14 Okay? Now, local variables are all what?
+20:18 They're all strong.
+20:19 Right? Local variables are strong, they're strong pointers into the heap, pointer variables, until the method ends, and now the strong pointer goes away and so now that local variable obviously is not holding something in the heap by being strong.
+20:32 But there is a way to actually create weak local variables, with underbar, underbar, weak.
+20:38 Okay? Underbar, underbar, weak before a local variable declaration will make that variable weak, okay?
+20:45 And remember that weak means it's not keeping the object in the heap, if no one else is pointing to it, it just goes away, and the weak variable gets set to nil.
+20:53 Okay? So I'm going to make a local variable, weak self, which points to self, but is weak pointer to self, and now I can use that inside this block that I added.
+21:05 I'll send do something to weak self, and now I don't have this cycle anymore, because the block no longer has a strong pointer to self, it has a weak pointer.
+21:14 Okay? So yes, we will do this.
+21:16 You might have to do it in your homework, depending on how you decide to implement it, and I will definitely do it in the demo today so you can see how this works.
+21:23 Okay? This is really the only place we have these kind of cycles, with ARC, with the automatic reference counter, um, it's not too bad, you just have to know it's there, and deal with it.
+21:36 Okay? Okay.
+21:37 So when do we use blocks in iOS?
+21:39 We use them for enumeration, you saw that dictionary, enumerate, keys and values.
+21:43 We use it a lot for enumeration.
+21:45 We use it for view animation, I'm going to do the whole rest of this lecture and the start of next lecture is going to be about that.
+21:51 And we use it for sorting.
+21:52 There's messages you can send to arrays like sort this array, and use this block to compare two objects in the array.
+22:00 Okay? Notifications.
+22:03 Right? When a radio station broadcasts instead of sending a notification message, you can say "just execute this block" when broadcast happens on the radio station.
+22:11 Error handler is very common.
+22:13 Do this thing, and when an error happens, execute this block and I'll handle it.
+22:18 Okay? Completion handlers also very common.
+22:21 Do this thing that's going to take a long time, and it's going to be done in a background thread, and when it's done, execute this block to let me know.
+22:30 Okay? Animation does that, in fact, we'll see that in animation too.
+22:35 Question?
+22:36 >> So you have like a method defined in your class and you want to use that function as a block.
+22:41 Is there any easy way to refer to it, or do you have to like write it as a block?
+22:44 >> Yeah, so the question is, if I had a method, defined in my class or whatever, and I want to use it as the contents of the block, just call self and that method inside the block, and that will call it.
+22:54 That's a common thing to want to do, actually.
+22:57 Um, a very, very important use of blocks, which we're going to talk about later in the quarter, is multi-threading.
+23:03 Okay? Which is getting your application doing multiple things at the same time, not really at the same time, but seemingly at the same time.
+23:11 And I really encourage you, this is one of the few times I'm going to tell you go look in the documentation to find out about blocks, just search for blocks in X-code documentation, and you can find out things like how to declare a local variable that is a block, and things like that, because I haven't really talked about those things.
+23:26 Mostly I've just talked to you enough about blocks to be able to call methods that take blocks as arguments.
+23:31 Okay? That's all I've pretty much shown you so far.
+23:35 Okay. So that's it for the objective-C that I wanted to cover.
+23:39 And now we can get into the fun stuff, which is animation.
+23:42 Alright? So that's going to be the rest of today and probably the start of Wednesday because this demo is really big.
+23:49 And there's lots of different animation that goes on in iOS.
+23:55 I'm going to talk today, and only really in this course, for the most part, about animating views.
+24:02 Okay? You know how to create custom views, right?
+24:04 And you can even animate non-custom views, buttons, or whatever you want, but basically making views move around the screen, get bigger and smaller, fade in and out, spin around and rotate, that's what we're going to talk about.
+24:16 Okay? Animating views.
+24:18 But. There's other animation that goes on, like when you go into a navigation controller, and you click, and a new view slides in, okay?
+24:25 That's animation.
+24:26 Alright? And it's possible, also, okay you're in the maps app and you click in the corner and it curls up to show you other options?
+24:33 That's animation, okay?
+24:35 All that kind of view controller animation, I'm not going to talk about, for the most part.
+24:39 Okay? But that's all - there's all support for that as well.
+24:43 There's also a whole other thing in iOS called the collection view, which is a collection of views that kind of live in a grid, sort of, or in a flow, kind of layout, and those all can be animated.
+24:55 What's going on in there as well, okay, but I'm only going to talk about views.
+24:59 Underneath all of that is this framework called core animation, super powerful framework, I mean, industrial grade animation framework there, but we're going to be doing it all at a much higher level, much easier to program, and you know, kind of easier to - you don't have to know quite so much about the detail of how animation really works.
+25:20 Whereas core animation is really for animation people who really want to do serious animations, and a lot of iOS applications are games, or other things that have a very serious animation going on in there.
+25:31 By the way, in iOS 7 there's a lot of other things we're doing in animation, for example, sprite kit is a way to animate sprites, which are essentially 2-D graphic elements that are being composited in a way to try to get a 3-D looking environment, like a lot of video games are, and we're not even going to touch sprite kit, I don't think, unless we get to it the last week.
+25:52 So there's a lot of stuff that I can't possibly cover, so let's just talk the basics here of animation.
+25:57 So there's three ways to animate views, basically.
+26:02 Okay? The first way is that there are some very special properties in view, namely the view's frame, remember that's the rectangle enclosing it, it's transform, which we talked about briefly, when we did the playing card thing, transform is the view scale, can be used to scale it up and down, and it's rotation, views can be rotated, and also translation, although usually for translation we use the frame, we move the frame around.
+26:28 And also alpha, it's opacity, these three things can be animated at any time into view.
+26:35 Meaning, you set them to a new value and it will set to that new value immediately, but the effect will appear on screen animated over some amount of time.
+26:44 So, let's take a look at how this works.
+26:47 It's done with a class method in UIView.
+26:51 Okay? A class method, it's not an instance method in UIView, it's a class method, and the class method basically takes the animation parameters, how long to take and stuff like that, and it takes a block, and inside that block, you can modify these three properties.
+27:07 There's actually a few others you can do, but these are the three main ones I'm going to talk about here.
+27:12 So it looks like this.
+27:13 It's called animation with duration, and the first argument is how long you want it to take for this thing to appear on screen, remember that the change you make happens immediately.
+27:24 So if you change the alpha or the frame, or the transform, it instantly happens.
+27:29 As soon as this method is executed.
+27:31 And this method returns immediately at all times, okay?
+27:34 It does what's in the block immediately.
+27:37 But the appearance of it is going to happen over time.
+27:41 Right? It's going to fade in, if it's alpha, it's going to move over if it's the frame, it's going to rotate if it's the transformer.
+27:48 Okay, that's going to happen over time.
+27:49 Duration says how long to take to do that.
+27:52 Okay? Delay is how long to wait to start doing it.
+27:57 And why would you want a delay?
+27:59 Well becomes sometimes you want to chain animations, you want to do one animation first, that takes two seconds, then you want to do another animation after that.
+28:06 Well, there's two ways to chain.
+28:07 One is to delay the second one using this delay, second argument, or there's a completion block - you see the completion block at the bottom there - you can actually do another animation in that.
+28:19 Because that completion block is called when the animation completes.
+28:22 Alright? Options.
+28:24 We're going to talk about all the options, and quite a few options for animating.
+28:27 And then there's the all important animations argument.
+28:30 That is a block, you can see, it takes no arguments and has no return value.
+28:35 In that block is where you change frame and you can also change center, center and frame are related, and transform and alpha.
+28:44 Okay? So here's an example of calling it.
+28:47 So I'm saying UIView class method, animate with duration, this animation is going to take 3 seconds, and what I'm going to do is, whatever state my view is in, I'm going to make it fade out and disappear.
+28:58 Okay? So, you see in the animation block?
+29:00 My view dot alpha equals zero.
+29:03 That means fully transparent.
+29:05 Okay? So that is, whatever it's at now, okay, could be anything, it's going to go from whatever it's at now to zero in three seconds, on screen, okay?
+29:16 But in the code, this happens immediately.
+29:18 Immediately the view has gone to alpha of zero, it's just onscreen it's not showing what's currently the state, it's showing this animation.
+29:25 Okay? And notice the completion handler there.
+29:29 Okay? The argument to the completion handler's block is a BOOL that says whether the animation finished.
+29:35 Why wouldn't this animation finish?
+29:37 Well, some other animation might start animating alpha.
+29:40 Or someone might just set alpha.
+29:42 So if anyone interferes, with alpha, then the completion handler will get called, this animation will get interrupted, the completion handler will get called, but the BOOL there will be no.
+29:53 But if nothing interrupts it, and the alpha goes all the way to zero, then this completion handler will be called, and the argument will be yes, yes it completed, and if that happens, I'm then going to remove my view from the view hierarchy.
+30:06 So what this single line of code does is it fades out my view, and if it successfully fades it out, removes it from the view hierarchy.
+30:14 Question?
+30:14 >> Did you, in the next line, did kind of the same thing except changed the alpha to something else?
+30:21 And you had delay equals three seconds.
+30:23 It seems like it's right on the edge there, maybe it happens after this one finishes, or maybe it happens before.
+30:29 Is there - ?
+30:31 >> Yeah, so the question is, what if I have another animation that I execute on the very next line.
+30:36 Well first of all, let's say I delay this one, right?
+30:38 So you're saying delay this first call, put delay in there, delay equals three or something?
+30:43 >> Actually delay the second one, so that it has to - >> Okay, delay the second one, exactly three seconds?
+30:48 Okay, so that will be fine because the first one will finish instantly right before the second one starts, okay?
+30:53 Because it's a common practice to do just exactly that.
+30:56 Have something take three seconds, and then start the other one with a delay of three seconds, so yeah, it'll work.
+31:02 Here's another - oops!
+31:04 Well I guess I can do that example, but anyway - so that is - does everyone understand what's going on there?
+31:11 It's really that simple, the main thing to understand is that alpha would be set immediately to zero, it's just on screen that it will show.
+31:19 Alright, let's talk about some of the options.
+31:21 The first one's an interesting option, begin from current state.
+31:24 So if you set this option on, okay, and when - in the options list - what this means is if there is another animation that is going on that is animating the things I want to animate, then pick up from wherever they are when you do my animation.
+31:39 Okay? So if I'm doing that alpha thing and it's fading down and it's down to 0.2, or something, and then I issue another animation to start, that goes up to 0.7 alpha, if I begin from current state option on, then it will start at 0.2 and go up to 0.7.
+31:56 If I don't have this on, it will start at zero, because zero is what the real alpha is, and go up to 0.7.
+32:03 So begin from current state is a way of intercepting other animations, intercepting them, right?
+32:08 In mid-flight.
+32:10 Okay? You need this because remember that when you set these animation parameters, it happens immediately.
+32:16 So if you want to intercept animation in flight you need some option for the system to go check and see where the view is, if it's flying across screen, before it sends it to a new place or if it's fading out, it fades at its new level.
+32:28 It's very common to have that option on, actually.
+32:31 And then you see things like allow user interaction, do you want to allow gestures to happen in this view while it's in flight?
+32:37 Sometimes that makes sense, sometimes not.
+32:39 Down at the bottom, you see those curves?
+32:41 Curve ease in, curve ease out?
+32:44 Sometimes when you move a view across screen you don't want it to just up and move, you want it to kind of slowly pick up speed, get up to full speed, and then slow down at the end.
+32:53 It's a little smoother kind of animation than just here's my view, mmmmm, that's a little, mmmmmm, you know, but mmmmmmmmmmmmm, okay?
+33:02 Better. Smoother.
+33:03 So curve in, ease and out, that's for controlling that.
+33:07 Okay? Same thing for fading, you could do it for fading as well.
+33:10 Though fading tends to be okay linear.
+33:12 But moving definitely curving in and out is a pretty good idea.
+33:16 So you can look in the documentation and see what all these options do, you can repeat animations, have them go over and over and things like that.
+33:22 So that's how you animate those special properties, okay?
+33:26 And it animates them, it figures out all the in between.
+33:30 Even if you animate multiple of them at the same time.
+33:32 It's moving, it's fading, it's rotating, it will find, you know, it will interpolate all those points all the way along automatically.
+33:40 Okay? And pretty high performance, as well.
+33:44 Okay. Sometimes though, you're changing your contents of your view in a way that's other than those three things.
+33:51 The classic example here, the playing card.
+33:54 When I'm flipping my playing card over, the only property I'm setting in my view is face up equals yes, right?
+34:00 And now my card flips over to face up.
+34:02 Face up equals no, now it flips over to down.
+34:04 So that's not an animatable property per se, however, what I'd like to do is have the view change from face up to face down through some animation, like flipping the card over, or dissolving between the two.
+34:18 In other words, I want to change the entire view through some animation to a new state.
+34:25 And that's what this one is for.
+34:26 Transition with view.
+34:28 So transition with view takes a view that you want to do, like a playing card view, and it takes a duration.
+34:35 How long it's going to take to go from the old state to the new state.
+34:39 Options, again, similar to the other options, but this is especially where you would specify the options listed at the top there, like UIView animation options transition flip form left would mean I want this to flip over or cross dissolve, or curl up.
+34:56 And animations, again, is a block, that's where you're going to set face up.
+35:01 In that block, you can set anything you want about the view to make it be in its new state, and the system will apply all those changes, re-draw the view in the new state, off screen, and then transition between the two.
+35:14 The old state is on screen now, and whatever your changes result in.
+35:18 Make sense?
+35:19 Questions about that?
+35:21 And then completion, same thing, if you get interrupted somehow, you know, it's harder to get interrupted on this one, but it can happen, then the completion handler gets called.
+35:30 Either way.
+35:32 Okay? So this one will be great.
+35:33 Part of your homework is to flip that card over, and this is the method you're going to want to use, so very, very straightforward.
+35:42 If you're changing the view hierarchy, like you're swapping a view out, okay?
+35:47 You got a view in the view hierarchy and you're swapping a new one in, or if you want to hide a view in favor of another view, you can use this transition from view to view.
+35:57 So this one is kind of like the other one in that you're changing, but instead of having a single view that you're changing its state and then flipping it over, here you're replacing a view with another view.
+36:08 Okay? But otherwise is very similar.
+36:10 It's even called almost the same thing, transition, right?
+36:12 Transition from view to view.
+36:14 Okay? Alright.
+36:17 So that's it for direct changing of views, properties, and making things happen.
+36:22 Okay? The next kind of animation we're going to talk about, which is a totally different system, new for iOS 7, is called dynamic animation.
+36:32 And this one's a completely different concept.
+36:35 Here, what you're going to do, is define a bunch of physics that apply to all the views that you want to animate, and then you're just going to say "Okay, do it!" And they're going to go have those physics apply to them.
+36:48 So what kind of physics are we talking about here?
+36:51 We're talking about gravity, collisions, forces applied to them, things like that.
+36:56 Okay? And they're just going to keep on animating until the forces all balance out.
+37:02 Okay? And we'll see what that looks like.
+37:04 The way we do this, this is a really nice API, very easy to use.
+37:08 You create a UI dynamic animator, you just need to create one.
+37:12 You can do multiple, but just one - it's really for grouping these behaviors, but usually create one dynamic animator with alloc in it, basically.
+37:21 I'll show you that.
+37:22 And then you're going to add behaviors to it.
+37:24 Behaviors are like gravity, collisions, pushes, those kinds of things, those are behaviors.
+37:29 Things that are going to be applied to the things.
+37:32 And then you put the things in there, and the things you put in there are UI dynamic items, meaning they respond or they implement that protocol.
+37:41 I'll show you that.
+37:42 And the instant you put them in there, they'll start animating.
+37:45 You don't have to say run, you don't have to say anything, immediately, any time there's an item that's in a behavior that's in a dynamic animator, it will start animating until the forces on it, meaning that it doesn't need to move, then it will stop.
+38:00 Okay? So let's look at all these things.
+38:02 UI dynamic animator, you can just do alloc init, but when you're doing views, if it's views that you want to animate, if you want to do alloc init with reference view.
+38:12 Okay? And init with reference view, you're specifying the top view of a view hierarchy, all the views you animate have to be in that view hierarchy, in other words, they have to be somewhere, a subview of this reference view or a subview of that or a subview of that, as deep as you want to go, but you have to specify the top level view.
+38:28 Okay? Then you create these behaviors.
+38:31 Behaviors are just alloc init, like UIGravityBehaviorAllocInit.
+38:36 UICollisionBehaviorAllocInit, and then you add these behaviors to the animator, using add behavior, which is a dynamic animator method.
+38:45 Okay? Couldn't be simpler.
+38:47 And then, you add the items to the behaviors.
+38:50 And you do that with?
+38:51 Add item, in dynamic behavior.
+38:54 So an item is just an ID that implements the protocol UIDynamicItem which you can see there below.
+39:02 And again, UIView implements that protocol, so usually the items we put in there are UIViews, about 90 percent of the time.
+39:09 100 percent of the time in this class, 100 percent of the time in your homework, I'm only asking you to animate views, but you could animate completely non-visual items.
+39:18 They could be - as long as they implement this protocol, they can do anything they want.
+39:22 So what's in the protocol?
+39:24 There's the bounds.
+39:25 That's again the bounds in the items world.
+39:29 It's like the views bounds, right?
+39:31 It's its own drawing coordinate system.
+39:32 Notice that's read only.
+39:34 Okay? It could be modified by the transform, centering, moving the thing around, possibly, mostly the transform.
+39:41 So the bounds, though, is just the drawing area for the item.
+39:45 But the center, in other words, the position of the item, and its transform, it's rotation and scale, those are read-write.
+39:54 Those can actually be set.
+39:56 They're obviously set by the animator, that's what the dynamic animator does is go figure out what the center and rotation and scale should be.
+40:04 And you could set them too, but if you do set them while the animator is also setting them, you have to call this method update item using current state, current state in the animator, otherwise the animator will not - will ignore anything that's going on.
+40:16 Okay? So if you want to be setting the center, if you want to be moving the thing while the animator is also trying to move it, in other words, you want to fight it a little bit, or if it is moving it and you want to rotate it, you need to do this update item using current state, otherwise it will assume, for performance reasons, that it knows the current state.
+40:33 Until it's done animating, until everything settles.
+40:36 Okay? So that's it.
+40:38 Animator, behaviors and items.
+40:41 That's all there is in this system.
+40:43 So now let's talk about some of these behaviors.
+40:45 The concrete behaviors that are available.
+40:46 There's gravity.
+40:48 Okay? Gravity - gravity behavior by default, gravity is down.
+40:52 So if I'm holding my phone, it's down, which kind of makes sense if I hold my phone up I kind of want things to go down, but really it can be set to any angle.
+41:00 You can have the gravity up or to the left, you can have multiple gravity pulling on things from different directions.
+41:05 In fact, if you had two things pulling, one from the top, one from the bottom, the thing would just float in the middle if they have the same magnitude of gravity.
+41:12 And you can set the gravity.
+41:13 Magnitude of 1 means a thousand points per second squared.
+41:18 That's the acceleration due to gravity.
+41:21 That feels a lot like 9.8 meters per second squared which is acceleration due to real gravity.
+41:27 So in other words, if you hold your phone up and let the gravity work, it kind of feels like it's falling about the same speed, something in real life would happen, and it's also a very nice round number, a thousand points per second squared.
+41:38 Okay? But understand, it's just like gravity, it's an acceleration in a certain direction.
+41:44 Collision is really cool.
+41:47 Collision just means the items inside of the collision behavior, if they bump into each other, they'll bounce off each other, like a real world collision, and you can specify the elasticity and how bouncy they are, and even you can define the density of one versus another, so a really dense one will smash another one out of the way, all definable.
+42:08 You can also set boundaries.
+42:11 So any UI [inaudible] path that you want to come up with, you can put it in your collision behavior and things will bounce off it.
+42:17 So it can be round, it can be square, whatever, and things will bounce off it when they hit it.
+42:23 Also you can set the boundaries of the reference view to be bouncy boundaries as well by saying translate to reference bounds into boundary equals yes, and then things will bounce off the edges of the reference view, the top level view in the dynamic animator.
+42:39 Okay? So, the collision mode determines whether the items bounce off each other or just off the boundaries.
+42:47 Okay? Alright?
+42:50 Attachment behaviors.
+42:51 Okay, this is the way to attach an item to a fixed point or to another item.
+42:58 Now one thing to remember about this, if I hook an item up to a point, that does not mean that item is not going to move.
+43:05 Okay? If I hook it up to this point and I have an item here, right, and gravity happens?
+43:12 My item is going to go like this...it's going to swing.
+43:15 Because the attachment is just attaching the two things, the point and the item.
+43:20 It's not attaching to the background, okay?
+43:23 And also if I move the point, the thing will stay with it and it will kind of swing around behind it.
+43:28 And we'll see this in the demo, okay?
+43:30 So attachment is attaching the thing to a point.
+43:33 You can also attach two items.
+43:35 If I attach two items like this and I gravity down, they're going to go bam!
+43:40 They'll stay the same distance apart, but they're just going to go straight down because gravity will still be applying to them as well.
+43:46 Right? And the connection just keeps them together.
+43:48 The attachment behavior is a little different in that you don't alloc init, you actually specify the attachment at init time.
+43:56 So alloc init with item, alloc init with other item, there's also some versions where you can attach items, with the attachment point instead of being the center is offset.
+44:05 And that will make things kind of hang if the items rotate, they'll kind of tilt, okay because you're not grabbing them in the middle, you're grabbing them on the side, so you can make some pretty cool effects.
+44:15 The other thing to notice about attachments that's cool is that the length between the two items is writeable.
+44:23 So for example, let's say you were pinching.
+44:26 You could change the length and those two attached items would move closer together.
+44:31 Okay? So even though you set it up as this item attach from this point or these items attach to each other, if you change the length to be smaller, they'll move toward each other, okay, that which is cool, and the same thing with the anchor point.
+44:44 If you move the anchor point around, the attachment is still there and the thing will follow around, right?
+44:49 With other behaviors applying to it.
+44:51 Question?
+44:51 >> Is that attachment length, is that an exact value, like it would be with like when they're attached or?
+44:57 >> Iron, like an iron bar you mean?
+44:59 >> Yeah, like iron bar or straight?
+45:01 >> Okay, so the question is, is it like an iron bar or is it more like a string?
+45:04 And actually what it is, it's like a spring, okay?
+45:07 So it actually as you move it around, like if I move it up, it will "whoom!" spring up.
+45:12 And you can control the damping and oscillation of that.
+45:15 By default, it's an iron bar.
+45:17 Okay? So the damping and oscillation are set so that it does not oscillate, but you can set it so as you follow it around it kind of - it's very, very cool.
+45:25 So you can play with all of those when you are doing your homework.
+45:28 Snap behavior snaps an item to a location, but it does more than just have it fly there.
+45:34 It does fly there, rather rapidly I might add.
+45:36 When it gets there, though, you can imagine that there's four springs attached to the item in the corners, a little ways out, so the thing gets there and it goes "doinggg" - kind of springs - like this.
+45:46 And you can specify how much it does that.
+45:48 Why does it do that?
+45:50 That's because you want to give feedback to the user, oh, I just moved this.
+45:53 So you don't want it to just go "blip!" You want it to go "hmmmm," you know, and it kind of gives them just a moment's springiness, so it's like "oh, okay" and that's good animation, the snap behavior very common.
+46:03 Also you have push behavior, which is you can push, push an object and it will start moving.
+46:08 So especially if you don't have gravity, this might be what causes things to move, you push it and it moves across and then these items have friction, they have density when they collide with each other, so push - you can read about push - and how you specify the angle and the magnitude and all that.
+46:25 Okay? So. Another thing about behaviors is you want to be able to set this friction, elasticity, the density, all these things that we're talking about, you want to set them on the items independent of the other behaviors, okay?
+46:40 So if I have friction, I want it to apply, whether it's gravity that's causing the thing to move, or whether a collision caused it to move.
+46:48 So we don't put the friction and the density and stuff like that in collision behaviors or gravity behaviors, we put it in its own behavior called the items behavior.
+46:58 So there's a class of behavior called UI Dynamic Item Behavior.
+47:03 Okay? And so if you want any of these things, like you don't want to allow it to rotate, you don't want the view to be able to rotate, which I don't know if you're doing homework sometimes you might want that, sometimes not, or you want to specify the friction or the bounciness of this object, you create a UI Dynamic Item Behavior and add the items to that as well.
+47:24 So the item would be a member of the gravity behavior, it might be of the collision behavior, and it's also a member of a UI Dynamic Item Behavior.
+47:32 Okay? And this controls all its options.
+47:34 So you can think of this as kind of like the animation options, but really it's more like the behavior of the - the intrinsic behavior - of that item.
+47:41 Okay? What is its density?
+47:43 You want that to be the same no matter what behavior is acting on it.
+47:47 You can also find out information about what's going on with the item using UI Dynamic Item Behavior.
+47:52 It has methods like linear velocity for item.
+47:56 It will tell you the velocity of this item in different directions.
+47:59 Which is really cool for if you want to take over animation, the dynamic animation system started this thing moving, and now you want to take over and keep it moving, maybe in some other direction or something like that.
+48:11 You can find out how fast is it moving right now, and then continue having it move at that speed.
+48:15 Same thing with angular velocity.
+48:16 How fast it's rotating in radians per second.
+48:19 Okay? Dynamic behaviors also - the UI Dynamic Behavior is the base class for gravity behavior, collision behavior, all these, you can also create your own subclass, and usually when you do your implementation, just adds other behaviors as child behaviors.
+48:35 So there's a method in UI Dynamic Behavior called Add Child Behavior, and you can add a gravity, collision, UI Dynamic Item behavior, as sub-behaviors.
+48:45 And this is very common to do, just to clean up your API, to group behaviors that go together, into their own class.
+48:52 Okay? Their own UI Dynamic Behavior subclass, and all that thing usually has is child behaviors and then maybe a little bit of API to add the items in a certain way or have them interrelate in some other way.
+49:06 Okay? What is more, all behaviors, all UI Dynamic Behaviors, gravity, collision, your own custom ones, whatever, they know what dynamic animator they are in.
+49:17 They have a property called Dynamic Animator which will say what dynamic animator they're in, and there's kind of a view controller life cycle thing of UI Dynamic Behaviors, which only has one method in it, will move to animator.
+49:30 So that gets called every time it gets moved to an animator or out of an animator.
+49:35 So this would be called with nil.
+49:37 Okay? So that way you can find out whether your behavior is currently being animated or not, and by which animator.
+49:44 Okay? And the last thing I'm going to tell you about behaviors, really cool property is a block called action, this block returns nothing and takes no arguments, so it's basic block.
+49:57 This block you provide, you just say my whatever behavior, gravity behavior, collision behavior, whatever, dot action equals a block - it will execute that block every time this behavior causes animation change.
+50:13 Okay? So this is called a lot, as gravity pulls the thing down, every time it moves, even a pixel, this thing gets called.
+50:21 Okay? If a collision happens, and it moves that causes it to move, this will get called.
+50:25 Okay? So this is a way to get in there and get involved.
+50:29 Now, you have a responsibility when you get in there, don't do anything really expensive in action or your animation will get all jerky.
+50:36 Okay? You do not want to do something expensive like draw too much, but you can draw a little bit.
+50:40 And we'll show in the demo on Wednesday, we'll get to the part where I'll set an action that draws a little bit, so that we can see things a little better, and you can see this, really nice to be able to set this.
+50:52 Okay? So this is a simple little hook to get involved with the animation that these behaviors are causing to happen.
+50:58 Okay?
+51:01 Alright. So let's do this demo.
+51:03 All that what to look for, you can look on later, just to make sure you actually saw this.
+51:09 This demo is called "Drop It." And basically going to drop views, squares, down, and they're going to collect at the bottom, and when a whole row collects, I'm going to blow them up.
+51:21 Kind of like Tetris.
+51:22 You know Tetris?
+51:23 You put the blocks in and when they fit and you get a row, boom, the row disappears.
+51:27 We're going to do that.
+51:28 Okay? We're not going to use Tetris squares and stuff like that, this is a demo, I only have like 45 minutes to do, but we'll do blocks instead.
+51:36 But the main thing I just want to show you everything I can in that amount of time, about animation.
+51:42 So we're going to make a new app here, let's get rid of that.
+51:46 Don't need that.
+51:47 We're going to create a new project.
+51:49 I'm going to call this project - I'm going to go quite fast now through most of this stuff that you already know how to do.
+51:54 So I'm going to do Drop It, I'm going to call the view controller also Drop It.
+51:59 Okay? We'll put it in home directory developer.
+52:02 Here's our Drop It.
+52:03 You know me, I always like to move these out of the way.
+52:06 Alright. So here's my storyboard.
+52:08 I'm going to use a generic UIView to contain my game.
+52:15 Okay? My little dropping game.
+52:17 I could do all this dropping in self dot view here, but it's usually a bad idea, because what if I ever want to add a score or another button or something like that, I want my game then to be in a little smaller space, and you're going to want to do that for your homework as well.
+52:30 So I'm just going to drag out a generic UIView.
+52:33 I always have trouble finding it.
+52:34 Yep, there it is.
+52:35 So I'm just going to drag this generic UIView in here, and I'm going to create an outlet to it, I'm going to call it my game view.
+52:41 So just control, drag, out here and call it game view.
+52:46 And it's a generic UIView.
+52:48 It's no custom thing.
+52:49 But I just want it to be the bounds, and I can move these bounds in from the edge if I wanted to put some other UI in there or whatever.
+52:56 So now I have my game view.
+52:59 And I'm also going to have a tap gesture, so let's drag out a tap gesture.
+53:03 So that every time I tap on this, I'm going to add another square to drop.
+53:07 Okay? So I'm going to put this on my game view.
+53:09 Here's my tap gesture right here.
+53:11 Control drag this out, I'll call it tap.
+53:17 Okay. Get some more space here for us.
+53:22 So every time that you tap on my game view, I'm going to drop another, drop another full square that falls down like a Tetris kind of thing.
+53:36 Oops. Oops.
+53:37 Drop. Okay?
+53:39 So that's what this method is going to do, it's just going to add a view.
+53:42 So this is also a chance for me to show you how to create a UIView in code, which hopefully you've all done that because you've done the part of the homework that's the custom view, but if you haven't, here you go.
+53:52 I'm going to actually create the frame first.
+53:55 I'm going to have the frame origin start out at CG point zero, but then I'm going to change the X origin.
+54:04 So I'm going to have that drop start out at the top and then I'm just going to put in a random spot across the X. The size, I'm going to define a nice little, well let's do a static.
+54:17 Static, const, CG size, we'll call this drop size equals and I'll make it like 40 by 40, but I'm going to make this be static const as opposed to it making it be a property or something because I don't want to write the code right now to deal with the fact that someone changes this, because I probably have to re-draw my whole thing to have smaller squares, right?
+54:40 Or something like that.
+54:41 Which is cool, be great to do, but just with time constraints I'm not going to do that.
+54:45 So I'm going to have the frame size be this drop size.
+54:48 So I'm creating a little drop view, okay, and that's the size I want it to be.
+54:52 So here I'll do my random - actually let's go ahead and do this...let's go to here.
+55:02 Let's go just pick a random place along the X axis, so I'm going to do arc 4 random, and we're going to mod that by the self dot game view dot found dot size dot width, so somewhere along some random spot along there.
+55:23 And I'm also going to make it be lined up so the drops are, you know, in a grid.
+55:29 So I'm just going to divide by the drop size dot width, and then I'm going to multiply by saying - oops, frame dot origin dot X equals X times the drop size dot width, so you see here, I've divided it here, this is an int, so it's basically going to do a floor, right?
+55:49 I've picked an int and just multiply it back, that puts it at a random spot across, and then I create a view just by saying drop view equals UIView alloc init with frame, which is the designated initializer for view, and I'll specify this frame, and then I'm just going - I'm going to set the drop views background color to be a random color.
+56:19 Okay, I happen to have a little snippet for that, random color.
+56:24 Okay, so random color just picks one of five random colors, okay, right here.
+56:30 And then let's just go ahead and self that game view, add sub-view, drop view.
+56:36 Okay? So it's as simple as that to drop something on here, so unless I've forgotten something or doing something wrong, let's go ahead and run.
+56:47 Every time I tap, we get another one, so that's great.
+56:50 They're collecting at the top.
+56:51 Now we're going to add some gravity so that they fall down.
+56:56 Okay? Animated, so they fall down.
+56:59 So how do we do that?
+57:00 Very simple, we're just going to create an animator, have a property which is strong non-atomic, which is a UI dynamic animator, and I'm also going to have a property which is strong, non-atomic, which is a gravity behavior, I'll call it gravity.
+57:20 Keeping these names short kind of for a reason, but you might want to call it gravity behavior.
+57:24 I'm going to go ahead and do some lazy instantiation here, so let's get our dynamic animator, if not animator, then I want to create one, otherwise I'm going to return it.
+57:42 Okay? So as I said when we create the animator, it's just UI dynamic animator alloc init with reference view and the reference view is just our game view, right?
+57:53 That game view that I dragged out, that generic view, it's perfectly fine for that reference view to be a generic view.
+57:58 And then the gravity one similar kind of deal, if the gravity is not set, then we'll create it and we'll return it, and creating a gravity thing is very simple, we just say gravity equals UI gravity behavior alloc init.
+58:17 Okay? I'm going to do one other thing here, or two, I'm going to say self dot animator add behavior.
+58:24 Okay? So any time someone asks me for the gravity thing, I'm going to add it to my animator.
+58:29 This is going to only happen once, right?
+58:31 Because this is my lazy instantiator, so that's good, that's exactly what I want.
+58:34 I could also in here set things like the gravity's magnitude, right?
+58:39 So I could say light gravity instead of 1.0, a little lighter or whatever.
+58:45 Okay? So now I have an animator, I have a gravity behavior, all I need to do now is add this drop view, okay, that I created to that, so I'm just going to say self dot gravity add item, my drop view.
+59:01 Okay? So now that the instant I do that it's going to start animating.
+59:07 So let's take a look at that.
+59:09 So you can see as I click they immediately start animating.
+59:14 Okay? And um...sorry, but they're falling off the bottom, okay?
+59:23 So that's not so good, I want them to stop at the bottom.
+59:25 So to do that, I just need a collision behavior, very easy, just go up here, properties, strong, non-atomic, UI collision behavior, collider, I'm going to call it.
+59:39 And my collider, if my collider is not set, then I'll set it, turn the collider, I really should have a snippet for that kind of thing.
+59:56 I think Johan showed that in the Friday section.
+59:58 So that equals UI collision behavior alloc init, and here I'm also going to set the bounds, oops, to yes.
+01:00:12 So I'm going to have this collider use the bounds of the reference view as its bounds, okay, so it's a one line thing to get that in there, but I could make, you know, a nice UI [inaudible] path, you know, like down along the bottom, whatever I want, but it suits my purposes here just to use the whole translation, and I'm going to do the same thing here, self dot animator add behavior, this collider.
+01:00:36 Okay, so it gets added to the animator.
+01:00:39 So again, I need to add any items that I want to be affected by the collider to the collider, and now it's going to - as soon as I do that, if something hit it, it would start colliding.
+01:00:54 Alright? So let's take a look at that.
+01:00:57 Okay, so hopefully the drop, notice they have a little bounce to them, a little bounce in their step.
+01:01:04 Okay. Now notice that they tilt a little.
+01:01:07 Why does that happen?
+01:01:08 Well, on the way down, the two they landed, one was bouncing and the next one hit it, and there was a little bit of real world bounce to it.
+01:01:15 Now, probably if we're building a Tetris game, we don't want them to rotate and get off center like that, so we would have to A, not allow rotation probably and B, we might want to grid them up.
+01:01:28 I don't think we're going to get that in the demo, but maybe on Wednesday I'll get to that, I'll post how you would actually do that.
+01:01:34 Okay? And all we're going to do is when they collide, we're going to have them line themselves up.
+01:01:39 Okay? So we'll do that later on Wednesday.
+01:01:42 Okay, notice that I have these two very related behaviors, gravity and collider.
+01:01:49 They really go together.
+01:01:50 Okay? So this is where I might want to create a custom UI behavior.
+01:01:55 So let's do that real quick.
+01:01:56 I'm just going to go file, new file, okay, new class, and this class is going to be a UI dynamic behavior.
+01:02:06 Behavior. And I'm going to call it the drop it behavior.
+01:02:10 Okay? And that is going to be a new behavior I'm creating that's going to have the gravity and the collider and eventually some more things as child behaviors.
+01:02:18 Okay? So let's hit next, where we want to put it, this is all good, here it is.
+01:02:24 Okay? Here's my drop it behavior, and all I'm going to do in this drop it behavior is I'm going to define a couple of methods here, add item, which allows you to add UI dynamic item, notice I'm using this protocol syntax, and then I'm also going to let you remove an item.
+01:02:45 Okay? And that's all I'm going to implement in my drop it behavior except I'm going to override its init.
+01:02:50 Okay, so what am I going to do in its init?
+01:02:52 So instance type, init, I'm going to do self equals super init, so that's UI dynamic behavior init.
+01:03:02 Alright? And then return self, and then in between here all I'm going to do is add child behaviors for the gravity and the collider, which I'm actually going to copy and paste.
+01:03:19 Save ourselves a little time, here's nice little lazy instantiation of these, and let's go grab the - oops, let's grab the outlets for these, add those.
+01:03:37 Oops, sorry, I keep clicking on the wrong button.
+01:03:39 Okay, so this is at sign interface, drop it behavior, oops, paste, hello, paste.
+01:03:47 And okay so we've got those, that's good.
+01:03:49 These lines, we're not going to add it to the animator because we're going to add this whole behavior to the animator, so we can get rid of those.
+01:03:56 And in add item, which we'll put right here.
+01:03:59 Actually let's go ahead and copy and paste these two things that we want.
+01:04:04 Add item and remove item.
+01:04:07 Okay, all I need to do here is add them to each of my sub behaviors, so I'll do add item to my gravity and add item to my collider.
+01:04:19 And I'll do the same thing for remove.
+01:04:22 Okay, except we want this to be remove.
+01:04:27 Okay. So this s a common pattern here, you know, you create basically a dynamic behavior that has child behaviors and in the add, I mean you also have add items, you might have init with items, whatever, and then here, we're going to add child behaviors, the gravity and the collider.
+01:04:53 Okay? So we've created a new class here, it's a sub-class of UI dynamic behavior.
+01:04:58 We can add items to it, just like we added items to our gravity and our collider, and its implementation is merely to have a sub, these little sub behaviors.
+01:05:10 Okay? Very, very simple.
+01:05:12 And we go back to our controller here, we need to, instead of having the individual ones, now we're just going to have a drop it - sorry, pound sign import, drop it behavior.
+01:05:25 It's going to have a drop it behavior, okay, we'll put a little lazy instantiation for this one too [typing sounds].
+01:05:48 Oops, so there's alloc init, that's going to call that other init that we just did.
+01:05:52 We'll do self dot animator add behavior or drop it behavior, alright, and then we'll just return our drop it behavior like that.
+01:06:01 And now, down here, we don't have to add these separately, we're just going to say drop it behavior add item like that.
+01:06:10 Okay? So everyone understand how we kind of grouped all that stuff over there?
+01:06:13 And we're going to add more things as this demo goes on to this kind of general drop it behavior, and we're going to add them over in that other class now.
+01:06:22 We're still going to add other behaviors that we add here, that really aren't part of that other thing, but now we collected that into a nice space over there.
+01:06:30 So hopefully that didn't break anything, let's see, it didn't.
+01:06:35 Okay, it's all still working, which is awesome.
+01:06:38 Okay so now what I want to do is, when I get a full row like that, I want it to blow up, okay?
+01:06:44 And I'm going to do the blow up not using a dynamic animator.
+01:06:49 Okay? I'm going to do that with that UI view animation business.
+01:06:51 Because I want to show you how you can mix the two together and they'll work fine, okay?
+01:06:56 So let's do that.
+01:06:57 So how are we going to do that?
+01:07:00 Well, one question is when can I start thinking about doing other animation when I've got this dynamic animator going off and doing all these things bouncing and colliding and all this stuff.
+01:07:10 The answer is you can find out when an animator reaches quiescent state, when nothing is bouncing, everything is resolved.
+01:07:19 Okay? When everything is quiet.
+01:07:20 Okay? And you do that using a delegate for the animator.
+01:07:25 So if I go to animator here, there is a property on animator called delegate.
+01:07:30 And the delegate is an object that's going to find out when the animator stops and when it starts up again.
+01:07:36 And I'm going to set that to be self.
+01:07:39 Now when I do that, I'm going to get a warning from the compiler here.
+01:07:42 Why is that?
+01:07:43 It says "You are assigning self," which is a drop it view controller, "to something that's supposed to be an ID UI dynamic animator delegate" - in other words, you're supposed to be implementing this UI animator delegate.
+01:07:56 So we have to go up here and say that we implement this UI dynamic animator delegate.
+01:08:02 This is what we're talking about, protocols saying that we promised to do something.
+01:08:06 Okay? Now, I'm not getting any more warnings, so there must not be any required methods in this, they must all be optional.
+01:08:13 And in fact they are all optional, and there's only two of them, and the one I want is called dynamic animator did pause, you can see there's the two dynamic animator delegate methods, dynamic animator did pause, and dynamic animator will resume.
+01:08:30 Okay, so that's telling you when it reaches a settle state and when something changed, a behavior or an item got added, and now it's going back active again.
+01:08:38 Okay? So in this case, we want to know the pause.
+01:08:41 Okay? When the pause happens, I'm going to look at that bottom row and see if it's complete.
+01:08:46 Actually I'm going to look at all the rows and see if any of them are complete.
+01:08:50 Okay? And if they are, I'm going to blast them out of there.
+01:08:53 So I'm going to do that by calling a method called remove completed rows, and I have a little snippet for that to speed us up here.
+01:09:03 Okay. Here it is right here.
+01:09:07 Okay? I didn't put it all in here.
+01:09:09 Actually remove completed row, I call it, but really should be rows.
+01:09:14 And so how does this work?
+01:09:15 Well, you can take my word for it that this little snippet of code, and you can go look at it later, it basically just fills this mutable array, drops to remove with all the drops that are in a completed row, even if there's multiple rows, okay?
+01:09:30 It does this using this method hit test.
+01:09:32 I'm actually looking at all these things and seeing if there's a view there, and if it is, I'm okay.
+01:09:37 And if I get all the way across a row I'm like, okay, I've got a whole row and I'll keep them all.
+01:09:42 So that's what drops to remove.
+01:09:43 This code right here is going to fill in drops to remove with all the things.
+01:09:48 Okay, so now we have an array of the drops that we want to remove.
+01:09:52 Now, let's talk about what we're trying to learn here, which is animation, how do I remove them?
+01:09:56 And what I'm going to do, to do that, it's kind of a two-part deal here, the first thing I'm going to say if I have any drops to remove, okay, then I am going to remove all of the drops that I'm going to be taking out of this view from the animator, from the dynamic animator, because I don't want the dynamic animator fighting me.
+01:10:23 Okay? I'm going to remove these things using UIView animation, I don't want it trying to pull them back or the gravity pulling on it, so I'm going to take them out, and I'm going to do that very simply by just saying self dot drop it behavior, remove item, drop.
+01:10:39 Okay? So I'm going through all the drops to remove, and I'm removing them from my drop it behavior.
+01:10:43 Now they're not in any behavior, so they're not going to be affected by the animator.
+01:10:48 Okay? Now, I'm going to - so that's that.
+01:10:51 Now I'm going to animate the blowing them up.
+01:10:54 Okay? And let me do that with animate, removing, drops, drops to remove.
+01:10:59 Okay? So this is a new method that we're going to write together here, animate, removing drops, it takes an array of drops to remove, okay and how are we going to do this?
+01:11:14 Well, I'm just going to do UIView, animate with duration.
+01:11:21 Okay? So I want - there's a few versions of this, some of them have delay, some don't have delay, so I want the one - which one do I want?
+01:11:28 I think I want the one with just completion, so that's this one.
+01:11:32 Okay? So I want this one right here.
+01:11:34 How long is this going to take?
+01:11:36 I'm going to take about a second to blow those things up.
+01:11:39 This probably wants to be a constant, and you want to tweak it to look good, right?
+01:11:43 If it blows up too slowly it looks ridiculous, if it blows up too fast, people can't tell that it did it, so we'll do that.
+01:11:49 And then here's the animations, which is just a block, and here's the completion, which I'm not going to do anything on complete - actually I am going to do something on completion, let's do something on completion just to show here.
+01:11:59 So finished, okay?
+01:12:01 And that's it.
+01:12:03 So that's this entire animate with duration, all we need to do is fill in these two blocks, right?
+01:12:07 So let's do this block first.
+01:12:08 This is the animations.
+01:12:10 This is the actual moving.
+01:12:11 So all I need to do here is move these things out of the way.
+01:12:15 So I'm going to have them kind of explode up and off the top of my view.
+01:12:19 So I'm going to move each one to a random location somewhere off screen above my view, okay, kind of just out there somewhere.
+01:12:26 And so how am I going to do that, by saying 4, UIView, drop in, drops to remove, I'm going to have the X be some random location that is between two times my width to the left to two times above my width.
+01:12:47 So it's going to be kind of going out like this in a funnel.
+01:12:50 Okay? So the X has to be from two times my width to the left to two times my width on the right, so I'm going to make that be self dot game view dot bounds dot size dot width times five, okay, so that's going to get me there, minus self dot game view dot bounds dot size dot width times two.
+01:13:14 Okay. And actually I'm going to move this all back here so we can see it better, move this back too.
+01:13:24 Okay. So let's do that, okay, so you see I'm just going five wide and I'm shifting it over too.
+01:13:30 So I'm just creating this thing above.
+01:13:32 And then the Y, I'm going to make Y easy, I'm just going to have it be self dot game view dot bounds dot size dot height, and then when I move it there, I'm going to make it negative, so I'm going to say drop dot center equals CG point X com minus Y. Alright?
+01:13:51 So inside this duration block, if I change the center, it's one of the magic things.
+01:13:57 This will get animated.
+01:13:59 Okay? Center, and frame, and alpha, and transform, those are all the magic things that automatically will animate, and what did I type wrong here?
+01:14:11 >> [ Inaudible Comment ]
+01:14:11 >> Oh [inaudible]
+point make, yeah.
+01:14:13 Make. Good job.
+01:14:16 Okay, so that's it.
+01:14:18 So now they're all going to blow up.
+01:14:19 What am I going to do on completion?
+01:14:21 Well, after they blow up, if they successfully blow up, I'm going to remove them all from the super view, right?
+01:14:29 Because I don't want them anymore, I just blew them up, they're gone.
+01:14:32 So what's a cool way to do that?
+01:14:33 Watch this.
+01:14:34 Let's go drops to remove, make objects perform selector, at sign selector, remove from super view.
+01:14:44 Okay, I told you that methods like this would come in familiar, come in handy, and they are, it's better than having to do 4, in, you know, all that stuff.
+01:14:52 Boom, just do this, it's going to send remove from super view to all of them.
+01:14:56 Okay? Make sense?
+01:14:58 Alright, let's see if this works.
+01:15:02 Alright, so let's add some of these guys until we get a whole row, almost there, almost there.
+01:15:09 Oh, come on, oh, there it is!
+01:15:12 Okay, now, two things there.
+01:15:15 Notice that we got the animation of the thing happening, but what happened to all the other blocks?
+01:15:19 They moved down, because they're all still under the influence of the animator.
+01:15:23 Gravity is still pulling on them, the collider is still working.
+01:15:27 So if I put a whole bunch of things in here, okay, and also okay they're kind of tilting, watch this again.
+01:15:34 Oop...
+01:15:34 >> [ Inaudible Comment ]
+01:15:35 >> Yeah, I did.
+01:15:36 I did get unlucky with the hit test there, here let me show you a different way.
+01:15:39 The hit test is kind of a questionable way to do that, by the way.
+01:15:43 But, here, let's show you.
+01:15:45 I'll just show you this again.
+01:15:48 Also, I should make it so that they're not tilting like that.
+01:15:50 We'll do that next time.
+01:15:52 But...wow, I'm getting - oh there we go.
+01:15:54 Okay. Hello.
+01:15:58 Knock, knock, knock.
+01:15:59 Well, I don't know why it's not working now, but anyway you got to see it work and time's up, but we'll look at that, we'll look at that later and try and find out what our problem was.
+01:16:08 But anyway, the main thing there to notice, we did the fly away, but we also had the animator still working on the other things, and that's important to know, that the two things can interact like that.
+01:16:18 If you move things out of the way, the animator is going to go back to life and start pulling down on things, okay?
+01:16:24 So next time, we'll continue to do the animation, we'll make it so it's not so rickety, okay, so we don't have this problem where the bottom load doesn't line up, and we'll also do an attachment, where we attach to something and, you know, have it swing from an attachment, with a little attachment behavior.
+01:16:42 Alright, we'll see you next time.
+01:16:44 >> Announcer: For more, please visit us at stanford.edu.

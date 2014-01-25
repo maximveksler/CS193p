@@ -1,0 +1,1159 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:07 >> Well welcome everyone to lecture number seven of CS1973P Fall of 2013-14.
+00:14 Today we are going to talk about input and output.
+00:17 Okay? It's about views which you're rectangular areas on the screen that you can use both to draw custom stuff and to get gestures in -- from user touch gestures, multi-touch.
+00:31 I'm going to have a demo that's going to show you all that.
+00:34 We're going to build a custom view, it's going to have its own custom gestures and all that stuff.
+00:39 It's basically going to draw the -- you know, the cards that we used in Machismo were just really bad like A clubs.
+00:47 They didn't look like cards so we're going to actually have a custom view that looks like a card.
+00:51 Right? Has the things in the corner, and face cards, all that -- that whole business.
+00:56 All right, so a view is of critical importance in iOS.
+01:00 Its right at the heart of all the drawing we do.
+01:03 You've used a ton of views already.
+01:05 Buttons are views.
+01:06 Labels are views.
+01:08 Okay? It's basically the building block that represents a rectangular area on screen.
+01:14 It defines a coordinate space.
+01:17 Okay? A coordinate space you can draw in.
+01:18 And a coordinate space that you can get touch events in and understand where they are.
+01:23 It's hierarchical.
+01:25 Right? So you can have view inside views, inside views, inside views.
+01:29 All right?
+01:29 Every view only has one super view.
+01:32 But a given view could have many sub views and those sub view are just rectangles.
+01:36 They can overlap, whatever.
+01:38 You know they're not required to somehow be tiled or separate.
+01:43 They're complete free form sub views of a given view.
+01:46 You can have any number of sub view you want for a given view.
+01:51 The order of the sub views does matter because they can be transparent.
+01:55 We'll talk about that.
+01:56 And one thing that's sometimes a little confusing is you have this rectangular area that you're view, but you can actually draw outside that area.
+02:04 Perfectly legal.
+02:05 There is a little switch you can turn on in xcode or obviously a property in UI view that says "clips my sub views." In other words don't let my sub views go outside my -- my views bound.
+02:16 Right? So kind of keep things contained if you want.
+02:19 But general that's not the default and generally we don't.
+02:22 There is a UI window class.
+02:25 Very unimportant in iOS.
+02:27 If we're on the Mac, UI window would matter.
+02:29 You got a map, windows on a desktop.
+02:31 But in iOS it's all about views.
+02:33 There's only one UI window.
+02:34 It's the one that's containing all the views that are currently on screen.
+02:38 That's why in the last demo I was able to say if self.view.window, then I knew I was on screen.
+02:44 Right? Because that's the only window there is and so if I am in it then I'm on screen.
+02:48 So UI window very unimportant -- important you don't even aver had to look at the documentation for UI window.
+02:55 UI views are what it's all about.
+02:56 So this hierarchy of views.
+02:58 View inside views is most often built in xcode just by dragging views in.
+03:03 Now we haven't done a lot of dragging views inside other views but it's perfectly legal to do that and you'll see in xcode sometimes when you drag it try to drop it in another view.
+03:12 You don't want it to but it tries to.
+03:14 So a lot of it would build graphically.
+03:17 However, we could also build it in code and when we build it in code, build and tear down this new hierarchy and code with these two methods, add sub view.
+03:25 Exactly what you would think.
+03:26 It just takes a view and adds it as a sub view of some other view.
+03:29 You send that to the view that you want to be the parent view right.
+03:33 That's the view to which you are adding the sub view.
+03:36 On the opposite side, to get view out of the view hierarchies you send remove from super view to the view you want to remove.
+03:44 Not to it's parent.
+03:45 So you don't say remove from super view:view.
+03:49 You just say to a view that you want out of there, remove yourself from super view.
+03:52 Okay, so it's a little different adding and removing when you ask to do it.
+03:59 You're NVC's of course have a view.
+04:02 And that top level view that contains all the views in the view hierarchy for your NVC is the property view in view controller.
+04:13 So if you look in UI view controller there's a property called view.
+04:15 It's the UI view.
+04:17 And if you go in xcode and right click on your controller or right click on the back round of your NVC's view you'll see an outlet basically.
+04:27 Because it's really is an outlet, this view property.
+04:30 And it points to that top level view.
+04:32 So that's a good place to start if you want to start adding views in code to your view hierarchy.
+04:38 And of course when you drag them out in xcode that's what you're doing.
+04:40 You're dropping them in.
+04:42 Unless you're dropping them in on top of another view you're dropping into that background, the self.view.
+04:46 Okay self.view.
+04:47 We use that phrase self.view but it's self.view.
+04:50 Self.view is that top level UI view in UI view controller.
+04:55 It's just a plain UI view.
+04:57 It's not a subclass version.
+04:58 You never subclass that view.
+04:59 It's just kind of a big container view.
+05:01 And that's another thing to know about view is that you don't always subclass them to draw or do touch events.
+05:05 Sometimes they're just boundaries.
+05:07 Right? Just a view you want to find a coordinate space and you want to put some other views inside of it.
+05:11 Perfectly fine, we do that.
+05:15 So initializing the UI view.
+05:17 A little more common to want to override the designated initializer of a UI view in a subclass.
+05:24 Remember in UI view controller we kind of said, we almost never do that because UI view controllers are almost always coming out of story boards.
+05:31 So the designated initializer never gets called in anyway.
+05:34 So we just do awake from NIB.
+05:36 Okay? And we never do that with NIB name bundle thing.
+05:40 That's not true in UI view.
+05:42 In UI view you do more often need to do something in your initializer and just want to, you know, have your initializer around and code in there.
+05:54 So but when you do it, you want to also do awake from NIB.
+05:58 Okay? That's because UI views are equally created -- well not equally but at least they're commonly created both by dragging them into a story board.
+06:08 So that would be the awake from NIB initialization and by sending [inaudible]
+to them.
+06:13 In other words in your code creating a view.
+06:15 So for example, in your homework you're going to have to do set cards and playing cards for real, not as buttons but actually drawing them and you will almost certainly be allocating those views because there can be -- there's not a fixed number of them so you can't really drag them out in xcode because they have to come and go.
+06:33 So you'll be doing that.
+06:34 So we do the same kind of thing we did with UI view controller.
+06:37 Right? Where we have some kind of setup method.
+06:39 Setup being whatever you want.
+06:41 And then you call it from wake from NIB and then you also call it from UI views designated initializer which is called in knit with frame.
+06:49 And that frame specifies where this view is in its super views coordinate system.
+06:54 It's the positioning of this view.
+06:56 Okay? So that's what the code would look like.
+07:00 Look like that.
+07:01 Put your initialization codes up.
+07:02 And we'll do that in the demo just do you see that.
+07:05 Now before I can talk more about UI view and drawing there and getting events we got to define a few types here.
+07:11 One is CG float.
+07:13 It's a floating point number.
+07:14 All floating point numbers that have to do with drawing on the screen or getting touch events or whatever are CG floats.
+07:21 This might be a double.
+07:23 It might be just a regular floating point number.
+07:25 It might be 32 bits, 64 bits.
+07:27 You don't know and you don't care but you always have to use GC float.
+07:31 Not only using GC float to specify positions on screen but you know, I think if you're going to be multiplying or adding numbers to things that are on screen to recalculate new things, all -- you want to do all that in the GC float domain.
+07:44 So you're going to have a lot of properties in local variables that are GC floats.
+07:48 When you're doing screen stuff.
+07:50 Okay? Then there's a c-struct called GC point.
+07:53 That has just got two elements in it.
+07:55 X and Y. That's an X and Y position.
+07:57 Okay? In the drawing world.
+07:59 And there's GC size which is just a struct with width and height which are both GC floats also.
+08:05 And that's just specifying a width and height.
+08:07 And then there's GC rect which is c-struct with those other two GC structs in them.
+08:13 GC point and GC size.
+08:14 That specifies an origin and a width and height for a rectangle.
+08:18 Okay? So you've got to know these four.
+08:20 I'm going to refer these left, right and center.
+08:22 Whenever we're drawing on screen this is what we're talking about.
+08:25 Okay? The origin of a views coordinate system for drawing or for handling events is upper left.
+08:33 Now lower left.
+08:33 Not like Cartesian coordinates.
+08:35 Okay? This is -- you -- drawing from the upper left.
+08:38 So positive Y values are down the screen.
+08:41 Okay? So you can see I put that point up there 400,35.
+08:45 That's X and Y. X is 400 way over to the right and 35 is Y and positive so it's down from that origin on the upper left.
+08:56 Okay? The units in all this drawing are points, not pixels.
+09:01 Okay? Probably you already understand why this is because some devices have lots of pixels.
+09:07 Right? I mean it's very high density pixeled like these retina displays.
+09:12 Other ones like some of the iPads, older iPhones, they don't have as many -- they're not as dense of pixels.
+09:18 Well if -- if we didn't use points, if we used pixels then things we drew would be really small if the pixels were small and really big if the pixels were big.
+09:25 So we abstract that away by using points.
+09:28 Okay? How many pixels per point are on the display that your view is in.
+09:33 You can find out by using this UI view property content scale factor.
+09:38 So it returned two for example on a retina display because there are two pixels per point on a retina display.
+09:43 One on a non-retina iPad for example.
+09:46 You know probably not going to need to use that property in this class, this quarter.
+09:52 Previous quarter we played around with it but not this quarter.
+09:55 But more importantly there are these properties that talk about the position and extent of your drawing system.
+10:03 Okay?
+10:04 It's really important to understand the difference between these properties.
+10:07 First you have this GC rect property bounds.
+10:09 That is the origin and width and height of the drawing area in your own coordinate system.
+10:16 Your own coordinate system.
+10:18 A system you are drawing in and handling touch events in.
+10:21 Okay? GC rect frame at the bottom there, that is a rectangle that completely contains you in your super views coordinate system.
+10:31 So you can see how that positions you.
+10:33 Right? Because that's in your super views coordinate system.
+10:35 That's where you are.
+10:37 Okay? Center is just the center of where you are in your super views coordinate system.
+10:42 There's no property to get your center in your own coordinate system.
+10:45 You just take your balanced out width divide it by two and height divide it by two and -- boom you're in the middle.
+10:50 Okay? Now you might think frame and bounds are going to be exactly the same except for that the frame is going to be in the super views coordinate system so the origins might be different.
+11:00 But that's not true.
+11:01 Okay? And the reason for that is that views can be rotated.
+11:06 Okay? And if a view is rotated you can see that the rectangles in containment might be much bigger.
+11:13 Right? Because it's a diamond shape that it has to contain.
+11:16 Okay? So there's details on here in this slide.
+11:19 You can look at them at your leisure but bottom line is understand that frame is a rectangle containing you and your super views coordinate systems bounds is the rectangle you use to draw when you're drawing in your own code in your view.
+11:32 It's your coordinate system.
+11:33 Yeah?
+11:34 >> When would the origins of bounds not be zero zero?
+11:38 >> When did the origins of bounds not be zero zero?
+11:40 That's an excellent question.
+11:41 Origin of the bounds since it's your own coordinate system is up to your own interpretation.
+11:46 So for example scroll view uses the origin to say where am I looking in the thing I'm scrolling on?
+11:53 That's just the way it defines origin.
+11:55 You can define what you want origin to mean.
+11:58 Okay? Because you're going to be asked to draw and you know your own coordinate systems.
+12:02 You're going to draw whatever you're asked to draw.
+12:04 So it's kind of up to you.
+12:06 99% of the time your origin is zero zero.
+12:09 Because it doesn't need anything for you.
+12:10 It's just the width and height that matter.
+12:12 But that's a very good question.
+12:14 Okay? So again, you can look at the slide is a bit more detail but frame and bounds is for making sure you understand that.
+12:21 So most often you create views by dragging them out of the pallet in xcode and that's when you're like dragging out labels, and buttons, and scroll views, and text views.
+12:32 Those are all views.
+12:33 So you just create them by dragging out and you could even drag out your own custom views.
+12:37 But the way you do that is you drag out a generic view, and then go to the identity inspector and change its class.
+12:43 Exactly like how we drag out a view controller.
+12:47 We have to go change its class to be one of our custom classes.
+12:49 Right? Because xcode obviously doesn't know our custom classes.
+12:53 At least doesn't know in the kind of runtime way that's happening in the story board so we have to set the things -- it works exactly the same as setting view controllers.
+13:02 Creating a view in code, in other words not dragging it in to a story board.
+13:07 Just you [inaudible] with frame or [inaudible].
+13:09 It you do [inaudible], that's the same as [inaudible]
+13:12 with frame GC rect zero, which is a rectangle with origin zero, width and height of zero.
+13:19 Okay? So you can do either one.
+13:21 If you do [inaudible] presumably you better set the frame to something so that it knows where to be when it's put into its super view.
+13:31 So here's an example of creating a UI label in code.
+13:34 You see I said UI label in knit with frame.
+13:36 I gave it a -- a rectangle.
+13:38 That's in the super view system.
+13:40 And then I add sub view that label to self.view which is that top level view in my view controller.
+13:47 And so it ended up at 20/20, 20 X and 20 Y, and its 50 wide and 30 high in my NVC view.
+13:56 Right? Now you probably wouldn't ever create a label like this because you drag them out.
+14:00 But you might create your own custom view like this.
+14:03 Right? Okay, so when do I want to create my own custom views?
+14:09 Obviously, when I want to draw something custom.
+14:11 Not something that a button or a label can draw for me.
+14:13 Or when I want to handle special touch events.
+14:16 Swipes, or pinches, or something like that.
+14:18 So the drawing side of this which we'll talka bout first is really easy.
+14:22 There's one method in UI view called draw rect and all you have to do is implement that method to draw what you want.
+14:31 Okay? One method, that's it.
+14:33 Implement this method to draw what you want.
+14:35 Now it has that argument there, that's a performance optimization.
+14:39 That's basically a rectangle that says well, please draw yourself but really I only need the stuff that's in the rectangle in your coordinate system.
+14:47 But if you want to ignore this rectangle and draw all over yourself, that's fine by me.
+14:51 Okay? So it's purely performance thing.
+14:53 Some views it'll make sense to look at that rectangle and be really efficient.
+14:56 Like we had an assignment a couple years ago in this class where you're drawing a graph.
+15:00 Well if you're drawing a graph and you're having to calculate every point it's kind of nice to only have to calculate the points in some part of the graph instead of drawing the whole thing every time.
+15:08 But if you're drawing a playing card, it's so light weight to draw it so you can just draw all the parts of it.
+15:13 You don't have to use the rectangle.
+15:15 >> If you draw outside of the rectangle does that stuff show up?
+15:18 >> The question is if you draw outside the rectangle does that show up?
+15:21 Remember that everything you draw shows up unless you have one of these clipping things I talked about on, where your super view is clipping you or you have a clip rect as part of what you draw.
+15:31 So the answer is that rectangle has nothing to do with clipping.
+15:35 Okay? No matter what that rectangle is, clipping or not is unaffected.
+15:41 They have purely performance -- giving you a hint of what needs to be redrawn.
+15:44 That's all it is.
+15:45 So really important, never call draw rect.
+15:49 If you called draw rect in a homework assignment in this class you are going to get dinged.
+15:53 Because I'm putting it in red -- never red.
+15:56 And I'm telling you don't ever call draw rect.
+15:58 Draw rect is for the system to call.
+16:00 Okay? If you want your view redrawn you call the method set needs display.
+16:06 That tells the system this view needs to be redrawn, and then the system will call draw rect at an appropriate time.
+16:13 Okay? The system knows when it's an appropriate time to call draw rect, update off screen buffers, whatever the heck it has to do.
+16:21 It's in control of that.
+16:22 Don't ever call draw rect.
+16:23 It just will not work to call draw rect.
+16:26 Okay? Set needs display.
+16:28 Then you can do set needs display in rect, giving the little optimization rect.
+16:32 Okay? But set needs display is how you do that.
+16:37 Okay? All right so, how do I implement this draw rect thing?
+16:41 Okay, I got this draw rect method.
+16:42 I want to draw something.
+16:43 Well the answer is you use this library the course library's called Core Graphics.
+16:48 Core Graphics.
+16:50 It has a ton of C functions that all start with GC, Core Graphics.
+16:55 They almost all take in context as a the first argument.
+16:57 We'll talk about that.
+16:58 Or you can use this nice class called the UI [inaudible] path.
+17:02 UI [inaudible] path let's you build all these complicated shapes, into a big path, and then you can stroke it or fill it on screen.
+17:10 Okay, so let's look into these.
+17:11 To understand these we need to understand a little bit about how Core Graphics thinks and it thinks in the following four step process.
+17:19 You got to have a concept to draw in.
+17:21 You got to create paths; triangle, squares, whatever, rounded rect, whatever it might be.
+17:27 Then you set the colors and the fonts you want to use, and line widths and all that stuff.
+17:32 And then you stroke or fill the paths that you created.
+17:36 This is the fundamental way Core Graphics goes.
+17:39 Okay? So let's talk about all those things.
+17:42 UI [inaudible] path by the way encapsulates all -- doing all of that.
+17:46 It takes care of the context for you.
+17:48 So you don't even have to think about that.
+17:49 You create paths by sending messages to the UA -- to a UI [inaudible]
+path instance.
+17:54 It let's you set colors, and line widths, and all that and then it has methods to stroke and fill.
+17:59 So it encapsulates all that.
+18:00 So let's talk about the context.
+18:02 Mostly you don't have to worry about context because you're going to use UI [inaudible] path.
+18:06 I'll show you a way if you're using the GC functions to get the context to draw on screen.
+18:11 But a context means where am I drawing in terms of -- am I drawing on screen right now?
+18:16 Am I drawing off screen, in some bitmap?
+18:18 Am I creating a PDF file out of what I'm drawing?
+18:21 Am I drawing to a printer?
+18:22 iOS has great printing support so you could be drawing to print a page on an Air Print printer or something like that.
+18:29 So that's the context part of it.
+18:31 For normal drawing UI kit sets this concept up for you before it calls draw rect.
+18:37 And then once you're in draw rect context is ready to go.
+18:41 UI [inaudible] path knows what it is, and if you want to call the GC functions you call this method UI graphics get current context.
+18:48 If you call this inside your draw rect you'll get a little cookie that you can hand off as the first argument to all these GC, you know, Core Graphic functions.
+18:58 Okay? And you're not going to need those GC functions very much.
+19:01 Only when UI [inaudible]
+path won't do what you want, 19:04 which is pretty rare.
+19:05 Okay? So this is a magic thing.
+19:08 That context ref is it's just a void star.
+19:10 You don't know what it is.
+19:11 It's opaque.
+19:13 And this thing is new every time your draw rect is called, to never keep that thing around.
+19:20 It's only good from the start of your draw rect to the end.
+19:22 Don't keep it in a property or anything that's going to live.
+19:25 Okay? Call the UI graphics to get current contents each time you start a new product.
+19:31 Okay, so how do we define a pass.
+19:32 So let's say we wanted to do a triangle with UI [inaudible] path.
+19:36 We [inaudible] UI [inaudible] path like this.
+19:39 We move to where our starting point is.
+19:41 So I'm going to move to the top there.
+19:44 75 across and 10 down.
+19:46 Then I'm going to add a line to that point going down to over to 160 down to 150.
+19:52 I'll add another line to come back to 10, 150.
+19:57 And then I'm going to close this path, by calling close path -- that goes back to where we -- draws a line where we started.
+20:04 So I have a nice triangle there.
+20:07 Now I'm kind of misleading you because as I'm making all those calls in UI [inaudible] path, nothing is actually happening.
+20:13 Okay? The screen is blank.
+20:15 Okay? Because all I'm doing here is building that path up, that UI [inaudible] path.
+20:19 I haven't actually draw it yet.
+20:21 When I want to actually draw it I have to set my fill color and stroke color and you can do that by calling, sending set fill and set stroke to a UI color.
+20:31 Get a UI color like you did for attributed string, whatever.
+20:35 Same thing.
+20:35 The call set fill or set stroke.
+20:37 You can even just say set and it'll set the fill and the stroke to whatever color you're set to do.
+20:41 And once you have your color for fill and stroke set you send a message to the path saying fill and or message to the path saying stroke.
+20:50 And now it will actually draw.
+20:52 So those last two calls there, fill and stroke.
+20:54 Those are the things that cause drawing to happen.
+20:56 Okay? Everything else is just like setup.
+20:59 Make sense?
+21:01 Okay. Now this might all seem like whoa, triangle great and I can draw a triangle.
+21:06 Sounds easy.
+21:07 But there's actually a lot the UI [inaudible] path can do that's really much more sophisticated than that.
+21:12 You can set your line widths and things like that to make your drawing, you know, into patterns and all kinds of that to make them more interesting.
+21:21 And also UI [inaudible] path has a lot of cool functions like [inaudible] path with rounded rect corner radius.
+21:27 Okay? And that will give you a path, which is a rounded rectangle when it's inside of a certain bounds.
+21:34 Okay? And it has a bunch of other ones similar to that.
+21:37 So that you can build more complicated things than line to line to line to.
+21:41 Okay? I just show you that because it's simple.
+21:43 Right? So that's how you would for example create an oval.
+21:47 You can also use UI [inaudible]
+path to flip your drawing.
+21:50 This is super important.
+21:51 You will need this for your homework I think.
+21:53 I supposed there's a way to do the homework without this but I can't think of a way.
+21:58 Well I can but it would be extremely tedious.
+22:01 [Laughter] Rounded rect for example could be used to clip your drawing.
+22:05 So if you wanted to draw some kind of pattern but you wanted it to be inside a rounded rect you just get a rounded rect, just like earlier in the slide there and say add clip.
+22:14 And at that point -- from that point on all your drawing will be clipped to be inside that [inaudible] path.
+22:19 Okay? And there's ways to add more clipping on, to turn off your clipping, you know, that kind of thing.
+22:26 So clipping important piece of UI [inaudible] path.
+22:29 Okay let's talk about drawing with transparency UI view.
+22:34 Okay, UI views by default are opaque.
+22:37 They have a background color, by default it's white.
+22:40 So if you put a view on screen and just run it'll come out as a white rectangle.
+22:45 Okay? So that's not always what you want.
+22:48 So for example in a playing card I want it to have rounded rects and I want those corners to show through.
+22:54 Maybe there's a card behind or something on the playing table that the card is on or something.
+22:59 So I don't want it to be opaque.
+23:01 So you're going to see in our demo we're going to have to turn this opaqueness off.
+23:06 The way you turn the opaqueness off is you have to set this property opaque in UI view to no.
+23:12 In other words you have to tell the system this view is not opaque.
+23:15 Even if you set the background color to nil.
+23:19 Okay? Which means I don't want a background color.
+23:21 It still won't be transparent because of this.
+23:25 This opaque isn't a performance optimization but it's a hard optimization meaning it just won't work if you don't set it to the right thing.
+23:32 So if you want your view to be transparent you have to set opaque to no.
+23:35 You're also going to want to set your background color to nil so that it's not filling with a background color.
+23:40 It is also possible to make your entire view transparent with alpha.
+23:46 Okay? So UI view has a property called alpha.
+23:49 If you set it to 50% then everything in your view will be 50% see through.
+23:54 Right? 50% transparent.
+23:55 20% or whatever percent you want.
+23:57 That's the entire view.
+23:58 No matter what's going on inside.
+24:00 And of course you have transparent colors that you could draw with, fill with, stroke with, whatever.
+24:06 To draw transparently that way as well.
+24:08 So there's a lot of ways to draw transparently in your view.
+24:11 What happens if you've draw transparently and views overlap?
+24:15 Well they show through to each other.
+24:18 Okay? And I told you that the order in which you add the sub views matters.
+24:22 Okay? Every view has a property, an NS array called sub views.
+24:27 It's the list of views and the order matters.
+24:30 The lower one in the array, okay, the ones that -- like zero are in the back and the ones down at the end are in the front.
+24:38 All right?
+24:38 So the sub view array is from back to front.
+24:40 Okay? And things can overlap and [inaudible]
+24:42 and they will show through.
+24:44 If you have an opaque on in the middle, it would all of a sudden block all the ones in the back.
+24:48 See what I mean?
+24:50 So it's as simple as that.
+24:51 Now having transparent views is not cheap.
+24:55 We talk about performance optimization, one of the biggest mistakes I think computer science students make is premature optimization.
+25:00 You're in there optimizing stuff that just doesn't matter.
+25:03 This matters.
+25:04 If you have a lot of transparency it's going to be a performance hit because you're talking about having to composite those view on top of each other with alpha.
+25:12 Way more expensive than just blasting the bits in there.
+25:15 Okay? Anyone taking graphics knows that I'm talking about.
+25:17 So this is something you're going to be a little careful with.
+25:20 You're going to set that opaque to no.
+25:21 Understand there's a performance cost there.
+25:24 [Inaudible].
+25:24 You can also hide a view entirely.
+25:29 Okay? So it's just like think of it as alpha of zero, like you can't see anything.
+25:34 But it also won't get any gestures.
+25:36 It's almost like removing from the view hierarchy but you're leaving it so it has its space in the sub views list.
+25:43 It gets to keep that but otherwise it doesn't appear.
+25:45 It doesn't draw, it doesn't get events.
+25:48 It's like it's not even there.
+25:49 Why do you want that?
+25:50 Well because sometimes you just want to temporarily remove a view from the hierarchy and put it right back in.
+25:56 So you said -- or put it back in some short time later.
+25:58 So you say hidden equals yes.
+26:00 It's gone.
+26:01 You hit hidden equals no, oh it reappears.
+26:03 Okay? So that's better than setting the transparency.
+26:07 So I think mostly UI kit probably optimizes alpha equals zero to be the same as [inaudible] is my guess.
+26:14 Okay. Probably won't have to do that in homework is my guess.
+26:19 But you might.
+26:20 Depends on what kind of sophisticated [inaudible] you build.
+26:22 I'm not going to go through this slide but you can imagine that if you're setting up fill colors and clipping and all that stuff in a sub routine, when you [laughter] come back from the sub routine all those things might still be set.
+26:33 And that would be bad.
+26:34 Okay? So you want to be able to push and pop your state.
+26:38 Basically save the concurrent graphics context and then restore it.
+26:42 And that what this functions do, GC context save GC state, GC context restore GC set [inaudible] state.
+26:48 We'll save everything.
+26:48 All the fill colors and clipping regions.
+26:51 Go do a bunch of stuff.
+26:52 You know, clip and fill and everything and then you restore and you're back the way you were.
+26:56 So that if you have your draw rect and it calls this draw green circle thing it won't come back to your draw rect and now everything is drawn in green.
+27:03 Okay? So that's a push and pop [inaudible].
+27:08 All right, drawing text.
+27:09 Okay, it's all great drawing triangles and filling them with colors.
+27:12 What if you want to draw text inside your view?
+27:15 Well of course we use UI label to draw the vast majority of text on the screen in UI kit.
+27:20 But you can use NS [inaudible] string to draw any text you want.
+27:24 And it could not be simpler.
+27:25 You create the attributes string with all the attributes you want.
+27:28 No restrictions, exactly like you learned to do in this last homework assignment and then you just send a message to that attributed string, draw at point.
+27:36 This point.
+27:37 And that will be the upper left corner of a rectangle that includes all that attributed text.
+27:44 Okay? It's -- could not be any simpler [laughter].
+27:48 You can also find out how big that text is going to take.
+27:51 How much space that thing is going to take by sending size to the attributed string and it'll tell you how big it is.
+27:57 Now you might be a little disturbed by this and like whoa, attributed string is not really a UI kit thing.
+28:02 All the properties inside usually are but it itself is not.
+28:06 And that's true.
+28:07 UI kit actually adds to these methods draw point and size and there's a few other ones.
+28:12 It adds them even though it's in a completely different framework using a mechanism in objective C where you can add methods to classes without sub classing them.
+28:21 Okay? All the categories, talk about Wild West.
+28:24 That's why I don't show you until the [laughter] halfway through because it can be abused, this mechanism.
+28:29 But that's how this is working for those of you who are wondering.
+28:34 Drawing images is almost the same.
+28:36 But instead of an NS attributed string you get a UI image.
+28:39 So you know how to get one out of the image assest library with image name.
+28:42 There are other ways you can create the files.
+28:44 You can even draw into an off screen bit master UI created UI image.
+28:48 Once you have a UI image in your hand you just send it, draw at point, which will draw that image with its upper left hand corner at the point you specified.
+28:57 Or draw in rect which will scale the image to fit in the rectangle you specify.
+29:02 Okay? This is a scaling one.
+29:04 Or draw as pattern in rect which will like tile the image.
+29:08 You know, repeat the image to fill the rectangle that you specified.
+29:12 Okay? And you can get other representations, PNG representations of things you've drawn an all these things.
+29:19 So I just wanted to let you know that's in there.
+29:20 You don't need to know that for your homework but anyway.
+29:22 So the drawing text and images really easy is just attributed string and UI image draw at point, draw in rect.
+29:28 Okay? What about when your bounds change?
+29:32 Okay? You notice when you did the navigation controller or the tab bar, you know, you're bounds of your view got shrunk down to fit the thing at the bottom or fit the thing at the top.
+29:43 And also if you rotate your device obviously the bounds are going to change.
+29:46 What happens when your bounds change?
+29:47 Well by default the bits of your view, the -- that were last draw will get stretched.
+29:55 Okay? Which really is almost never what you want.
+29:58 Okay? I mean most content wants to bed drawn to get high resolution to look nice.
+30:05 So the default is that because it's way high performance then asking you to draw again.
+30:10 But there's a property in UI view.
+30:13 You really want to know called content mode.
+30:15 And it says what happens when your bounds change.
+30:18 And the one down at the bottom there UI view content mode redraw is doing what you imagine, which is it asks you to redraw your -- your whole view with draw rect whenever your bounds change.
+30:30 Okay? So in our demo we're going to set it to redraw because if our cards bounds ever change we want to redraw so we get a nice sharp face card image or the right side little pips on there and text and all that.
+30:43 So you might want to do that as well.
+30:45 Okay, UI view content mode scale to fill is the default.
+30:48 That's the bit stretcher.
+30:49 Okay, so that's the drawing side of things.
+30:54 Now let's talk about the input side.
+30:56 Okay, the recognizing gestures.
+30:58 It is possible to get the raw data about fingers touching the screen.
+31:03 How many you're touching, where the fingers are, when they move.
+31:06 But -- and it used to be [laughter] that you actually had to look at all that data to figure out what the heck the user was doing with swiping or pinching.
+31:12 It was a nightmare.
+31:14 I mean I can't believe people actually did it.
+31:16 It was quite esoteric code.
+31:18 But the last few iOS releases have had the right way to do it which is gesture recognizers.
+31:24 Okay? So the way we're going to understand what the user's doing is this system is going to recognize certain gestures for us and tell us when those gestures are happening.
+31:32 Okay? Obviously you want to do this.
+31:36 The class that is the base for all these recognizing gestures is called UI gesture recognizer.
+31:42 It's an abstract class.
+31:44 Okay, you never instantiate it.
+31:46 But it has a lot of concrete clips of classes like pinch gesture, tap gesture, all that.
+31:51 And those are the things that does the actual recognition of a gesture and communicating with you when it does.
+31:57 There's two parts to suing a gesture recognizer.
+32:00 You have to create a gesture recognizer and add it to a view.
+32:04 You can only add a recognizer to a view.
+32:06 Because views are the only ones that have a coordinate system to know where the touches were that cause the gesture to happen.
+32:13 And then number two is you've got to provide the handler, a method to call when the gesture happens.
+32:18 What is happening?
+32:19 If it's like a pinch it's, you know, that gesture handle is going to get called a lot as the pinch goes out and in.
+32:25 Or if it's a pan.
+32:26 Okay? But if it's a swipe or a tap you're just going to get called once.
+32:30 Make sense.
+32:31 So those are the two things that you need to do.
+32:33 Usually number one is done by controller, although it's sometimes views do it to themselves where they add a gesture recognizer to themselves.
+32:41 And number two is often provided by the view.
+32:44 In other words the handler, the thing to do when the gesture is happening or happened a lot of times the view implements that method.
+32:51 So even though the controller might add the gesture recognizer to the view what it adds is, it tells the system oh and when you recognize the gesture let the view handle it.
+33:01 But the controller can handle it itself.
+33:03 So we'll do both in the demo.
+33:04 We'll have the controller handle it.
+33:05 We'll have the view handle it.
+33:07 The whole deal.
+33:08 So let's take a look at the code.
+33:11 What the code would look like to add a gesture recognizer to a view.
+33:16 A gesture recognizer to a view in a controller.
+33:18 So this code that I'm trying right here is in a controller.
+33:21 It's the setter of an outlet for a view called panable view.
+33:25 Okay? That's the name of the outlet, panable view.
+33:29 So this would just control drag.
+33:31 Write it up and now as an outlet and now we're in the setter.
+33:34 And in the setter what we're going to do is when that view is set in our controller we're going to add a gesture recognizer to that view.
+33:41 So that that view starts recognizing the pan gesture.
+33:44 Pan is put your finger down and move around.
+33:47 That's called panning.
+33:48 So it's very simple.
+33:50 You can see that we create a concrete sub class of gesture recognizer called UI pan gesture recognizer.
+33:56 You see that there in the yellow bubble.
+33:58 And when we create it you can see it's designated initializer.
+34:02 All the concrete classes designate initializer take two arguments.
+34:06 One is the target.
+34:08 That's who's going to handle this gesture when it happens.
+34:11 And the second thing is the method to call in that object.
+34:15 So here pan is going to be sent to the view itself.
+34:18 The same view that we're going to add this gesture recognizer to.
+34:21 And then we just do the step of adding the gesture recognizer to the view.
+34:25 The method add gesture recognizer is only implemented by UI view.
+34:29 So a controller can't recognize a gesture.
+34:32 It was no coordinate system to do that in any way.
+34:34 So some view has to be handling this gesture and yes you can have self.view recognize gestures.
+34:40 Right? The whole view.
+34:41 That's perfectly fine.
+34:42 And yes, the target in action could be the controller.
+34:46 A method in the controller.
+34:47 It doesn't have to be a view.
+34:48 Okay? That can be any object.
+34:54 So how do we implement that target, that pan calling.
+34:58 So I'm panning, I'm pinching and I'm getting sent pan calling when I'm panning.
+35:04 What do I do inside that method?
+35:06 And the answer is that each concrete subclass of UI gesture recognizer will provide some methods to help you.
+35:13 Okay? So for example the pan gesture recognizer provides these three methods.
+35:17 Translation and view, that's how far the touch moved since it's -- since basically it was last reset.
+35:27 Okay? I starts off reset when the touch goes down.
+35:31 So as you move unless you reset it which you can do in your recognizer.
+35:34 We'll show you that.
+35:35 It's going to tell you the cumulative translation distance from where you started.
+35:41 Okay? So that's translation view.
+35:43 Philosophy in view is how fast it's moving.
+35:47 Is your finger moving quickly like it's almost like a swipe or something?
+35:50 Or is it moving really slow?
+35:52 Is the user trying to really do some detail work?
+35:55 So this is telling the velocity.
+35:56 And then set translation view allows you to reset the translation.
+36:01 Okay? Because I told you translation [inaudible] is since the last reset.
+36:05 Set translation will let you to reset it at some point.
+36:08 And then the next pan call in you get, the next finger movement the translation will be from the place you just reset it to, to the last time.
+36:16 Okay? So -- so those are given to you by pan gesture recognizer and you also inherit -- an gesture also inherits a very important property from UI gesture recognizer.
+36:30 The abstract super class called state.
+36:32 Now state can be a lot of different things.
+36:35 Here' some of the more interesting ones.
+36:37 UI gesture recognizer state began means this is a continuous motion kind of thing like a pan or a pinch and it just started.
+36:48 Finger just went down.
+36:49 Okay? Then UI gesture recognizer state changed means it's one of those continuous things and it changed.
+36:56 The fingers moved.
+36:57 Okay? Chance means it moved.
+36:59 And then there's UI gesture recognizer state ended.
+37:02 Finger went up.
+37:03 Okay? Exactly what you would think.
+37:05 But there's other states like UI gesture recognizer state -- what's it called -- recognized.
+37:12 Okay? That one you get for discrete gestures like taps or swipes.
+37:17 You don't get all this began, moved or began change ended.
+37:21 You just get recognized.
+37:23 I recognize the swipe.
+37:24 I recognize the tap.
+37:26 See? The different state there.
+37:28 So recognize you'll never get on the continuous ones.
+37:32 Well you might get it but you wouldn't pay much attention to it.
+37:34 But on the discrete ones that's what you look at, vice versa with the began change [inaudible].
+37:39 You can also get cancelled and failed.
+37:41 Things like that.
+37:42 These happen when things like you're in the middle of a gesture and a phone call comes in.
+37:46 Okay? Boom, that gesture just got blown out of the water.
+37:49 So really good code will pay attention to failed and canceled and make sure these things aren't in a wacky state if the thing gets aborted right in the middle.
+37:56 So I'm not going to show that in the demo because time is going to be of the essence here.
+38:01 But you can look at the documentation on how to handle [inaudible].
+38:03 All right.
+38:05 So what would pan look like given that we have those methods the concrete things provides?
+38:10 So I'm probably not going to do anything when the finger first goes down because nothing has really changed yet.
+38:16 But as soon as it starts changing or when the finger goes back up I'm then going to update something inside my view based on where this new position is.
+38:28 And I'm going to get this new position by asking the recognizer, the pan gesture recognizer what's the translation in the view self.
+38:35 Okay? The reason we specify the view when we say the translation is because we need a coordinate system.
+38:40 Okay? We got to know the coordinate system we're talking about is translation B. So self in this case because pan call in is in the view.
+38:49 Like I might set my origin or some property.
+38:52 This is just an example line of code if I had a graph of something like that.
+38:55 Maybe be moving the graph around.
+38:57 It's just constantly resetting the origin.
+38:59 And here since I'm moving the origin from where it exists at the time this is called by some little translation I want to reset that translation every time.
+39:09 So that I'm always getting little incremental translation movements and I'm moving my origin around incrementally.
+39:15 Otherwise I'd have to keep track of where did my origin start?
+39:18 And then every time this was called I'd have to find the difference and then move it [inaudible].
+39:22 This way I don't have to worry about it.
+39:23 I just keep resetting the thing back to zero and so I keep getting these tiny changes.
+39:28 I just keep applying them to my view.
+39:30 This very common pattern to do this for these continuous ones.
+39:33 Constantly resetting.
+39:35 We'll do that in our demo.
+39:36 We're going to do pinch but we'll do the same reset.
+39:39 Okay, so let's look at some of the other concrete recognizers.
+39:45 Pinch; okay, pinch doesn't have translation it has a scale.
+39:49 So when the pinch first starts the scale's one, 1.0.
+39:53 And as I go out 1.1, 1.2, 1.5, 2.0.
+39:58 1.5, 1.2, 1.0, .9, .8, .7, .6.
+40:02 Okay?
+40:03 Okay? That make sense?
+40:04 So, that's what's happening there.
+40:05 And then, the velocity is how fast, in scale factor change, per second, that's happening.
+40:11 So, are you pinching really fast in, pinching fast out, etcetera?
+40:15 So, that's giving you, again, some indication, what's the user -- if they're pinching out really quickly, repeatedly, maybe they're trying to really zoom out fast, you can zoom out faster than usual or something.
+40:25 Rotation Gesture Recognizer, also a two-finger thing, like a pinch, except for you turn your fingers.
+40:31 And it's going to tell you the rotation in radians.
+40:34 Everyone know what radians are, right?
+40:36 Zero to 2 pi around a circle, in radians.
+40:40 Look it up if you don't know it.
+40:41 And that's also telling you velocity in radians per second, how fast they're -- the person's rotating.
+40:47 Swipe Gesture is one of these discrete gestures.
+40:50 You just set up this Swipe Gesture, you alloc an init with the target in the action, and then you set these properties' direction or number of touches required.
+40:59 Number of touches means this is a swipe with two fingers or one finger.
+41:03 That's what number of touches means, two finger, one finger, three finger, five fingers, whatever you want, and the direction is left to right, right to left, top to bottom, or bottom to top.
+41:12 Okay? So, you create it, and then if a swipe happens that meets all that, you'll get the -- your handler called once with "recognized" as the state.
+41:23 That make sense?
+41:24 So, swipe is something you don't track; it just tells you, "Oh, I saw a swipe." And, yes, it's smart about -- if you have a Pan Gesture Recognizer and a Swipe Gesture Recognizer; if you swipe smoothly enough, it will see it as a swipe.
+41:37 But if you go slower, or you don't go, you know -- you're going in a diagonal or something like that, it will say, "Oh, no, that's a pan." Okay, so it knows how to kind of tell the difference between gestures.
+41:49 Okay? As much as possible.
+41:50 It's pretty cool.
+41:52 Tap Gesture, just like Swipe Gesture.
+41:53 It's discrete.
+41:54 You set it up, how many taps?
+41:56 Double tap, single tap, how many fingers, etcetera.
+41:58 And it will send you "recognized" when it sees it.
+42:01 >> Can you do Swipe Gesture Recognize [inaudible] four corners, or no?
+42:06 Is it only those four directions?
+42:09 >> The question is, can you do Swipe Gestures -- like, you mean, like swiping up into a corner, as opposed to....
+42:14 >> Right [inaudible].
+42:15 >> I don't think so.
+42:16 I think it's just left-right, up and down.
+42:17 >> [Inaudible].
+42:17 >> I could be wrong about that.
+42:18 I haven't looked in the documentation for a while, but I think it's only those four.
+42:21 All right, so let's do the demo.
+42:24 Okay? So, it's going to be -- I'm going to go fast through this; there's a lot to show you here, okay?
+42:28 But I'm only going to show you all the things we just talked about today.
+42:31 But I'm going to try and show all of it to you in a comprehensive demo.
+42:35 Let me talk about what's coming up so that we can just finish the demo and be done.
+42:40 Again, we're hoping on Friday to get this university developer program thing going, but it looks like that's still not working.
+42:47 Watch Piazza tomorrow for whether Friday is canceled.
+42:51 At this point, it's not looking good.
+42:53 That would be a Stanford-only thing, anyway.
+42:57 The homework, as I said, is due a week from Monday.
+42:59 So, more than seven days from now [laughter], a week from Monday.
+43:04 I really strongly recommend you get started on the part that is a custom view and gesture recognizer immediately.
+43:11 Do not wait until next Tuesday or Wednesday, because then you're going to find that this is a lot of work, for this assignment, to try and jam into one week.
+43:18 That's why I've given you, you know, whatever -- however many days it is.
+43:21 Do this part -- I would try and do this part before next Monday if you can, but certainly do this part as soon as possible.
+43:29 Then, the rest of the part, which is animation and autolayout, which I'll be talking about on Monday and maybe next Wednesday, you can leave that -- you do that after you do this part.
+43:38 They're not so intertwined that it's like, oh, you've got to do them all at the same time.
+43:41 It's something that you can do after.
+43:46 Okay? Okey dokey.
+43:48 So, we are going to create a new project in Xcode here.
+43:54 And, I'm going to call that -- I'm going fast through a lot of these starting up things, because you know how to do this already.
+43:59 So, I'm going to call this one SuperCard.
+44:01 One thing interesting here, I'm not going to specify a class prefix, just so you see what that looks like, because we've always specified that, like card game or something like that.
+44:08 So, I'm just going to not specify that, and we'll see.
+44:11 I'm going to create it in my home directory, developer, as I usually do.
+44:15 Here, you can go.
+44:16 and see right here where it says ViewController.h and ViewController.m, that's the name of my view controller classes, which is really -- those are bad names.
+44:24 And that's why we usually want to put something in that class prefix, like CardGameViewController.
+44:28 Okay? I'm going to move these down out of the way.
+44:32 Otherwise, here's my view, right, my storyboard view.
+44:37 And I could bring up the controller for it right here.
+44:42 You can see I've got a viewDidLoad, which I'll go ahead and leave.
+44:45 Memory warning, don't need that.
+44:48 Okay. And all I'm going to do in this view -- let's make this a little smaller -- is put a single view, custom view, which is going to be a playing card but a real playing card, drawn playing card.
+45:01 Okay? So, let's start by doing what we always love to do, but which is setting our background here to moss.
+45:10 I love moss; there it is.
+45:12 Okay, there's our moss.
+45:13 We like that.
+45:14 I'm doing that mostly so you can see what's going on better.
+45:17 And, then I'm going to grab this custom view out of here.
+45:20 So, let's go down here.
+45:21 UIView is pretty far down, past halfway; there it is.
+45:26 See right here, "view represents a rectangular region which draws and receive events," and you just drag it out and put it out here.
+45:32 I don't want it to be this big, so I'm going to make it smaller.
+45:34 It really doesn't matter exactly what size I make this, because I'm going to make my class, my drawing class, so that it'll draw properly in pretty much any size.
+45:44 Now, it's going to look pretty bad if it's not, you know, mostly tall than wide, because playing cards don't look very good if they're wide and short.
+45:51 Okay? My view will work; it won't -- people won't recognize it very much as a card, but it certainly would be fine.
+45:58 And in your assignment, the custom view you're going to create, you also want to make it that way so that it works in any size bounds.
+46:05 And in that card, since this is going to be a set card for you, set cards actually could make sense being sideways; you would want the three symbols, you know, going sideways instead of up and down.
+46:14 So, a good solution would make, really, any aspect ratio look nice for a set card.
+46:20 But playing cards, mostly only going to look good, kind of, set up.
+46:24 So, what we do here, then, is we go to this identity inspector, and here we want to set our class of this view to be some custom class, right?
+46:32 Right now, it's just a generic UIView; and so, let's go create that class.
+46:36 So, I'm just going to do File -- New File, just like we always do to create a class, Objective-C.
+46:40 This one's going to be a subclass of UIView, okay, instead of UIViewController or anything else.
+46:45 I'm going to call it PlayingCardView.
+46:48 Okay, this is going to be a generic playing card-- displaying view.
+46:52 Completely generic, not tied to the Machismo model, not tied to anything else; it's just, like, standalone.
+47:00 And remember that when we create views, things that go in the view camp, they want to be as generic as possible and reusable as possible, so that I could use this PlayingCardView in my poker game app and also in Machismo.
+47:11 Okay? That's why -- we really want to try and enforce that kind of generic nature of it.
+47:17 So, here's PlayingCardView's implementation.
+47:20 You can see that I've got intiWithFrame right here; that's its designated initializer.
+47:24 And you can see I've got the all-important drawRect commented out.
+47:28 If you don't comment -- if you comment this out, and you don't put anything in there, that's going to give you a performance hit, because it's going to think this view needs to be redrawn all the time, when in fact it doesn't.
+47:37 So, that's why it starts out commented out, but we are going to draw in here, so we will be uncommenting it out.
+47:43 I'm going to move this; we're going to do something in there, but I'm going to move it down, out of the way, because we're going to do that at the appropriate time.
+47:51 Okay, so any time we create a new class, really important to think about is public APIs, so let's do that; let's look at its public API.
+47:58 It's a view, right?
+48:00 What does it need to do?
+48:01 Well, this playing card needs to display -- PlayingCardView needs to display a playing card, so we better have some way of specifying which card we want.
+48:09 Now, some of you might say, "Oh, great.
+48:11 Let's use CardStar." Or, "PlayingCardStar would be great because PlayingCardStar has got everything we need." But, again, I don't want to tie this generic reusable view to that model.
+48:21 So instead, I'm going to have NSUInteger rank, and I'm going to have NSString suit, and I'm also going to have something that's not even in that other model, which is nonatomic BOOL faceUp.
+48:37 Okay? I'm going to have it so my card is either face up or face down.
+48:42 This is a playing card view; it's got to be able to display the card in either up or down.
+48:46 So, that's my API; that's all I really need.
+48:50 And so, we've just got to implement that API in our implementation.
+48:54 One thing I'm going to do right off the bat, is this.
+48:58 Okay? Now, I typed this really fast [whooshing sound]; that was it.
+49:02 All I'm doing here, is all the setters for all my public API, I am calling setNeedsDisplay.
+49:10 Okay? Because if someone changes the suit, or the -- and yes, I could say, "If underbar suit does not equal suit" and save myself a setNeedsDisplay, but -- okay, demo time here.
+49:19 So I'm doing setNeedsDisplay just to make sure, if anyone changes the rank, or the suit, or the faceUp-ness of my thing, I tell the system I need to be redrawn.
+49:28 Do you all understand this, why I'd do that?
+49:32 Okay, excellent.
+49:33 So, let's dive into drawRect here.
+49:35 I'm going to uncomment it out, okay, and start drawing here.
+49:39 Now, if I'm not -- I'm going to do all my stuff with UIBezierPath, so -- well, actually, no, I'll do a context here, just to show you the context.
+49:48 We'll do it a little later, but we're going to start off doing UIBezierPath, and let's start with the outside of my card, which I want to be a RoundedRect, right?
+49:55 I want my cards to be a RoundedRect.
+49:57 So, I'm just going to create a Bezier path here, UIBezierPath.
+50:00 I'm going to call it -- and let me make some more space, so we can see lots of code here.
+50:06 RoundedRect, I'll call it.
+50:08 And I do that with UIBezier -- actually there's a class method that does that, RoundedBezierPath -- BezierPath for RoundedRects, down here, this one.
+50:19 And I'm going to have that RoundedRect be as big as possible, so I specify self.bounds as the rectangle to draw this RoundedRect in.
+50:27 Okay? Self.bounds is my coordinate system.
+50:30 Its width and height is the amount of space I have onscreen to draw in.
+50:34 Okay, cornerRadius, I'm going to throw in some magic code here for that.
+50:42 This is an important thing; this cornerRadius is how many points is in the radius as it goes around the corner of the RoundedRect.
+50:51 And, really, that number depends on how big my card is.
+50:54 If I have a big card, I want a big radius; if I have a really small card, I want a really small radius.
+51:00 So, I've created this corner scale factor, which I've just standardized to some height, and I can play with these numbers to see what works for all sizes.
+51:10 And then, I'm going to pick a radius that, at this height, is 12; and that works pretty nicely, right?
+51:16 And then, I'm going to scale it.
+51:18 Okay? So I'm going to call this method right here, cornerRadius, corner radius.
+51:25 And you'll see I'm going to use that scale factor in other places, too, to try and scale it up.
+51:31 And this is part of what I'm talking about; you need to this thing to draw in any size bounds to make sense.
+51:36 So, you're going to have to have a little bit of stuff that is dependent on, you know, the size and height of this thing to pick the right size roundedRects and things like that.
+51:44 So, the first thing that I'm going to do with this roundedRect actually, is I'm going to clip to it, because I don't -- sorry [random sounds] clip.
+51:54 I'm going to -- I don't ever want to draw outside that roundedRect.
+51:58 Okay? That's the interior of my card, so I'm just going to clip to that.
+52:01 It also lets me do something like this.
+52:04 UIColor whiteColor, set my fill color; and then I can just -- sorry, I do that a lot.
+52:13 Then, I'm just going to use this C function, because I just want to show this to you.
+52:18 UIRectFill, and you specify a rectangle, self.bounds.
+52:24 Okay, this just fills this rectangle.
+52:27 So, it's kind of like shorthand for creating that path, instead of filling it in, and all that stuff.
+52:32 It just fills it, this nice little UIKit thing.
+52:35 And this is going to make a big rectangle, but this clip is going to keep the white of this on the inside of that roundedRect.
+52:41 So it's not going to draw the white in the corners up there.
+52:44 However, I'm -- got a problem here, in that my background color for this view is by default white, so it's doing this all on a big white rectangle that includes those corners.
+52:55 So, I need to stop my background from being white, and I also need to tell the system that my playing card is not opaque.
+53:03 Okay? So, I'm going to do that in initWithFrame down here, but I'm going to do it in the right way, which is to have a setup method.
+53:11 And in Setup, I'm going to set my background color to nil, which means that I don't -- don't draw a background for me, and I'm going to set opaque to no, I'm not opaque.
+53:23 I'm also going to do that contentMode equals UIViewContentModeRedraw.
+53:29 Remember I told you that if my bounds ever change, I want to get my drawRect called.
+53:34 Now, my bounds is not going to change in this demo, but I know that if it ever does, that's what I want.
+53:39 And then, really importantly, I want to make sure I do this in awakeFromNib -- okay, self setup -- because, in fact, in this demo, I am going to be creating this view in a storyboard.
+53:51 I'm not doing alloc init on it, so this is how I'm going to get set up.
+53:55 Okay? Question.
+53:56 >> What's the advantage of setting background color to nil, instead of UIColor clearColor?
+54:00 >> Yeah, so the question is, "What's the advantage here of saying nil versus UIColor clearColor?" And the answer is there's no advantage, except for that, really, what I intend here is, I don't have a background color.
+54:13 So you can argue -- it's just a style thing, but there's no difference in there.
+54:17 Okay? So, now we're nice and set up.
+54:20 Oh, one thing I'm going to show you real quick here is pound sign pragma.
+54:23 I don't know if you guys know about that.
+54:24 How many people know what pound sign pragma is?
+54:27 Okay, almost nobody; this is awesome, then.
+54:29 Okay, so if you do a mark, a pragma mark, you can put a little comment -- comment, like initialization, like this.
+54:36 And now, up here -- see where it says "implementation PlayingCardView?" If I click on that, you see how it's put a line here?
+54:43 That's this dash is this line, and then initialization appears here, and it's grouped these for me.
+54:51 So, I can put, like up here as well, pound sign pragma, mark drawing.
+54:57 And maybe up here, I could put pound sign pragma, mark properties.
+55:03 And then my stuff really gets nicely grouped, okay?
+55:08 So, something to think about there.
+55:10 All right, so back to here.
+55:12 So, now I've got my background white in a roundedRect, which is great.
+55:16 But I actually also want to draw a little black line around the edge of my card.
+55:21 Okay? So how would I do that?
+55:22 Very, very, very simple; I'm just going to take to set my stroke color, which is UIColor blackColor setStroke.
+55:32 And then I'm going to ask this roundedRect thing, this Bezier path, to stroke.
+55:39 Okay? And this can have the default line width, which is probably one point, which is what I want, but I could make it thicker, or whatever.
+55:47 So let's go ahead and run, and see what -- how things look so far.
+55:51 Now, this is not going to work.
+55:52 And I'm doing this intentionally, because you'll probably do the same thing.
+55:55 Let's put this down here, to -- there we go.
+56:01 Surprised that doesn't do that.
+56:03 Okay. So, you can see that I don't have my rounded corners, and I don't have a black line.
+56:07 Why is this?
+56:08 Anybody know?
+56:12 >> Because you didn't hook up the class [inaudible].
+56:14 >> Exactly, because I didn't hook up the class.
+56:17 Okay, so if I go back to my storyboard here, this is still a plain UI view.
+56:21 You see? UI view.
+56:23 So I need to change this to be a playing card view.
+56:26 Now, when I run, the system knows that's a playing card view, and I get nice, rounded rects.
+56:32 Okay? See my corners cut off there?
+56:34 It's all good.
+56:35 And there is a little black line around there.
+56:36 It's hard to see, but it's there.
+56:38 Okay? All right, so we're off and running here.
+56:42 The next thing I'm going to do is draw the corners.
+56:45 You know, like where it says ace of clubs?
+56:47 And it's in the corner is an ace, and then underneath is a club; and then, down in the other corner is upside-down ace, and then clubs above it.
+56:53 You know what I'm talking about, in a playing card?
+56:55 So, we're going to draw that.
+56:56 I'm going to do that by saying -- again, let's make more space here -- I'm going to say self drawCorners, but do this in a different method, drawCorners.
+57:10 Okay. So, to do this, I'm going to use NSAttributedString.
+57:14 Okay? And what I'm going to do is, I'm going to make the string that I'm going to put in that upper corner be ace, carriage return, clubs.
+57:23 Okay? So, I'm just going to put that in the upper left corner.
+57:26 Bingo, that's all I need.
+57:28 But, I -- there's two things I need to set in my attributed string.
+57:31 One is the font, and I'm going to use Vervoord [assumed spelling] font; and number two is, I need the paragraph style to be centered.
+57:37 I want those two things, the ace and the club, to be centered on top of each other.
+57:41 I don't want them to be left aligned; that's going to look weird.
+57:43 Especially like a 10 of clubs would look really funny; I want them [inaudible].
+57:46 So, we didn't really talk about how to set that kind of paragraph-level alignment and stuff in a attribute string, so here's a chance to show you.
+57:56 So, to do that, we use this class called paragraph style.
+58:01 Okay, paragraph style specifies things like the alignment of a paragraph.
+58:04 So I'm going to create a mutable one that I can set things in, and I do that with NSMutableParagraphStyle, alloc init.
+58:11 And then, I'm going to set the paragraph style's alignment to be NSTextAlignmentCenter.
+58:18 So that should mean centered.
+58:19 And then I'm going to set this as an attribute on my attributed string.
+58:23 The other attribute I need is the font, so I'm going to say a corner font here, and -- whoops, font -- and I need, of course, to use a preferred font.
+58:33 And, you know, there's some arguments here.
+58:35 What would be the best -- U I -- the best style here?
+58:42 You know, maybe Headline; maybe even subHeadline.
+58:46 But I'm going to try Body, and we'll see how it looks.
+58:49 And if I don't like it, I can go change it to something else.
+58:52 But there's something really important to notice about this font.
+58:54 It's going to come in in a certain size; whatever size the user wants; old people like me want big ones, so I can see.
+59:02 And younger people like you probably want smaller ones.
+59:05 But we still need to scale it from there.
+59:07 So, we want to use that information, but then we want to scale it again, depending on how big our card is.
+59:11 Big cards want big font; little cards want little fonts.
+59:14 Okay. So, we're going to scale it just by creating a new font here.
+59:20 And we're going to do that.
+59:23 Make sure I do this the way that I predefined it here.
+59:28 So, I'm going to do this by saying corner font, fontWithSize.
+59:33 So, this is a method in font, an instance method in font.
+59:35 This is create me a new font that's just like the font I'm sending this to, but with a different size.
+59:40 And the size I think I'm going to use is corner font current size -- pointSize is the -- is the property in a font that tells you what its current point size is -- times that corner scale factor that I used earlier, up here, to do this cornerRadius, okay?
+59:59 So this is this corner scale factor; I'm using the same factor here.
+01:00:03 And, again, we'll see if that turns out to be right; if not, we can always change it.
+01:00:07 So now, let's go ahead and create this attributed string.
+01:00:10 I'm going to call this the corner text, and I'm -- it's just an NSAttributedString, alloc, initWithString.
+01:00:19 The string I'm going to create is NSString stringWithFormat; as I promised, % at sign; carriage return; % at sign.
+01:00:30 Okay. The first thing is the rank.
+01:00:32 So, I need self rankAsString, because my rank is a number, and I need it as a string.
+01:00:38 So I'm going to go up here and really -- whoop, look at that, rankAsString.
+01:00:42 So, same thing we did before; little array with that in there, self rank.
+01:00:46 I don't think we need bounds checking and stuff; this demo is light on bounds checking.
+01:00:50 You know, good code would protect yourself a little better.
+01:00:52 And then, here is the suit.
+01:00:55 Okay? Suit, suit.
+01:00:57 All right, so make sure I have my square brackets right here; self suit, no; and there we go.
+01:01:06 So, there's the string.
+01:01:08 And then, with the attributes we're going to set here is a dictionary.
+01:01:12 And I need to set the font.
+01:01:17 Font -- what's it called again?
+01:01:19 Font -- NS [inaudible]
+-- NSFontAttributeName.
+01:01:24 And that's the corner font that [inaudible] right there.
+01:01:27 And then, I need NSParagraphStyle attribute, which is a new one you haven't seen before; and we'll call that ParagraphStyle.
+01:01:35 Okay, close curly brace.
+01:01:37 Oops! Thank you.
+01:01:40 [Inaudible] that.
+01:01:42 Okay, semicolon.
+01:01:44 Are we good there?
+01:01:45 I think we're good.
+01:01:46 Okay. So, there's the corner text, which is just this carriage return thing, centered with the, hopefully, good-sized font.
+01:01:52 And now, I'm going to get the bounds of that.
+01:01:55 Okay? I'm going to get the bounds, then I'm going to put that in.
+01:01:57 And there's two things to the bounds.
+01:01:59 One is the point, the upper left-hand point of it.
+01:02:03 And I could just make that be -- actually, I don't even need a local variable; let's just go straight to bounds set origin.
+01:02:10 So, I could make that be zero-zero, actually, but then my little A return clubs might kind of bang into my roundedRect a little.
+01:02:19 So, I want to move it in a little bit, but again, it depends on how bit the roundedRect is to how much I want to move it in.
+01:02:24 So let's say CGPointMake, how about self corner offset, self corner offset.
+01:02:33 And corner offset is another little method I put up here that's also related to this cornerRadius.
+01:02:39 You see, I took the cornerRadius divided by 3.
+01:02:42 That looks like that's probably about right.
+01:02:45 Again, these are numbers you would want to play with when you are designing your UI; these numbers seem to work pretty good.
+01:02:50 And then, the size of this rectangle, I actually need to ask the attributed string to tell me corner text size.
+01:02:58 You know, how big is that A return clubs going to be?
+01:03:01 Because I don't know.
+01:03:02 Right? The attributed string can tell me, though.
+01:03:04 So, now I have a rectangle, and I'm going to drew the A return clubs in, and it's going to be centered horizontally on it.
+01:03:12 And all I need to do is tell it to draw -- oops.
+01:03:15 Corner text, drawInRect, text bounds.
+01:03:21 Okay? So now it's drawing in that rect; so, it's going to be doing the text alignment inside that rectangle.
+01:03:26 Okay? [Inaudible].
+01:03:27 So, let's hope this works.
+01:03:30 And it doesn't work.
+01:03:34 Now, why does this work -- not work?
+01:03:36 Well, because we haven't set any card.
+01:03:38 This playing card view is not displaying any particular card.
+01:03:41 So, we need to go back to our view controller and set that card to something.
+01:03:45 And a great place to do that, for testing right now, anyway, is in viewDidLoad.
+01:03:50 So, we're just going to pick a particular one.
+01:03:52 We also need to make an outlet to our card here, so we can talk to it.
+01:03:57 So we're going to start here, and then go over here; I'm going to control-drag to create an outlet.
+01:04:02 I'm going to call it PlayingCardView.
+01:04:06 Okay, so here's an outlet, so you can see what this is about.
+01:04:10 Okay. This is an outlet, IBOutlet; it's a PlayingCardView, so we need to import PlayingCardView.
+01:04:16 All right, so that works; that's good.
+01:04:20 We have our PlayingCardView, so I'm just going to set my playing card -- oops -- self.playingCardView.
+01:04:24 I'm going to set its suit to be hearts, and then I'm going to set its rank to be king.
+01:04:31 Okay, that's my favorite card, king of hearts.
+01:04:33 So, let's set this to hearts -- oops, special characters.
+01:04:37 There's a heart -- oop, missed it.
+01:04:43 Characters; there's a heart.
+01:04:45 Did I get it that time?
+01:04:47 Yeah. Okay, so there's a king of hearts, so we're going to do that.
+01:04:51 So, now we run.
+01:04:52 And we should hopefully get the king of hearts.
+01:04:56 There it is.
+01:04:57 And the sizes look pretty good there.
+01:04:58 Okay. Now, if I were debugging this -- in fact, let's just do it; let's make this card really small, see what happens.
+01:05:04 Let's try this.
+01:05:05 And that looked good, too.
+01:05:09 Okay, so I'm pretty happy with that.
+01:05:10 And then, I would also want to go to settings and set the fonts bigger and smaller, and make sure that still works.
+01:05:15 But, you know, I'm so far pretty darn happy with it.
+01:05:17 Now, of course, I checked this before I came today.
+01:05:19 I'm not [laughter]
+[inaudible] do these on the fly.
+01:05:22 So, there we go.
+01:05:24 Now, what do we need to do next?
+01:05:25 Well, now we need to put that king of hearts in the other corner, upside-down.
+01:05:30 Okay, now you might think, "Oh great, upside-down.
+01:05:33 Well, how are we going to do this?" Turns out to be very, very easy to rotate what you draw in Core Graphics.
+01:05:39 So, we're just going to do that; we're just going to do exactly what we just did but rotate it upside-down.
+01:05:44 So I'm going to go back here; I'm going to do this same thing, this drawingRect.
+01:05:49 Okay? But before I do it, inside here, I'm going to rotate it upside down.
+01:05:55 First, I'm going to move down to that corner, then I'm going to rotate upside-down.
+01:05:59 So, how do we move over to a corner?
+01:06:02 Well, let's use one of these CG functions that I told you you needed the context for.
+01:06:07 So, let's get a contextRef.
+01:06:10 Context equals UIGraphics getCurrentContext; I told you that's how you get the current context.
+01:06:16 Now that I have it, I can use CGTrans -- what's it called?
+01:06:21 Anybody remember?
+01:06:23 Translate something, context translate, or something -- there we go.
+01:06:27 Translate CTM; CTM is our transformation matrix.
+01:06:31 Okay, so we're just going to translate, which means move it.
+01:06:33 So I'm going to move it down to self.bounds.width and self.bounds.height.
+01:06:39 Okay, move down to the corner there.
+01:06:42 Oops! Did I type something wrong?
+01:06:44 Size, oops, size, size.
+01:06:48 Okay, self.bounds.size.width, self.bounds.size.heigth.
+01:06:52 So, I'm moving down to the bottom corner there; remember, our origin is in the upper left.
+01:06:56 And now, let's rotate -- there's a rotateCTM context -- and this is radians.
+01:07:01 So, I'm going to go halfway around; in other words, upside-down, which is m underbar pi; pi radians is halfway around a circle; I want it to be upside-down, directly upside-down, 180 degrees from where it was before.
+01:07:14 And, that's it.
+01:07:15 Okay? So, I've translated and rotated what I wanted to draw.
+01:07:20 And then, I'm just going to draw the exact same thing again.
+01:07:24 Bingo! Okay?
+01:07:25 So, some stuff is really, really easy to do in Core Graphics.
+01:07:28 Okay? Rotating, translating things; super-duper easy.
+01:07:31 All right?
+01:07:32 So, we're good there.
+01:07:33 Okay, the next thing we want to do is draw the face of the card.
+01:07:37 Okay? That king of hearts face.
+01:07:40 Now, the face of the card is one of two ways; either it's a face card, like the king, or it's just the pips, right?
+01:07:47 Little, like the four of hears is four little hearts in there.
+01:07:50 Okay, so we have to do both ways.
+01:07:51 So, let's do the face card one first.
+01:07:54 Okay, so I'm going to do that up here, back in drawRects.
+01:07:58 So, I'm in drawRects.
+01:08:00 And what I'm going to do, I'm just going to kind of have a design here, where if I can find an image that has the name of the card, I'll use it.
+01:08:08 Otherwise, I'll try and draw pips; otherwise, I'll draw nothing.
+01:08:12 Okay, so it's kind of a fairly safe way to go about it.
+01:08:15 If I can't find the face card image, then it'll just be -- I'll still have the corners, but I won't have any drawing.
+01:08:21 So, how am I going to do that?
+01:08:23 I'm just going to look up the image.
+01:08:25 I'm going to say UIImage -- let's make more space again.
+01:08:30 UIImage, face image, and I'm going to say UI -- I can use [inaudible] image, image named; then I'm going to make a string, [inaudible] the format.
+01:08:41 And it's going to have the rank and the suit.
+01:08:45 Okay, self rankAsString, self suit.
+01:08:50 Okay. So, there's the image names.
+01:08:53 So, I'm going to look that image up; so that would be, like, J spades, right?
+01:08:57 10 hearts is not going to find 10 hearts; there's not going to be [inaudible] thing, but there will be K clubs, right?
+01:09:01 It'll find those.
+01:09:03 So, if it finds the face image, then I'm going to display it in the middle; otherwise, I need to draw the pips, basically, because it's not a face card.
+01:09:14 And, so let's put a little -- draw pips here.
+01:09:19 Okay, move that later.
+01:09:21 So, the face image.
+01:09:22 How do I do this?
+01:09:23 Well, really I just need to tell UIImage draw this in the middle of my card.
+01:09:28 But I want to move it in from the edges a little bit, right?
+01:09:31 Because I don't want whatever the face image is, like a king, to smash my corners.
+01:09:37 Okay? My little king of hearts.
+01:09:38 So, I want to move it in a little bit; so I'm going to create a rectangle to scale my image into, imageRect, and it's going to basically be my bounds, except for I'm going to use this CGRect inset method here to inset it just a little bit.
+01:09:58 And I'm going to inset it by self.bounds.size.width times 1.0 minus a new property that I'm going to invent, called face card scale factor.
+01:10:09 So, the face card scale factor is going to be, like, .9, to be 90% of the size of my card.
+01:10:16 Okay, .9 would be 90% of the side of the card.
+01:10:19 And then, same thing with -- oops -- size.height.
+01:10:21 Oops! Heapsort new.
+01:10:25 Height times -- same thing, 1.0 minus self.facecard scale factor.
+01:10:31 All right, and we have to go make this property.
+01:10:35 So, let's go do that.
+01:10:36 Let's go up here, put it in our properties second.
+01:10:38 And I'll type it really fast, again.
+01:10:41 Sorry to have to use those, but some things are boring to type.
+01:10:44 All right, so I have this face card scale factor.
+01:10:47 It's a float.
+01:10:48 I'm going to override both the setter and the getter.
+01:10:52 Okay? In the getter, I'm going to make sure that it's at least a default value.
+01:10:56 Okay? 90% is going to be my default value, so it's at least going to be that default value.
+01:11:01 And in my setter, I'm going to call setNeedsDisplay.
+01:11:04 Because if someone sets that scaling, I got it to redraw my card if it's a face card.
+01:11:08 Okay? Everyone understand this?
+01:11:10 And since I do both the setter and the getter, look what I have to do; synthesize.
+01:11:15 Okay? Everyone remember that?
+01:11:17 If you put in both the setter and getter, you've got to synthesize yourself.
+01:11:20 Okay, good reminder of that.
+01:11:23 Okay, so now I have this imageRect, and it's inset by that -- whatever that percent is -- 10% if it's -- you know, 90 would be 1.0 minus that is 10% of my width, 10% of my height.
+01:11:33 And so, now I just say face image, drawInRect, imageRect.
+01:11:40 Okay? And it will scale it to fit in that rect.
+01:11:45 Now, I need these images, so let's go grab those.
+01:11:47 I happen to have them handy right here.
+01:11:49 Okay? So, here's a bunch of images that I have for face cards.
+01:11:53 Let's just go ahead and drag them into our assets library here, image assets.
+01:11:58 So, here's our image asset library.
+01:12:00 We don't have any yet; drag that in there.
+01:12:01 While I'm here, I'm also going to drag our famous Stanford one.
+01:12:06 And, actually, let's get the high-res one, too.
+01:12:10 Okay, we'll use that as our card back again.
+01:12:12 Okay, so we got all our images here.
+01:12:14 So, the images -- look at this -- I could -- let's put the high-res one in for a king of hearts, at least.
+01:12:19 So here's the king of hearts.
+01:12:20 I have a high-res for all of them, but just for time constraints, let's go ahead and put this guy right here.
+01:12:27 Okay, so we get that one at least.
+01:12:29 All right.
+01:12:30 I'd want to drag them all in for all of them.
+01:12:32 But anyway, so now I have these images.
+01:12:33 So now, when I run, it's going to go look for the image of these names, you see?
+01:12:39 And it's going to find the king of hearts there.
+01:12:41 Okay? So, that's the suicide king.
+01:12:43 Right? Looks pretty decent; size is pretty good.
+01:12:46 Okay. All right, so now we are going to do two quick things.
+01:12:51 We're -- I know we're right on the edge of time here.
+01:12:53 We're going to do the gesture recognizers really quick.
+01:12:55 So I'm going to do two things.
+01:12:57 One is, let's make this playing card view work facedown.
+01:13:02 And we're just going to do that by saying if we're face up, then we'll do this, all this stuff.
+01:13:09 Otherwise, we will just do our background image, UIImage, image named, favorite card back.
+01:13:19 I'm going to change it to that.
+01:13:20 And then draw inRect, self.bounds -- it's all -- and then for the back, I don't have the corners.
+01:13:27 And so, I can just go ahead and use the whole thing, so card back.
+01:13:32 Okay, so now we have the front -- the back there, rather.
+01:13:35 So now, since it's face up -- it starts out not face up.
+01:13:37 So, here it is, but I need to flip this over.
+01:13:40 So let's do a swipe gesture to flip that over.
+01:13:43 Okay, and the swipe gesture we're going to do using Xcode.
+01:13:47 Okay? So, swipe gestures go like this.
+01:13:49 You go down here, you get in the object palette, same place buttons are, and you'll see that there's these gestures here.
+01:13:55 Now, I'm going to take a swipe gesture and drag it onto the view that I want to recognize that swipe, which is my PlayingCardView, obviously.
+01:14:03 Then, I simply control-drag from this little icon that appears down here.
+01:14:07 You see it?
+01:14:08 Swipe gesture.
+01:14:09 You can also do it from here, this little document outline which we don't have time to talk about today.
+01:14:14 Okay, but you can do that, too.
+01:14:15 But I'm going to control-drag from here.
+01:14:18 Oops! Go auto in controller.
+01:14:21 And you just drag that.
+01:14:23 It's very much like target-action.
+01:14:25 Okay. I'll call this a swipe, just to make it clear.
+01:14:28 And their argument is the swipe gesture recognizer; I'm not sure why it doesn't default to that.
+01:14:33 And we have the swipe.
+01:14:34 And the swipe, all we need to do is say self.PlayingCardView.FaceUp equals not self.PlayingCardView.FaceUp.
+01:14:42 Oops! Just flip it over.
+01:14:45 Okay? Here it is.
+01:14:49 I'm going to swipe, okay.
+01:14:51 The default swipe direction, by the way, is to the right, so I'm swiping and you can see that it's flipping the card back and forth.
+01:14:57 By the way, you can inspect which direction the swipe is by clicking on it and going to the inspector.
+01:15:03 Then there's right-left, up-down, so that answers your questions; those are the only four there are.
+01:15:07 And how many fingers have to be involved; one finger, multiple fingers, etcetera.
+01:15:12 Okay? And lastly, I'm going to do a pinch gesture, and I'm going to do the implementation, the pinch gesture, entirely in the view, okay?
+01:15:22 So I'm going to add a new method to the view, which is pinch.
+01:15:27 And it's going to be UIPinch gesture recognizer.
+01:15:32 Okay? Now, this pinch is really simple; it's just going to say if the gesture's state is changed -- oops, not the [inaudible] -- changed, or if the gesture's state is ended.
+01:15:48 Okay? Then, I'm simply going to take this face card scale factor that I have and multiply it by the gesture scale.
+01:15:59 But I don't want that to accumulate, so I'm going to set the gesture's scale back to 1.0 all the time.
+01:16:05 So, the next time I get called, I'll get the incremental scale.
+01:16:08 Okay? So, that's all that's necessary there.
+01:16:11 I'm actually going to make this public, because I want to be able to add this gesture recognizer in my controller.
+01:16:17 So, let's just add this here, just so my gesture -- so my controller knows that my card view is capable of this.
+01:16:23 Then, I simply go and view didLoad, and say self.playingCardView, add gesture recognizer.
+01:16:31 And I'm just going to create a new UIPinchGestureRecognizer, alloc, init.
+01:16:41 You'll see that the -- this is the designated initializer, the target is going to be the view, and the action is going to be pinch.
+01:16:53 Okay. Well, that's it.
+01:16:54 So, this is how you add this in code.
+01:16:58 [Inaudible] everyone understand this?
+01:17:01 So, I'm adding it to this view, creating it.
+01:17:03 This is the target; the view is going to handle it; It's going to handle the pinch.
+01:17:07 We handled the swipe, but the view is going to handle the pinch.
+01:17:11 All right, so let's see, what does that do?
+01:17:13 That should allow us, when we have a card here, if I pinch, to change the size, because it's adjusting that face card scale factor.
+01:17:22 You see? Make sense?
+01:17:26 But, all we need to do to add the deck here is to go back to our controller and add -- well, first of all, let me drag the model in; I've got my model right here.
+01:17:38 There's my model; same model we used in Machismo.
+01:17:41 And I'm just going to go here and add that deck, strong nonatomic, deck star deck.
+01:17:51 Let's go ahead and import playing card deck [inaudible]
+01:17:57 import playing card.
+01:18:00 All right, so now we have that deck.
+01:18:02 Here is the lazy instantiation of the deck; you know about that.
+01:18:06 I'm also going to have this method I'm going to call draw random playing card.
+01:18:11 Okay, this method is just going to draw a card from that deck; it's going to see if it's a playing card; if it is, it's going to cast it so that we have a local variable.
+01:18:19 Then it's going to set that in the PlayingCardView's rank and suit to the card's rank and suit.
+01:18:26 Okay? And I'm going to do that every time we swipe and the -- it's face down.
+01:18:32 [ Typing ]
+01:18:38 Okay? So that's that.
+01:18:41 So, here it is.
+01:18:42 So now when we swipe over, we get different cards.
+01:18:45 Okay, we have no pips yet; I'm going to do that in a second.
+01:18:48 But we do have the face cards, the jack of diamonds; kind of low-res because I didn't have the other ones in there; but king of clubs, okay.
+01:18:55 Now let's do the pips real quick.
+01:18:56 The pips are super simple, especially if you have a little snippet here.
+01:19:01 So, remember we have this draw pips, okay?
+01:19:03 I'm just going to paste that with an implementation of that.
+01:19:07 You can go look at this offline, what pips does.
+01:19:10 Pretty straightforward; it just uses attributed strings, or maybe even just regular strings, to draw.
+01:19:15 So, let's see what that looks like.
+01:19:17 So, there's our card.
+01:19:19 And there we go; six of [mumbling], diamonds, four of clubs, seven spades.
+01:19:23 And the last thing I'm going to do; let's resize this view and make sure it still looks good small, even with all of the changes we made.
+01:19:30 So, we'll do -- make it, like, this big.
+01:19:32 And run. And -- well, it still looks okay; a little -- a little squishy with the pips, but I see a face card; that's not bad.
+01:19:44 Okay, that's it for today.
+01:19:45 Sorry to keep you so long.
+01:19:47 And I will see you all on Monday.
+01:19:52 >> For more, please visit us at stanford.edu.

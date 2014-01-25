@@ -1,0 +1,842 @@
+00:00 >> [music] Stanford University [ Silence ]
+00:10 >> Welcome to number 13 of Stanford CS1-93B, the fall of 2013-14, and today, I'm going to go over the requirements for your final project, and then I'm going to talk a little more, a few more slides about Core Data, and how it hooks up with UI TableView, because those two are a match made in heaven, and then I'm going to do this gigantic Core Data with TableViews demo.
+00:36 Alright, so you're final projects.
+00:38 There's kind of two phases to your final project; one is you have to submit a proposal for us, which we'll review.
+00:43 We're mostly just reviewing it for scope, to make sure you haven't picked too big a project or too small a project.
+00:49 Okay, we're not, you know, looking in detail of every single thing you're going to do.
+00:53 We're just trying to make sure you're headed in the right direction.
+00:56 Because over the course of the final project, you're going to of course talk to us, and ask us questions and interact with us to kind of get an idea of getting, you know, hitting a good target at the end.
+01:04 So, that is really, do immediate.
+01:06 We'd like you to get us your proposal.
+01:07 If you know what you're going to do, please submit a proposal as soon as possible.
+01:10 If you know what you're going to do, please submit a proposal as soon as possible.
+01:13 If you don't get on it right away, and submit it as soon as possible, really though by next Wednesday would be the latest we'd want to hear from you.
+01:21 And, I hate to say that, because I know a lot of you wait until the day before deadline to do anything, and I understand that impulse, but this is something where you want to get that proposal in sooner, in case we have issues, and we can get back to you, and you either write, maybe come up with a whole new proposal if what you're thinking about is just not going to work.
+01:38 Then the second phase is the final project itself, and that project, the code for the project, along with the keynote, set of keynote slides for a two minute presentation about your project are due on Friday, December 6, okay?
+01:52 So, that seems like that's far away, I know, that's over a month away, right.
+01:56 It's November 6 right now, but you got Thanksgiving in there, so it's really not that far away, and so your final project, like a final project in your class, where you get multiple weeks to do it, you do not want to wait to the last week to get started.
+02:10 So, get started immediately.
+02:11 You have everything you need now to start building an application.
+02:15 Yeah, no late days on the final project at all.
+02:18 Simply will not accept it late.
+02:19 Whatever you have on December 6 at midnight, submit it.
+02:22 I don't care what it is; submit it, because that's all.
+02:24 I'm not going to accept anything.
+02:26 I just can't, because I've got a lot of students who are taking this for a grade especially, and that's a lot of time I have to be fair to those people, and also, I have to get started grading immediately.
+02:35 The presentation that you're going to do, two minutes, it's really just going to be pitching your project to us, to your fellow classmates.
+02:44 If you can imagine, it's like you're trying to pitch a VC to invest in your company or to do the app, or you're just trying to get people to buy it, or whatever.
+02:53 It's that kind of presentation.
+02:54 I'll leave it up to you.
+02:55 You can certainly do a live demo if you want.
+02:58 You'll need iPhone 4S or later, or you'll need an iPad 2 or later, in order to hook up to this wonder projection system we have using Apple TV mirroring.
+03:09 But, you don't have to do a live demo.
+03:12 Live demos are perilous, as you can see, what I do each lecture, but they also kind of can be effective, and a really good way to show off your app, so it's kind of up to you.
+03:22 And, that presentation is required.
+03:24 I will have an alternate presentation, which is the last lecture of the quarter, which is the week before the final exam period.
+03:32 So, that's that.
+03:36 Yeah, the scope is basically three weeks of homework worth of work.
+03:40 You should know by now approximately what that is.
+03:43 Remember in the past when the people have to pass both the homework section and the final project separately.
+03:47 You can't bomb one, and get an A on the other, and pass this class.
+03:52 Your final project has to work on hardware.
+03:53 You have to show it working, either in a demo in your two minutes, or if you don't show a live demo in your two minutes, you have to show your TA.
+04:03 Only iOS-SD code counts, so if your app has a backend, some server somewhere, you get no credit for any of that really.
+04:10 You're only getting credit for iOS code, okay.
+04:14 So, simulate your backend if you have to, or if you have the backend from somewhere else, that's fine, but don't waste time doing non-iOS code in this three weeks, because you're not going to get any credit for that work.
+04:27 And, you'll be graded on your proper use of the SDK, and also proper object-oriented programming, and your aesthetics will matter.
+04:35 So, don't put a big junky-looking UI that just like, really looks terrible, and yeah, don't get sidetracked on non-iOS code.
+04:45 That's kind of a repeat of all that slide there, so.
+04:48 The presentation quality matters a tiny bit.
+04:52 It does matter.
+04:53 Giving your presentation, effective presentation is a very important skill to have.
+04:57 All of you at Stanford should be good at that by the time you get out of here, so here's just another chance to really practice doing a good presentation.
+05:05 Time it; see how long it's going to take.
+05:07 You know, run through it a couple times practicing.
+05:11 You proposal needs to have sections in it.
+05:14 Okay, the first section is kind of an overall description.
+05:17 What am I doing?
+05:18 This is best shown by example, so I have this example here, which is a Shakespeare Director App, so let's say you're a director at a theater company, and you're going to be direction some Shakespeare plays, and this is an app to help you do that.
+05:33 And so, it has a way to bring up a Shakespeare play from the folio database, and then you can lay out the blocking, which is like where the scene is set up, where the people are standing and all that stuff of each scene, lined up with the dialogue.
+05:51 And then, it's also got a dialogue learning mode for people who want to learn the dialogue, learn their lines.
+05:57 It will say the other parts, and then you can say your own part.
+06:01 So, you can see that this is kind of a description of what it does, as opposed to how you're going to do it.
+06:08 Section 2 is what parts of iOS are you going to use to implement it.
+06:12 Okay, it's going to have TableView with custom cells.
+06:14 It's going to use the camera.
+06:16 It's going; you know text fields with in popovers.
+06:19 It's going to use AV foundation.
+06:20 It's going to NS Timer.
+06:21 It's going to have Core Data, and where there are going to be my entities.
+06:24 It's going to print out the blocking things to printer, which is something we don't cover in class.
+06:32 And, you're required to have one feature, at least, that it was not covered in lecture.
+06:37 Okay, and so that task is on there; not only so you have to learn something from a documentation, instead of my kind of getting you started with it, but also so that you peruse all of iOS and find out what's in there.
+06:48 So, don't come to me and say, oh, can you tell me a feature to do for non-iOS not covered in lecture?
+06:54 It's like, that's part of the task for you to go figure out what's out there and pick something.
+06:57 Okay. So, that's what your proposal needs to have, these two sections.
+07:01 What it is you're opting to do, and then what iOS apage you're going to use that you know of right now to implement.
+07:07 Okay? And, here's some notes, again, you're going to review these slides offline to really get a good feel for what makes a good proposal, and you can ask on Piazza for clarifications, etc. Okay, so, the next topic I want to talk about is Core Data still, but its Core Data and TableView.
+07:28 How Core Data and TableView go together.
+07:30 Because Core Data is a bunch of, you know, objects, a big object graph, and TableViews are really good for traversing through object graphs, okay?
+07:40 So, how do we do this?
+07:41 There's a great class in iOS called NSFetched Results Controller.
+07:46 This class' only purpose in life is to link an NSFetchRequest, which hopefully you'll remember from two days' ago lecture with a UI TableView.
+07:54 That's what it does, it basically bonds those two things together, so that the Fetch; anything that Fetch would be fetching is always showing in the TableView, even if the database is changing underneath that FetchRequest.
+08:06 Okay, it's still going to be updating the TableView.
+08:08 So, the way this works, it's really two parts for the Fetched Results Controller.
+08:13 One is it answers all the questions in the UI-TableView data source protocol, like how many sections, how many rows and sections, and even some ones that you don't know about, some more advanced ones.
+08:22 It answers those questions as well.
+08:24 So, it's able to answer all those questions, using code kind of like that.
+08:28 Also, it can tell you at any given time, what thing in your database, what entity in your database is being shown in a given row, okay?
+08:39 There's a one to one mapping between a row in the table and some object in the database.
+08:44 Alright, of course we know when you do a FetchRequest, it can only return objects of a certain kind; an array of objects.
+08:51 And so, this will let you get it.
+08:52 And, it's a very important method to understand, which is object to the index path.
+08:56 Okay, you send that to the Fetched Results Controller, and it will return you a photo star, or a photograph photographer star or some NS Managed ObjectStar, which is the object that's at that row, and then you can pull out the attributes, and put them in to your UI-TableView cell in self row index path.
+09:13 Okay? It's really important to understand that method.
+09:15 How to you create one of these NS Fetched Results Controller.
+09:19 Okay, its Allocinit looks like this.
+09:22 It takes a FetchRequest, a context.
+09:25 That's obvious where we're going to be doing the fetching.
+09:27 Right? It will even do section headers, so you specify which attribute in the objects that your the section, the name of the section, and then it will divide the table into sections.
+09:38 And, it can also do caching, okay, so we'll talk about those last two things in a minute here.
+09:42 But, let's take a look at what kind of FetchRequest we might create to put into a Fetched Requests Controller, so here I'm creating a photo request, so I'm going to be fetching photos.
+09:52 I need a sort descriptor that says what order these photos are going to be in in the TableView, so I'll sort them by their table, let's say.
+09:59 And, then a predicate.
+10:01 I'm going to get all the predicates that were taken, all the photos rather that were taken by a photographer with a given name, photog name.
+10:08 Okay, so I just specify the predicate.
+10:10 So, you I just basically create a normal NS FetchRequest, and then I just do this fetch results controller alec, FetchRequest context, section key name and cache.
+10:21 It's as simple as that, okay?
+10:23 Now, oh, yeah, so, those last two items.
+10:26 The cache by way, one thing about the cache, if you specify nil, it won't cache.
+10:31 Caching means that it will cache the results of that fetch between launching of your app.
+10:36 In other words, it will permanently, you know, on disc, cache it.
+10:39 This is not caching it member.
+10:40 You know, it's always going to do it in memory caching.
+10:42 Core Data does that.
+10:44 So, this will make so between launches, it has this result cached, but if you set that to non-Nil, okay, you better keep your FetchRequest exactly the same.
+10:52 If you change anything about your FetchRequest, and come back and try to use your cache, it's going to fail.
+10:58 So, this is only really for TableViews that have the same Fetch Request all the time, exact same predicates or descriptors.
+11:04 Everything's the same.
+11:06 If you're going to use that section key thing, try and put sections in your table, the sort descriptors have to match up with the section keys.
+11:15 In other words, the rows in the table, the photos that you fetch, have to be in the exact same order that section headers would be, and this is a normal TableView thing, right?
+11:23 The section headers always have to be in the same order as the rows.
+11:25 Well, that's true here too.
+11:27 So, almost always, your first sort descriptor will be the section key header, to make sure everything is sorting in the same order.
+11:37 The Fetched Results Controller also has a delegate, and using that delegate, it can watch what's happening in Core Data, and when something changes that would affect your FetchRequest, it will change your table, which is incredibly cool.
+11:50 Okay, that means if you added a photo, and if it would have matched your FetchRequest, it will add a row to the table, and you don't have to do anything, because it's watching.
+11:58 It's using that NS Object Managed Context, objects did change radio station, it's listening to that, and it's changing it with methods like this, okay?
+12:08 So, there's really two things to get a Fetched Request Controller hooked up to your table.
+12:12 One is, you've got to use it to implement all those UI-TableView data source things, and two, is you've got to set its delegate, and then use all these methods to have it watch, but we've made that easy for you.
+12:21 I've created a class called Core Data TableView Controller, and I'm going to make it available to you.
+12:26 All it does it those two things, and you're welcome to look at the implementation of it.
+12:30 It's all pretty much just one liners that are just using the Fetched Results Controller to implement the data source, and to do the delegate business, okay?
+12:41 And, the only thing you need to know to use Core Data TableView Controller, it has a property called Fetch Results Controller and you just set that to a Fetch Results Controller, and it will just work.
+12:54 Nothing else required to do.
+12:55 You just set that, and Core Data TableView Controlled will then use it to answer all those data source questions, and also it will set the delegates of the Fetched Results Controller, and make it so it watches the database properly.
+13:06 Okay? So, that will be included in your homework.
+13:09 You will definitely want that for your homework.
+13:10 I will be using that in the demo today.
+13:12 Alright, so speaking of the demo.
+13:14 This is a huge demo.
+13:16 I may not get all the way through it.
+13:18 It covers some things that I haven't covered in lecture yet, and that's kind of intentionally.
+13:21 This is the only lecture I really do that, but I just wanted to kind of show you some things that I didn't really want to spend lecture time on.
+13:27 I might come back to these in future lecture, but anyway, there's a lot, lot there to cover, and you have these slides in front of you.
+13:33 Hopefully you can see what the list there is.
+13:35 I'm not going to back to the slide, so coming up; today's your last homework.
+13:41 We have an instrument, which is performance monitoring adjunct to X code on Friday's section, and then next week, we're going to talk a little bit about multitasking.
+13:49 I say more multitasking, because I'm going to do some of that in the demo today, and then we're going to do some more advancing Segway.
+13:56 So far the only Segwaying we've done is, UI-Navigation Controller pushed Segways basically, and then also, we talked a little bit about iPad replace Segways, where you replace the entire detail view, which is kind of a weird Segway.
+14:08 We're going to talk about some more kinds of Segways that we can do as well.
+14:12 And, maybe we'll get to Mapkit next week or maybe the week after.
+14:16 Okay? Alright, any questions before I dive into this monster demo?
+14:21 Okay, feel free to stop me.
+14:23 A lot of time when I'm demo, I'm typing away, I'm not seeing you raise your hand, so feel free to shout out.
+14:27 So, I'm going to create a new project here, and I'm going to do single view application, even though I'm going to use Core Data, and I told you that if you click on this one, you can see some generated Core Data code.
+14:39 I'm actually going to use the code that's generated here, but I put it off into a category of my application delegates, so that you don't really need to look at it.
+14:48 I'll include it in the demo, and you can see it.
+14:51 But, for your homework, you're going to do your Core Data stuff using a documented.
+14:55 UI-managed documented, and I'm not going to show that.
+14:58 Because I want you to kind of go through the process of trying to figure that out for yourself.
+15:01 So, I'm just going to create our normal view single view application like we usually do.
+15:04 I'm going to call is Photo Mania, and it's going to be universal app, although I'm only going to use the iPhone version.
+15:11 I'm only going to do the bare bones of this application.
+15:14 What this application is going to do, it's just going to query Flickr those URL, the URL for recent geo reference photo theme, the same thing we did for Shutterbug.
+15:23 But instead of just showing the photos, it's going to show you the list of photographers who took those photos.
+15:31 And then, you know, after this demo, you could easily make it so if you click on a photographer, it shows you the photos by that photographer.
+15:37 Click on the photo; use the image view controller to show you an image.
+15:40 So, that's kind of the application we're trying to build.
+15:42 We won't get all the way to building those other TableViews.
+15:45 We're just going to do this main TableView, but that's what this is going to do.
+15:49 And, the way it's going to do that; the way it's going to show those photographers is kind of a little bit different strategy than we saw with Shutterbug.
+15:56 I'm going, in the background, basically of my application, be constantly querying Flickr every once in awhile, and getting more and more photos, and then just throwing them into a Core Data database.
+16:07 Okay, just throwing them in there in the background.
+16:09 Meanwhile, I'm going to have TableViews that are going to be looking at that data.
+16:12 Looking at the photographers, clicking on them, looking at them, looking at the photos, and that's just going to be always be updating automatically, all the time.
+16:19 Okay, so that's the app that we're going to build.
+16:21 So, there's some things to talk about here.
+16:23 How to build a Core Data database.
+16:25 How to hook it up to a TableView with the Fetched Results Controller.
+16:28 How to fetch things in the background.
+16:31 Okay? We're going to talk about all those things today if we have time.
+16:34 Alright, I'm going to call this Photo Mania.
+16:37 I'm put it the developer where I usually put things.
+16:39 Here it is.
+16:39 I'm going to dive right in with building my data model.
+16:45 My schema, as you would call it in the database world.
+16:48 This is a description of all the entities and all that stuff.
+16:52 We saw how to do this all in the slide, so I'm going to just going to show you what it looks like live.
+16:56 So, when I want to create a new schema, I do new file.
+17:00 Okay, so I'm going to do new file.
+17:02 I'm going to go up here to Core Data, and pick this data model, not mapping model, data model right here, so click that.
+17:09 We can call it anything you want.
+17:12 I'm going to call this one the name of my app, photo mania, and it's asking where do you want to put it, and I'm going to put it at the top level here where all the rest of my stuff is.
+17:21 Here's my controller and delegates something like that, so I'll put this data modeling file there.
+17:27 And, so it creates this data modeling file.
+17:28 You can see it's empty.
+17:30 I've no entities or attributes or Fetch Properties or any of that business.
+17:34 So, let's just start adding some.
+17:36 So, I'm going to go down here to the bottom, add entity.
+17:39 Click that.
+17:39 It added one, called entity.
+17:41 I'm going to double click, and call it photo.
+17:43 So, I need photo, and I display photographers too, so I better add photographer.
+17:49 Now one thing that's really important when you make a schema is you want to put the entities and the attributes in there that support the kind of UI you're building.
+17:58 Okay, and that's really important for you to understand in your homework.
+18:01 Okay, this homework that I'm assigning you is pretty straightforward, as long as you pick a good schema.
+18:07 If you pick the right entities and attributes in the database, it's just really easy to just throw up tables of information.
+18:13 If you don't, if you have kind of the wrong schema or just too simplistic of a schema, you don't put in a couple of attributes that you need to make your UI work, it can be like ah, how do I get that information.
+18:23 So, the schema is your slave, you get to make the schema however, you think it's going to best support the application that you're building, okay?
+18:31 So, photo and photographer.
+18:34 What kind of attributes does a photo have?
+18:37 Well, let's see, of course it has its title, and it has a subtitle.
+18:42 That's that little description from Flickr.
+18:44 It has the URL of its image from Flickr.
+18:47 Probably has the URL of its thumbnail as well.
+18:51 In fact, we could even store the thumbnail data, which you're going to want to in your homework, right in here, put the data in, not just the URLs, and also importantly, photos have a unique identifier that comes from Flickr.
+19:03 Because when I get data from Flickr, I don't want to be, sometimes you click Flickr, you get the same photo again, and I don't want to be duplicating that in my Core Data database.
+19:12 So, I'm going to look at that unique ID from Flickr, and make those unique in my Core Data database as well.
+19:17 So, I've added these, but I've got to set their, you can tab warning here, or any error, because I haven't set these.
+19:23 If I click on this, you'll see.
+19:24 Must have a defined type, so we got to set a type for these.
+19:27 These all happen to be strings; all four of these, but you could image putting things like dates, like for your recent tab in your homework.
+19:36 You probably want to have some sort of last viewed date or something like that.
+19:39 That's perfectly reasonable to put in here, and numbers and all that stuff.
+19:42 So, we'll just do that.
+19:44 Photographers are a little simpler.
+19:46 They just have a name.
+19:47 Okay, a photographer has a name.
+19:49 That's a string.
+19:50 That's about it.
+19:51 And, remember I told you we could look at these entities graphically with this little button down here.
+19:56 Here it is right here.
+19:57 They're kind of smashed on top of each other, but I can pick them up and move them.
+20:00 And, you can see that as I move one, it kind of makes space, alright, keep them, and if I have relationships between them, it will keep those relationships sensible as I move them around.
+20:11 So, let's create a relationship.
+20:13 What is the relationship between a photo and photographer?
+20:15 As we saw on the slides, who took, basically, so I'm just control dragging.
+20:19 I'm holding down control right now, and dragging from photo to photographer, and I have this new relationship created.
+20:26 And again, if I move these things around, this things will stay with, so let's go ahead and give these relationships names.
+20:33 On the photo side, this is the who took relationship, and on the photographer side, this is the photos, and we can inspect this right here with this little guy right here; the inspector.
+20:44 And, we can see all kinds of things about our particular properties.
+20:48 This is true for properties, and also for relationships.
+20:51 And, of course, we know that this is a too many relationship, right?
+20:55 Because a photographer can have many photos, so we get this double arrow here.
+20:58 But, it's a two one relationship here, because a photo, only one guy took the photo.
+21:03 And so, if you move these things around, it will keep this all kind of looking okay.
+21:09 Alright? So, now, we've kind of set up everything here that we need.
+21:12 This is a pretty simple application, so we don't need any more attributes.
+21:16 But, in your application, you're going to have at least one or more two more entities and some attributes on there, and some more attributes on photo.
+21:24 So, I left with some work to do.
+21:28 Okay, so now that we have this, we want to be able to access all this stuff in our objective C code using properties and normal class syntax.
+21:39 So, we're going to do this thing we talked about, which is generating manage object subclasses.
+21:44 So, I'm going to pick the classes that I want.
+21:47 I'm going to go here and say create NS managed objects subclass for photo mania, and we'll do photo and photographer, both of them.
+21:54 And, we click this, says where do you want them?
+21:56 I'll put those also at the top.
+21:58 I'm going to put everything at the top level here.
+22:00 And here, I have my photo and photographer, and I can see that photo looks okay.
+22:05 It's got photographer who took, but photographer, not so much, right?
+22:09 It's got NS manage object for remove photos object.
+22:12 This should really be photo star, so I'm just going to generate these things again.
+22:17 Okay. And really, it's too bad that it doesn't automatically do this two pass generation, but you end up doing it yourself.
+22:23 Get used to doing this generate, because you're going to do it a lot.
+22:26 You're going to be constantly adding entities, changing attributes, like that, and you're just going to constantly be regenerating these things, and it's going to ask you to replace them, and so don't be uncomfortable about doing that regenerate.
+22:38 It's a common thing to want to do, and so now we're winning here.
+22:42 Okay, so we have these nice classes, and now we can use properties to access all their attitudes.
+22:51 My photo dot title to get at the title for example.
+22:54 But, as I said before, we might want to add code, and I do want to add code to photo here.
+22:59 I want to add code to create a photo.
+23:02 Okay. To make so that I can add, insert a photo object into the database.
+23:07 And so, I'm going to do that using categories.
+23:09 Remember categories is that new objective C thing I was telling you about, where we can add code to a class without sub-classing it, so I'm going to add code to this photo class, right here, without sub-classing photo.
+23:20 Okay, so I do that with file, new file, and instead of picking objective C class, I'm going to pick objective C category.
+23:29 And when I do, it's going to say, what class do you want to make a category on, I'm going to make a category on the class photo, and I'm going to call it Flickr because that's what this method that I'm, these methods I'm going to add to photo are all kind of hooking Flickr up to the database, so Flickr seems like a good name for that category.
+23:47 And, it wants to know where I'm going to put them.
+23:49 Put them in the same places everywhere as everything, and so here's my .H and here's my .M, and it's asking me what do you want to do here.
+23:58 So, the method that I want to implement here is a method that essentially takes a Flickr dictionary and adds a photo object to the database, and returns the pointer to it to me.
+24:12 Everyone understand what I'm going to do here?
+24:14 So, I'm going to call this thing, photo, make sure I pick the same name, so that I don't get sidetracked here.
+24:21 Photo with Flickr info and this is going be NS Dictionary, photo dictionary, and what else do I need beside that photo dictionary to create an object in the database?
+24:34 A hook to the database.
+24:38 Okay, I got to know which database you want me to add this photo too.
+24:40 So, I also need in managed object context, NS managed object managed context context.
+24:48 Okay, and that's all I need; just the Flickr information and the context.
+24:52 That's the place you want me to create this photo, and I will, okay?
+24:55 And, I'm also going to have another one here; because I know that I'm going to be downloading these Flickr photos in big bunches.
+25:03 Every time I call URL, geo reference photos or whatever it's called, I'm going to get a whole bunch of them, like a hundred or 200 of them.
+25:09 So, I'm going to have a bulk load one that I'm going to call load photos from Flickr array, NS-Array photos of Flickr NS dictionary into managed object context.
+25:30 Whoops, NS managed object context context.
+25:36 Okay, so that's just going to bulk.
+25:38 It's going to call this basically repeatedly, although that might not be the most efficient way to do that, and we'll talk about that in a little bit.
+25:46 So, let me implement these two methods.
+25:48 Okay, this is the interface of my category, and so here's the implementation of my category.
+25:53 Now, I can do whatever I want to implement these, except, I can't use any instance variables, so I can't have any properties that are, you know, here, so I have to implement them basically in terms of photo, if that makes sense that way.
+26:08 So, this is going to return a photo, so I'm going to say, photo equal nil, and down here, return photo, and in between, I got to go find this photo in the database, or create it, or whatever it may be.
+26:22 So, let's start with asking the database, do you already have this photo?
+26:28 And, so how am I going to ask the database if the photo is already there, and the answer is, I'm going to try and fetch it.
+26:35 So, I'm going to have a Fetch Request, and it's going to be a Fetch Request into the photo table, if you know anything about it, or into photos.
+26:48 It's going to return photos, okay, because I'm trying to find this photo.
+26:52 And then, the request needs a predicate, and what is the predicate.
+26:56 Which photo am I looking for?
+26:58 Well, I'm looking for the photo whose unique equals the same unique that is photo dictionary right here, so let's go get that.
+27:13 NS-string star unique equals, and we're going to need our Flickr Fetcher import, Flickr Fetcher .H, so I'm going to grab Flickr Fetcher .H from the thing we did before, which was Shutterbug.
+27:30 So, here's Shutterbug, and here's Flickr Fetcher.
+27:33 I'm just going to dray that whole thing right in here.
+27:36 Alright, so now I have Flickr Fetcher .H, and inside Flickr Fletcher .H, we can get the photos unique ID with this Flickr photo ID.
+27:47 Okay? So, I'm going to go down here and say, photo dictionary, Flickr photo ID.
+27:58 Now, I might want to do value for key path here, just in case this Flickr photo ID might have dots in it or whatever, Flickr.
+28:09 You know, it might have dots in it like the description has.
+28:12 Okay, I'll leave it this way here, but value for key might be a good idea.
+28:15 So, I'm basically going to fetch into the database to try and find this unique photo; see if it's already there.
+28:23 And, I do that by saying I need an NS error here, and then I'm going to say NS array matches equals context, because we always have to ask a context to do a fetch.
+28:34 Okay? Execute Fetch Request, that request, and if there's an error, return an error.
+28:40 Okay? So, now I've got those photos.
+28:43 Those photos hopefully, in this case a matching photo or maybe not, has been pulled out.
+28:47 Now, this matches can have a number of different states or different values.
+28:53 One thing is, it might be nil.
+28:56 If it's nil, okay, or if this error is not nil, let's say or error or another error condition here is that the matches, matches count is greater than one.
+29:19 Okay, because these are supposed to be unique, and so if I somehow got multiple photos by doing this, that would also be an error condition, so I have to handle error here.
+29:31 Handle error.
+29:33 I'm not going to do that today, but you can imagine.
+29:36 Okay, otherwise, if the matches found something, then we can just return it, okay?
+29:48 So, how do we return it?
+29:49 This is in array, but this array is going to have the one and only one match, so I'm going to say matches first object.
+29:58 Could also say last object.
+30:00 Otherwise, this matches dot count is 0, so it returned an array, an empty array.
+30:06 That means I looked for that photo that had that unique, I couldn't find it, so that photo doesn't exist.
+30:11 I now need to create it.
+30:13 Okay, everyone remember how to create an object in the database?
+30:16 NS entity description, insert new object for entity for name, we're inserting a photo, and we obviously have to specify the context.
+30:26 Okay? So, we created a photo.
+30:28 Excellent.
+30:29 And, now, let's go ahead and set the attributes of the photo.
+30:34 I'm also going to set the photo's unique, go to unique.
+30:39 Alright, so here I'm setting the photos title, subtitle, image URL.
+30:43 So here I'm just setting the title using value for key path out of the Flickr dictionary, the subtitle, given the description, the URL.
+30:51 I'm using this URL for photo format thing.
+30:53 I have to turn it into a string, okay, because can't URLs in the database, but we can put strings there, and then I also have the photographer name, but I have a relationship to photographer entity, so now I need to create a photographer as well.
+31:06 So here, loading a photo, right from Flickr, is causing a photographer also to be created.
+31:12 Okay, and this is happen in your homework too in spades.
+31:15 Okay, where you're going to download these photos from Flickr, and you're going to build your entire database.
+31:20 Lots of entities are going to be created all the time, every time things come back from Flickr, okay?
+31:26 So, how do we create a photographer?
+31:28 Well, I'm going to do the same thing I did here, where I have this photo category that creates that, I'm going to do the same thing for photographers.
+31:35 I'm going to say new file, another category.
+31:38 This is going to be a category in photography, photographer.
+31:41 This one's not Flickr specific, because photographer only has a name, so I'm going to call this category, just to be different, create, instead of Flickr.
+31:49 Okay? So, we'll put this in the same place.
+31:51 Here it is right here.
+31:53 Put this up here, and Photographer, yeah.
+31:59 It's very similar.
+32:00 It looks almost exactly the same.
+32:01 We're going to fetch for it.
+32:02 We'll handle, if we can't find it, set the name, all that business.
+32:07 So, we put that in the other file, okay.
+32:11 Just trying to speed it up a little bit here.
+32:14 You wouldn't learn anything new by my doing this all again.
+32:16 Okay? But, now I have a way to create a photographer, given a name in a given context.
+32:22 So, we'll use that over here, and we'll just say photo.whotook equals, and we've got to import that little category.
+32:30 Photographer create.
+32:35 Photographer, oops, photographer with name and the name is the photographer name that we got out of the Flickr thing, and same context.
+32:48 Okay? Everyone understand this method right here.
+32:53 So, this method is going to, if we give it a Flickr dictionary from photo info, it's going to give us back a photo object in the database, either by creating it or by finding one that's already there, and it will return nil if it has a problem with it.
+33:09 Everybody got that.
+33:11 Okay. So, now that we have this thing, we have these nice ways to access it.
+33:15 Let's talk a little bit about the TableView, and how we're going to display this stuff in a TableView, and it's really a simple matter of creating a new TableView subclass that implements that Fetch Results Controller business.
+33:31 And I told you that you were going to have this Core Data thing to make that easy, so we're going to use that.
+33:36 Here is the Core Data TableView controller.
+33:38 We'll drag it in.
+33:39 We'll take a look at it here.
+33:41 Alright, so here's the Core Data TableView.
+33:44 Here's its header file.
+33:45 You can see, it just has this Fetch Results Controller thing.
+33:48 It also has a way to force it to Fetch, but you don't ever have to do that.
+33:51 It will happen automatically.
+33:52 So, it has this property, and if you look at this implementation of this thing.
+33:55 Besides setting the Fetcher Results Controller, which is mostly just a bunch of logs, okay, that I put in there.
+34:02 It's implementing UI-TableView data source, you see, in terms of the Fetch Result Controller.
+34:09 And then, it's also doing this delegate business, where it's watching for changes in the database.
+34:14 Okay, and that's it.
+34:15 That's all it does.
+34:16 And this code is actually copied and pasted from the documentation for NS Fetch Results Controller, so this is nothing exciting in here.
+34:24 So, when we create a TableView that wants to look in the database, okay, we've created objectives in face, we're going to make it be a subclass of Core Data TableView Controller.
+34:33 So, I'm going to create one, and I'm going to call it photographers, I'm going to call it CDTVC, Core Data TableView Controller.
+34:41 Okay, it's kind of a naming convention some people like to use, and so I'm going to do that.
+34:45 Because it displays photographer; that's what it does.
+34:48 So, let's create that.
+34:49 Let's put it top level; same place as everywhere else.
+34:53 Here it is.
+34:54 It's created it.
+34:55 I don't need any of this business for that.
+34:57 And, let's think about its public API.
+35:00 What does this thing need?
+35:01 Well, it needs what most things need that are doing database stuff.
+35:05 It needs an NS managed object context, and so, this class, its job in life is going to be, it will show you all the photographers in a given context, the given database.
+35:18 You give it a point or two databases; it will look in there and show you all the photographers in it.
+35:21 That's what this thing is going to do, okay?
+35:24 So, to make that happen, all it needs to do is set that Fetch Results Controller thing in its super class, right?
+35:32 Which is its Core Data TableView controller, so I'm going to do that.
+35:35 As soon as someone sets the managed object context.
+35:39 Let's call this managed object context, so it's a little clearer.
+35:46 As soon as someone sets this managed object context, I'm going to be able to set up my Fetch Results Controller.
+35:54 I can't set up my Fetch Results Controller until I have the context.
+35:58 Sometimes, the context comes to me via public API like this.
+36:01 Some view controllers will get their context from other objects.
+36:06 Most notably, and pay attention here for your homework, if someone gives you a managed object like a photo or a photographer, you now have the context, because NS managed object has a method in it called managed object context.
+36:19 It will give you the context that that object came out of, okay?
+36:23 So, it's really important to understand.
+36:24 If someone gives you a photo, you have a managed object context, but this thing is at the top level.
+36:29 It's showing all the photographers.
+36:31 We don't have anything yet out of the database, so someone has to tell us the context.
+36:34 Which database to fetch these things out of?
+36:37 So, now I just need to say, Fetch Results Controller equals something, and so I'm going to create a new Fetch Results Controller.
+36:44 Alec in it, and it's in it has all these arguments here.
+36:52 It needs a Fetch Request, okay.
+36:54 Actually, let's, so we don't get this kind of blackiness, let's go ahead and make all the arguments first.
+37:00 It needs a Fetch Request, because that's what it does is hook up a Fetch Request to something, and so, this is a request into the photographer table, right, so we want photographer.
+37:14 We're going to show all the photographers.
+37:17 The predicate for this thing is nil.
+37:19 What does that mean predicate nil?
+37:22 Predicate nil means all of them.
+37:25 Okay? So, if you say predicate nil, that means give me all the photographers.
+37:30 And sort descriptor, yea, let's sort these things.
+37:33 Let's sort them by, let's see, sort descriptor with key, well, let's sort photographers by their name.
+37:41 Okay? Amazingly, you can actually sort things by things through relationships.
+37:46 So, you can sort it be other objects properties if you want.
+37:49 But here, photographer, we're going to have it sort by its name, and yes, we're going to have it descending, and we're going to use the selector here called localized standard compare, okay.
+38:01 Which is what we use mostly for stings that are going to appear when these interface, okay.
+38:07 We need to close our array there, because this is an array of sort descriptors.
+38:11 We only need one, and we could limit like, for example we could say, only give us a hundred.
+38:15 We only want to see a hundred photographers, which would be kind of silly because we are sorting alphabetically, so this would not make sense, because we wouldn't get to see the people whose names unfortunately happen to be end of the alphabet, but we wouldn't do it here.
+38:27 But, in other cases you would.
+38:28 In your homework, you very well might do that.
+38:31 Alright, so now, we have the request, we have the managed object context.
+38:36 That's an argument to this method is what we're setting actually.
+38:40 Here's the section thing.
+38:41 We could make sections here, but there's really nothing in a photographer to do that, so we won't do that, and we're not going to catch, okay?
+38:48 So, that's it.
+38:49 That's really all that's required to make this TableView work, except for one thing, which is that Fetch Results Controller, I told you it implemented all the UI-TableView data source things, but there's one of them it can't implement which is self row and index path.
+39:04 Okay, it doesn't really know what attributes of the object you want to put in which parts of the UI-TableView cell.
+39:11 Right? The title, the subtitle, it doesn't know those things.
+39:14 So, we have to implement that ourselves.
+39:16 So, that's UI-TableView cell, self erode index path.
+39:22 You should be very, very, very familiar with this thing.
+39:25 It just looks like this, cell equal, self.tableview DQ, and well, these are photographers, so we'll call this photographer cells.
+39:35 We got to make sure you guys are going to keep me honest.
+39:38 Make sure I remember to set that in the story board when we create one of these in the story board.
+39:42 And now, I need the photographer that is at this row and section.
+39:50 So, I'm going to import photographer first of all, not create, .H. Okay, so there's the photographer.
+39:58 And, then I'm going to say photographer equals, and how do I do this, photographer equals self.
+40:06 Fetch results controller, objected index path, index path.
+40:10 Now I have the photographer that's in this row, okay?
+40:13 So, now that I have that, I can do things like text label.text equals let's say the photographers name of course.
+40:22 Also, how about something cool like this, cell.detail text label equals a string with format.
+40:29 What if I wanted to put how many photos this photographer has taken, well that information is readily available to me in the database, percent D photos, photographer.photos count.
+40:45 Okay, X code, shoot, the way it does that.
+40:50 Okay. Right.
+40:52 So, I just go through that thing that goes through that thing that who took photos relationship.
+40:56 I just grab the photos side.
+40:58 It's an NS set.
+40:59 NS set implements count.
+41:01 I got what I need, okay?
+41:03 And, then let's return this cell.
+41:05 Okay, every one understand this self erode index map.
+41:10 Question?
+41:10 >> Fetch Controller came in from Core Data table controller that was subclass?
+41:15 >> Yes, this property spectral controller is inherited from Core Data TableView.
+41:19 That's actually a good question.
+41:22 Okay, so let's go ahead and build our story board while we're at this, and while we have this fresh in our minds.
+41:29 So, here it is.
+41:29 This is the kind of default one that we got.
+41:31 Let's get rid this.
+41:32 We don't want this.
+41:33 Let's go bring out a TableView.
+41:35 So, here I'm just going to drag a TableView out here.
+41:38 I'm going to set it to be a photographers Core Data TableView Controller, right, and then let's set up our cell the way we want.
+41:50 We want it to be subtitled, because it's going to have the photographer name and then how many photos they took.
+41:56 We need to make sure that its photographer cell is our reuse identifier.
+42:01 Otherwise, we're ready to go.
+42:03 So, if we had stuff in our database, and we hit run right now, this would work.
+42:08 That's all we needed to do.
+42:10 An incredibly small amount of code to hook up a table view to Core Data.
+42:14 But, of course, we have no data in our databases.
+42:16 Nowhere in our code are we querying from Flickr or loading stuff in, and so I'm going to use the opportunity of our needing that to introduce you for the first time to your application delegate.
+42:29 So, I've always been moving down to supporting files.
+42:33 Don't look at them, you know, and show now I'm going show you a little bit what's in here.
+42:36 So, your application delegate is kind of like, it is watching what's going on at the highest level of your application.
+42:45 It sees your application has launched.
+42:47 Okay. It sees that your application has resigned being the active application.
+42:52 It sees that your application is entering the background.
+42:55 Okay, we know then iOS, the apps, when you go to another app, they don't quit, they just kind of move into this background state, right, so we can find that.
+43:03 You can find it when you move back into the foreground.
+43:05 If you become the active application.
+43:07 If someone's quitting your application, you find that out as well.
+43:10 So, it finds out all these things, and we're going to learn about those later in the quarter, so I'm going to delete all those now, but we are going to look at this one.
+43:18 This one is did finish launching with option, so here it's tell you your application finished launching.
+43:23 Okay? This is a great time to do things like kick off some Flickr fetching or something.
+43:28 Now, if I'm going to be doing my Flickr fetching here in my application delegate, I need the context.
+43:35 Okay, now in your homework, you're going to do that by creating a UI managed documented.
+43:40 But, here, I have a little piece of code that I got from that other template that I was telling you about that I'm going to bring in here.
+43:51 It looks like this.
+43:52 It's a little category, and it has this method, create main cue managed object context.
+43:58 So, that's a managed object context that attaches to a database, the database for this app.
+44:04 This only has one luckily, and gives me; it's on the main cue, just like a UI document one is, so this code can be similar.
+44:13 And then also, I can save it.
+44:14 Now, I don't need this save context message for you on managed document, because it auto saves.
+44:18 But, here if I create this manage object context not using a document, then I have to do that.
+44:23 So, this is, like I said, the other way to do it, which you're not going to do for your homework, but I just wanted to show you, I didn't really didn't want to show you the UI managed document, because I wanted you to figure that out on your own, so we're going to manage this one.
+44:35 Okay, so I've added this.
+44:37 This is a, you can see that the photo mania app delegate category, so it simply added these two methods to my app delegate, okay?
+44:48 No, what I'm going to do here is I am just going to, first of all, let me create some property.
+44:56 So, this is some stuff that I just created, some properties that I need and stuff like that.
+45:00 For time, I'm just going to put them in here, but as we use them, I will refer to them.
+45:04 But one of them I'm going to use right here is this photo database context.
+45:08 So, I'm going to keep a property in my app delegate, which is the context that we're going to be fetching into and that we're going to be reading out of.
+45:15 So, I'm going to set that right here, photo data with context equals self create, oops, got to import that, import photo mania MOC.
+45:32 I'm just importing the category header file that has that create in that, so create main cue managed object context.
+45:39 So, again, you're going to set this as well, but you're going to set it from your UI managed document.
+45:44 So, now, I have a context, and I want to start doing some Flickr Fetches, so I'm going to call another method here, start, what did I call this, star Flickr fetch, I think, okay?
+45:59 So, that's just going to fire off a Flickr fetch as soon as we launch.
+46:04 Okay, we just launched.
+46:05 Get this message gets set to us when we launch, and I'm just going to fire off a Flickr fetch.
+46:09 So, that's one of the times we're going to fetch is as soon as we launch.
+46:12 We're going to fetch some other times, so we're going to fetch as soon as we launch.
+46:15 So, I'm going to go ahead and put this in here so we can look it, instead of my typing it in line by line, and this is something where it's got some stuff that I didn't teach really in detail in lecture, but you should mostly be able to understand.
+46:33 Mostly what this is doing here is it creates a session, so you know about URL sessions, so I'm creating this session.
+46:41 This session is a little different than the one we created before, because look, it has a delegate.
+46:45 You see that.
+46:46 We didn't specify a delegate before.
+46:48 Okay, we had delegate nil.
+46:50 And, why do we want a delegate, and why are we making it so.
+46:53 Well, that's because we want these Flickr Fetchers that we're starting off in the background.
+46:57 If they finish while our application is no longer running, we want it to launch our application and tell us.
+47:03 Or, if we're in the background, we're not the application the user is using right now, and this URL Flickr comes back with some information, we want it to you know, make us, wake us up a little bit and let us process it.
+47:14 Okay, so by doing this delegate, along with a background session, we can do that.
+47:21 So, I'm going to show you this delegate implementation.
+47:24 So, I create this session, and then I'm doing here on start Flickr Fetch is creating a task and resuming it.
+47:30 So, this is the exact same thing that we did before, right?
+47:32 We had a URL session.
+47:33 We created a download task.
+47:35 The only difference is last time we did with completion handler, and we had a little block that would happen when the download came back.
+47:41 Now instead, our delegate's going to get called when the URL gets loaded and comes back.
+47:48 Does everyone understand the difference between what we did before and what we're doing here?
+47:51 Okay, no completion handler.
+47:53 Here, we're going to use a delegate.
+47:54 So, let's look at what that delegate looks like.
+47:57 It looks like this.
+47:58 Okay, there are three methods in it.
+48:00 These three methods right here.
+48:03 One is your file just finished downloading, and here it is as a local file, so this looks a lot like that completion handler, and then, here's a couple that we're not going to use, like giving you, this gives you some progress, how many bytes its read so far, if it does it in chunks, and this also, download sessions can get interrupted and then resumed.
+48:22 We're definitely not going to talk about that, but anyway.
+48:26 Now, you can see I have an error here, okay, so what do we do.
+48:29 So, this is what we would have done in our completion handler.
+48:32 And, all we're going to do here is we are going to get the context, our little photo database context that we set up there and application did finish launching.
+48:41 We are going to download those photos from Flickr, so Flickr photos is this, which you're very used to, right?
+48:48 Data with contents of URL, Jasson, de-Jassonize it, grab the results out of that.
+48:55 Okay. So, we're going to do that little thing.
+48:57 This needs to be happening, you know, this is a local URL, so it can be happening on the main thread, no problem.
+49:04 Now, we're going to do something in this context, and notice I'm doing perform block.
+49:08 I didn't do perform block over in the photo creating one, because it's kind of implicit.
+49:12 I'm creating a photo.
+49:13 Of course, I'm doing it on that context, so whoever calls that would want to do that in perform block, and that's, in fact, what I'm doing here.
+49:20 I'm calling that method we just wrote, load photos with Flickr data, okay.
+49:25 We didn't actually write that method, so let's look at that.
+49:27 So, that's over here.
+49:28 Okay, we have photo with Flickr info, and here's loading the photos.
+49:32 So, how do we load the photos?
+49:33 I'm just going to say, 4NS dictionary photo in photos, okay, so give me each Flickr photo one by one, and then self photo with Flickr info, photo in manage context, context.
+49:48 Now, this turns out to be really an inefficient way of loading those hundred Flickr photos, because every time I call this, I am doing this Fetch.
+50:02 So, if I want to load a hundred photos, I got to do a hundred fetches to see if those are unique.
+50:07 Okay, there are much better ways to do this, and one of your extra credit items is for you to try and figure out a better way to do this.
+50:13 Okay, and one way is to look at the unique ID's of all hundred photos, fetch them all at once, and see which ones are in the database, because you can get a list of them back, right?
+50:22 The ones that are in there, and then one by one, you can go and create the ones that aren't there.
+50:27 Okay, so that's one way to do it.
+50:29 Okay, but this cheap and simple way is good for a demo, okay.
+50:33 So, back to our app delegate and now we have this load photos with Flickr array.
+50:37 Let's go ahead and import that header file, which I do, oh, maybe I called it something different there.
+50:42 What's the problem?
+50:43 Let's see, yeah, I probably called it something different.
+50:48 Call it the same thing.
+50:52 Here's my delegate, here it is.
+50:55 There we close, I called it [inaudible] Flickr, right?
+50:57 So, that's going to load all these photos.
+50:58 Notice, I'm saving my context here.
+51:00 Okay this is a method, manage object context was saved.
+51:03 This is an error, which I'm ignoring.
+51:05 Don't really need to do this for your UI managed documented, but it doesn't hurt.
+51:09 You can do it if you want.
+51:10 This would not break anything if you had a context from UI managed document, but mine's not, so that's why I'm explicitly saving here after I load some photos in, okay?
+51:21 Okay, so that's cool.
+51:23 So, let's go look at our tables.
+51:26 What is our tables, public API, managed object context?
+51:31 We never set that.
+51:33 Okay. We need to set this tables managed object context.
+51:36 Okay. When and how are we going to do that?
+51:40 We have this application delegate.
+51:41 It's kind of this global thing, and it is managing this global database, but it needs to be able to communicate this thing out to anyone who needs to use it, and the way we're going to that is, whenever we set this photo database context, we are going to post a notification, the radio station thing.
+52:00 So, this is the first time you're going to see how to post an notification, not just listen with that observer, you're going to actually post it right here, so let's do that, and when you post a notification you almost always 100% of the time, want to create a header file, so I'm going to create a header file.
+52:15 Just go here to header file, C, C++ header file, and that header file is going to contain the name of the notification, and also the name of anything that's in the user info, for the notification.
+52:26 So, let's go ahead and make sure it's in the right place.
+52:30 It is. I'm going to call this photo database availability, because that's what this notification is about.
+52:37 This radio station talks about whether the photo database is available, so I'm going to create this header file, and inside this header file, I'm just going to put pound defines.
+52:46 One is photo database availability notification.
+52:52 That's the name of the notification.
+52:53 I'm going to call it this.
+52:55 I can call it anything I want, but I'm going to call it that, and then also when the notification goes out, I'm going to include the context in the radio station broadcast, so the person can just get it when they get the notification.
+53:08 I'll do that with photo database availability context.
+53:14 And, I'll use the same, well, just say context.
+53:16 It can be anything you want it to.
+53:18 Okay, so this is going to be the name of the notification.
+53:20 This is going to be the key into the dictionary of information that comes along with the notification, alright?
+53:26 So, now, let's send that notification, and I'm going to do that every time we set this photo database context.
+53:35 Question?
+53:35 [ Background Conversation ]
+53:42 >> Oh, yeah, probably.
+53:44 Good point.
+53:45 Yeah, no equals there.
+53:46 Thanks, very good.
+53:49 This is just a pound sign defined.
+53:50 If it was a constant, we wouldn't do that.
+53:55 Okay, alright, so let's set this photo database context, so in the set; I think I might have a thing for that actually.
+54:05 Set photo data.
+54:06 Yeah, I do.
+54:07 So, here when we set this photo database context, we are going to post this notification.
+54:14 And we do that using the NS Notification Center default center, post notification name.
+54:20 We just specific the name, which is this.
+54:21 For this to work, we need to import that photo availability, photo database availability header, okay?
+54:30 So, we're just going to post this notification, and we're going to give this user info along with it, and these are info, it's just a dictionary that has one key, which is that context, and the value of that key is the context.
+54:44 Okay. So, this is how you post in the radio station model.
+54:49 Any questions about that?
+54:52 And now, I'm going to show you listening to a radio station without having to create another method and all this stuff, basically really straightforward listening, and who needs to listen to this?
+55:04 Well, this guy does, this photographer guy, he needs to listen to it.
+55:09 So, basically, as soon as this guy awakes, and I might do this in it with style, or whatever the designated initialize is for TableView, but I'm just going to it in a wait for nib for here, because we know this TableView is coming out of the story board.
+55:23 I'm just going to say, notification center.
+55:26 First let's import that availability thing.
+55:30 So, I'm going to do NS Notification Center, default center.
+55:36 Watch this.
+55:37 Add observer.
+55:38 Normally, we do it with a selector and all this stuff.
+55:41 I'm going to do a block-based one.
+55:42 I couldn't show you this before, because you didn't know block, but it's this one.
+55:45 Add observer for name, and we give the name, which is photo database availability notification.
+55:52 The object is who can send it, and I'll let anyone send this to me.
+55:57 It's going to be the app delegate, but it could be anybody.
+55:59 The cue, I'm going to do it on the cue that I'm on now.
+56:03 That's what nil means, but I could say NS Operation main cue, or some other cue even, but I'm going to say nil, which means whatever cue I'm on right now when this is being executed, using block, so I'm going to double click here to put a block.
+56:17 Okay, and then that's the end of that, and what's going to be in this block?
+56:21 This is one line of code.
+56:24 Self.manage object context equals this notification, its user info, photo database context.
+56:40 Okay. Sorry for the very, very long line there.
+56:42 I think it will fit, yeah it will.
+56:44 Okay? So, I'm getting this block.
+56:46 It's executed whenever this radio station broadcasts, and because I put this user info of the context, now I have the context, and I just set my own managed object context, and voila, it's going to load this table.
+56:59 Questions about that?
+57:01 So, that's notifying both on posting and receiving.
+57:04 Alright, so now hopefully it will work.
+57:06 Let's go take a look at this, and there it is.
+57:09 Okay, now it went really fast there, because it actually did the load last time, but we just didn't see it, so the database was loaded.
+57:17 So, I'm going to show it what it looked like to load up.
+57:19 So, how do I clean this out?
+57:21 Okay, how do I clean my database out?
+57:23 So, really watch this, okay?
+57:24 If you want to get rid of your database, especially if you want to change its schema.
+57:30 Because if you change its schema, and then you relaunch, it's going to say incompatible database type.
+57:35 So, if you want to get rid of it, just press the home key.
+57:38 I also recommend quitting in X code first.
+57:45 Then press the home key, hold down, press to hold, you can do this on your device too, and then, you get these jigglies, and then press the X to delete that application.
+57:56 That will delete the entire application, including the database, and now, when I launch again in X code, it is going to start up blank, doing the Flickr Fetch in the background.
+58:10 When that manage object content is filled up with data, it magically automatically appears in the TableView.
+58:17 That's because that Fetch Results Controller is watching the context.
+58:21 Okay? Questions.
+58:23 [ Background Conversation ]
+58:23 Yeah, let's go back and look at that.
+58:30 The question is where did I set this user info, this little user info right here, where did I set that, and that was when I posted the notification here in my app delegate, which I did when I set the context, which I did when I launched.
+58:46 Right, so I launch.
+58:48 Here's launch.
+58:49 When I launch, I create the context, you're going to create it with U unmanaged document.
+58:54 I set right here.
+58:55 This is the setter for that.
+58:58 Okay, I set it.
+58:59 Then I post it to available to everybody else.
+59:05 Okay? Question.
+59:06 [ Background Conversation ]
+59:08 Yeah, so the question is, how can I make sure that the view controller exists, and is listening in time to hear this, because the application delegate is posting this pretty early, right after launch.
+59:24 It's sending out this notification, and the answer to that is that's why I do this in awake from nib, really early in the view controller's life cycle, right?
+59:33 When it's first created, so it has the maximum chance of getting it, but it's possible.
+59:39 It's unlikely, but it's possible that some view controller you might create later in time might need it, and in that case, you might need a different mechanism, or you might need to report or you might need to pass it along.
+59:48 Okay, a lot of times, we don't want to use this mechanism to give the context to view controllers, exactly because the view controller doesn't exist yet, until when this availability happens, it's not even there.
+01:00:00 So, there are other ways to pass you manage object context around, and you always want to use those before a way like this.
+01:00:07 Okay, and I mentioned that in the hints, so the homework is, pass the manage object context to a view controller that's NS vector results controlled in a sensible way in a way that makes sense.
+01:00:19 If you're segwaying to it, pass it to it by preparing it, right?
+01:00:24 You wouldn't want to rely on something like this.
+01:00:27 Okay. Alright, now let's talk about loading our database some more.
+01:00:31 Okay, right now, we only loaded our database on launch.
+01:00:35 Here's the application that did finish loading with options.
+01:00:37 We load our database right here and Flickr fetch that's it.
+01:00:41 Okay? Well, that's not very good, that just means we only get one batch of data ever, when we launch our app, we have to quit, or have to relaunch it all the time.
+01:00:49 So, what about kind of loading this Flickr information in the background, and we can do that, but there's really two different background conditions to consider.
+01:00:58 One is background, and our app is in the background.
+01:01:02 In other words, the user is not currently using our app, okay.
+01:01:04 They were using it, but now it's in the background.
+01:01:07 Okay, how do I fetch when that happens.
+01:01:09 Well, fetching there is kind of limited by the system.
+01:01:12 The system is not going let you just go hog wild fetching things when you're not the app that the user is using, but it will let you do it sometimes, okay?
+01:01:20 And, the way you can get the system to kind of wake you up and let you fetch sometimes in the background, every once in awhile, I don't know, a few times a day, who knows what, but sometimes, it's using background fetching, which is a multitasking API, new for iOS 7.
+01:01:35 So, I'm just going to show you this as an example of what some of the multitasking APIs look like.
+01:01:43 Now, the way you turn this is on, is you edit your project.
+01:01:45 You see this is my project I clicked on up here, and now you're going to go to this tab right here, capabilities.
+01:01:51 So, I go to capabilities, and there's a lot of capabilities.
+01:01:54 This really kind of gives you a feeling of how we're only skimming the surface of iOS, when you look at all these things you can do.
+01:02:00 But, anyway, we're going to do this one right here, background modes, and I'm going to turn this on.
+01:02:05 When I turn it on, there's all kinds of background modes, things that I can be allowed to do in the background.
+01:02:10 That is to say when my app is not currently being used by the user, and I'm going to pick this one down here, background fetch, and if I turn this on, okay, background fetch, then I will occasionally by the system at its discretion, send a message to my app delegate, perhaps even launching me to do it.
+01:02:29 Okay? And what is that message that gets sent.
+01:02:32 I'll show it to you right here.
+01:02:33 It is called, we're going to type it in.
+01:02:36 Application, so you can look at all the things you can receive from your application.
+01:02:39 There is just a billion of them here.
+01:02:41 See them, okay?
+01:02:43 So, we'll cover some of those, but not all of them, but there's quite a few of them in here.
+01:02:47 But, the one you get when you do this is this one right here, perform fetch with completion handler, okay, so this gets sent to you, and it's basically saying, okay, I'm giving you an opportunity to go do something in the background, a fetch or whatever you want to do.
+01:03:02 Usually it's a fetch, but you can kind of do whatever you want here, and the only responsibility you have in doing this is to call this completion handler when you're done.
+01:03:12 That's the only thing you absolutely have to do.
+01:03:14 If you don't call that in a timely manner, the system will grow tired of you, and it will stop fetching.
+01:03:19 It will stop sending you this message.
+01:03:22 So, more timely we respond to this, the more likely it's going to let you fetch in the background.
+01:03:27 Okay, so what are we going to do here?
+01:03:29 Well, it turns out, all we're going to do in here is start a Flickr fetch, and then we're immediately going to call this completion handler.
+01:03:40 We're not done.
+01:03:41 This fetch, we just started it.
+01:03:43 It's going to take awhile to come back later, but we're done, as far as this background fetch thing is continued.
+01:03:48 Okay, getting the result and doing all that, that's going to happen at some other time, but here, we're done, and we have to, the argument to this completion handler is a UI background fetch result, which is whether whatever you did in here changed your UI.
+01:04:05 Because if it did, we need to update the little task switcher.
+01:04:09 Okay, does everyone know what the task switcher is in iOS 7?
+01:04:11 It looks like this, okay, here's the task switcher.
+01:04:14 It lets you go through and look at very apps, if my apps are doing anything here.
+01:04:18 Let's launch an app.
+01:04:20 Let's launch safari here.
+01:04:21 Okay, so now I go into task switcher, and here's Safari.
+01:04:24 See how it's showing me what's actually in Safari?
+01:04:27 It's not really showing me what's in Safari right now.
+01:04:30 It's kind of showing me Safari the last time I left Safari.
+01:04:35 Or, if I get this background fetch and this completion handler, I say UI background fetch, new data, then it would redraw that thing for me.
+01:04:46 It would give me a chance to redraw it.
+01:04:49 But, I don't actually have any new data.
+01:04:51 I have no data here, because I haven't gotten the data from this yet.
+01:04:55 This Flickr fetch has not come back yet, so it's not going to do anything.
+01:05:00 Okay? So, this is great.
+01:05:02 This lets me occasionally fire off a background fetch, but when the data comes back in, then what do I do.
+01:05:09 Well, if I'm in the background, none of these URL things are going to get called.
+01:05:17 Okay? Because I'm back-grounded.
+01:05:21 Now, it's not strictly true that these won't get called, because what will happen is if the URL returns while I'm in the background, so I started it in the background, if it returns, I'll get another application thing called application handle events for background URL session, okay?
+01:05:40 And, it also has a completion handler, a little different one.
+01:05:44 Okay, so this is called whenever things happen in the background.
+01:05:47 Now, what's interesting about this one is, I don't actually need to do anything in this one either.
+01:05:52 Because if I implement this method, then these delegate methods down here will automatically get called, and they already know how to unpackage the data from Flickr and put it in my database.
+01:06:04 They already know how to do all that, but I still do have this responsibility for the completion handler on this one too, okay?
+01:06:10 Now, this completion handler, we really do want to wait to call until we've actually handled this URL coming back from Flickr.
+01:06:19 Okay, this is handling a URL coming back from Flickr.
+01:06:22 So, now we're going to wait.
+01:06:22 So, I'm going to have to hold onto it.
+01:06:24 So, I'm going to.
+01:06:26 I have an instance variable here, where I'm going to hold onto this completion handler, and here's the instance variable right here.
+01:06:33 Okay. It's a void.
+01:06:35 It takes no arguments, just properties.
+01:06:39 All blocks by the way, want to be copy properties.
+01:06:42 Blocks want to be copied into the heap when you keep a handle to them.
+01:06:46 Something to know.
+01:06:47 So, anyway, all I need to do is keep this thing, and then I need to call this when I'm done, so I have a method down here that I use to do that with.
+01:06:58 It's called Flickr download tasks might be complete, because I might have multiple download tasks happening, and so what I do here is, I get all the tasks that my Flickr download session is doing, that's what this method does, and it has a little block that gets called, because it can't do that immediately.
+01:07:14 Sometimes it takes a little time to figure that out, and then if there are no download tasks left, right?
+01:07:20 Not download task count, then I'm going to call this completion handler.
+01:07:25 This Flickr download backload background inclusion handler, and say that I'm done.
+01:07:30 Okay, so now I've finished downloading it, I've redrawn my UI, and I'm calling the completion handler, and this completion handler doesn't have the little UI no data thing, because it always assumes that you're going to update your UI, okay?
+01:07:44 So, it's always assuming.
+01:07:45 It's always going to redraw when you do that.
+01:07:48 Okay. So, let's see what this, okay, to see what this is going to look like, there's a really cool way.
+01:07:53 Well let's, okay, let's do this two part here.
+01:07:55 I'm going to run this.
+01:07:57 Here it is right here.
+01:07:58 You can actually simulate fetching in the background in X code.
+01:08:02 So, I'm going back to X code.
+01:08:03 Here's my UI.
+01:08:04 Okay, I'm going to say, from X code, under debug, simulate background fetch, and watch what's going to happen to my UI, oop, I got put in the background.
+01:08:14 Okay. And it's doing a fetch.
+01:08:16 It's going in Flickr.
+01:08:17 It's downloading to Flickr and doing all that stuff, and actually if I went like this when it was done, I would see the results in here.
+01:08:24 Okay, now that's hard for you to see here, so I'm going to show you another way to simulate a background fetch besides this, so let's delete photo mania so that our tables are empty.
+01:08:33 You'll really be able to see it clearly here, oops, I should have quit X code first.
+01:08:39 Put that in the step.
+01:08:41 And, so what I'm going to do here is there's a way to launch your application as if it just got launched from a background fetch, and the way to do that is edit scheme.
+01:08:54 If you edit this little scheme, the scheme is how it's launching you.
+01:08:58 In this case, it's launching us in a simulator.
+01:09:00 So, if you edit scheme, and you go over to options, there's this little switch here, launch due to a background fetch.
+01:09:06 In other words, when I hit run, pretend I just got launched, because a background fetch got sent to me, okay, so that's what that means.
+01:09:14 Now, normally, we're not going to set that switch and leave it set like that.
+01:09:17 You can actually duplicate this scheme, so I have the schema; I'm going to duplicate it.
+01:09:21 I'm going to call it my BFF scheme.
+01:09:23 That means background Flickr fetcher.
+01:09:27 It's my BFF scheme, and in my BFF scheme, I'm going to have that switch set, okay.
+01:09:34 In my other scheme, if I go back to this scheme and edit it, that switch is not set, okay.
+01:09:41 So, if I want to pretend that's happening, I go to my BFF scheme, and I press run.
+01:09:48 Now, when I run, see it ran me in the background.
+01:09:51 So, the other two things -- the other thing I really wanted to show you here, which I don't really have time to do.
+01:09:57 Oh, actually I'll do it real quick is, how about fetching when I'm the foreground app.
+01:10:02 What happens if the user is currently using me, and I want to fetch periodically.
+01:10:06 Okay, that's a totally different thing.
+01:10:08 To do that, we're going to use a class called NS timer.
+01:10:11 Okay, so I'm going to put this here.
+01:10:13 Once the database context is available, then I'm going to fire off a timer using this NS timer method, schedule timer with time interval.
+01:10:21 I want to do this one.
+01:10:23 How often should we do our Flickr fetch?
+01:10:26 Well, it doesn't seem like Flickr updates it more than once every 10 or 15 minutes, so let's do it every 20 minutes.
+01:10:33 So, this is in seconds.
+01:10:34 So, I'll do 20 minutes, and the target is going to be myself.
+01:10:38 In other words, every 20 minutes, send me a method, and the method to send me is start Flickr fetch, and the argument.
+01:10:49 And, no user info.
+01:10:51 Sorry, this has to be a colon.
+01:10:55 I'll show you why in a second.
+01:10:57 And repeat, yes, so I want this to just be every 20 minutes at sending this timer.
+01:11:04 Okay. So, why is this start Flickr fetch here have to have colon?
+01:11:09 That's because this timer when it sends its message, it always has an argument, and if I do start Flickr fetch with the argument, it's the NS timer that sent it to you.
+01:11:21 But, in this case, I don't care.
+01:11:23 I'm just going to start Flickr fetch.
+01:11:25 So, every 20 minutes, I'm going to fire off this Flickr fetch.
+01:11:29 Okay, so that's easy.
+01:11:31 So, if you're in the foreground, now this timer will not fire when you're in the background.
+01:11:36 It just will not fire, but that's okay, because we have that background fetching thing firing it, not as often, but occasionally.
+01:11:42 Okay, but now all the time, our app is getting new Flickr information all the time.
+01:11:49 Make sense?
+01:11:50 Okay, so that's all I wanted to show you.
+01:11:52 Hopefully.
+01:11:53 There's a lot of information there I know.
+01:11:55 We have background fetching.
+01:11:56 We have foreground fetching.
+01:11:56 You've got creating the database model.
+01:11:58 You got doing the categories to create the adding things.
+01:12:01 We got the TableView with NS Fetch Results Controller.
+01:12:04 I'm going to post all this code.
+01:12:05 I'll throw some comments in there tonight, so you can remember what all these things do, and you'll be good to go.
+01:12:13 Alright? Good luck with your homework, and I'll see you on Monday.
+01:12:18 >> For more, please visit us at Stanford.edu.

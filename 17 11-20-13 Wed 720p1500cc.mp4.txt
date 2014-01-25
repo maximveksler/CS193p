@@ -1,0 +1,770 @@
+00:00 [ Music ]
+00:05 >> Announcer: Stanford University.
+00:07 >> Alright, well welcome to lecture 17 of CS193P, Fall 2013/14.
+00:14 And today I'm going to spend just a couple minutes typing up some loose ends from the demo we had on Monday, and then I'm going to talk about taking pictures with the camera.
+00:24 And then we'll do a demo about that.
+00:28 And that's basically PhotoMania, what we kind of set this all up for in our last demo.
+00:33 Then we'll talk about core motion, which is the accelerometer and the gyro and all that business, and I'll have a demo of that.
+00:40 And if time permitting at the end here, we'll talk a little bit about the application life cycle.
+00:45 We talked about the view controller life cycle where it appears and disappears and all those things, well the application kind of, you know, you come into the foreground, you run, then you go away, then you go the background, you come back, so there's kind of a life cycle there too, which we can talk about briefly, and I could even demo some of that if we have time.
+01:04 Alright, so let's talk about the demo.
+01:07 I'm going to go back to the demo here real quick and talk about two things.
+01:12 One was cleaning up image URLs because the way we do our URLs is we have this "getter" for image URL, and any time someone wants a URL for the image that's in our image view, why we just create a file on disc and return the URL.
+01:26 So it's kind of on-demand.
+01:28 Well, the problem is, what if they then take a different photo or if this view controller goes off screen and back on screen, and someone picked something else, you don't want any old URLs lying around.
+01:39 So we need to clean up those old URLs.
+01:42 And the other thing I'm going to show you, just a brief bit more about checking for errors in core location.
+01:47 Okay? Because we did some error checking already, but we could do just slightly a bit more.
+01:51 So let's go back to PhotoMania.
+01:56 And let's look at that.
+01:58 The cleaning up the image stuff is really two things.
+02:01 One, when we cancel, okay?
+02:03 When we do our cancel to get out of our modal view controller, we're going to set our image to nil, and why are we going to do that?
+02:11 That's because if you look at our set image, down here, we delete the URLs, right?
+02:17 So whenever we change the image that's in our image view, right?
+02:21 We delete the URLs.
+02:22 This is something we did, kind of it was a little rushed maybe at the end, but we do delete our URLs there.
+02:29 And that's because we've got a new image, so we're going to delete the URLs for the old image, and that will make, we'll set our URL to nil, so that we'll make new URLs, right?
+02:37 So this is where we're going to clean up.
+02:39 So we definitely want to set that image to nil when we cancel.
+02:42 And the other thing is, when we don't cancel, when we actually prepare for segue and make a photo, then we want to set the URLs to nil, so that they don't get deleted, okay?
+02:53 Because here, we're reporting that URL back in the photo, so we do not want that URL to delete.
+02:58 So we're going to set these to nil.
+03:00 So that they won't get deleted at any point.
+03:03 Okay? It's kind of like we use them, we use that URL, so now we don't want to-- we want to just set it to nil.
+03:09 So that was that, that's the only clean-up there that was involved.
+03:12 The other thing was this core location error checking, and you can see, for example in our should perform for segue, I put a comment in here, "should check location and image URL" too, right?
+03:23 Because I already checked to make sure we actually took a photo, and that the person provided a title, so I should also check that the location, that we got a location, right?
+03:33 Because remember that location we're kind of getting in the background is asynchronously looking at GPS or wi-fi or something to get that location.
+03:40 So here, when we hit "done," we've got to make sure we actually got one.
+03:44 And more than just determining that we got it, let's make sure there wasn't a particular error.
+03:49 And so there's a way to watch for errors.
+03:51 Here's where we create our location manager, and we only use this one delegate method right here.
+03:58 But there is another thing we could do, which is we could implement this delegate method, didFailWithError and that will tell us any time the location manager fails.
+04:09 Fails to get a location.
+04:11 And I'm just going to salt away the error code that comes in this NS error into this location error code, which I'm going to make a property.
+04:19 Okay so it's just an integer.
+04:20 So I'm going to keep that error code, and then down in done right here, okay, I am going to, in addition to checking the title and whether a photo was taken, here I'm going to check the location.
+04:33 And so if I didn't get a location, if location is nil, then I'm going to look at that error code that I got.
+04:39 Now, it might be zero, which is error location unknown, in which case, what does that mean if the location-- if either I've never gotten an error, or I got an error and it said location unknown, which is zero, well, that means that it's still trying.
+04:53 Okay? It hasn't gotten an error that says I can't get the location, but it's still trying, so that's what we're going to tell the user.
+05:00 It's like I couldn't figure out where this photo was taken, yet.
+05:04 Okay? And if they say this is an alert, so they'll click "ok" and they'll be back where they started, they can try hitting done again, and they just keep hitting done and seeing if this keeps coming up until they get tired of it and they hit cancel.
+05:16 Okay? So that's one error situation.
+05:18 Another one is "denied." This shouldn't happen because we checked whether we were authorized before, at the very beginning remember?
+05:24 And we put a fatal alert up if you weren't authorized.
+05:27 But it's actually possible they could put this alert up, go to settings, disable it, come back, and click "done," and then they'd be denied.
+05:35 Okay? So that's pretty rare, but let's check for it anyway.
+05:39 And if they do that, then we'll just tell them, go back into privacy and turn that thing back on, okay?
+05:43 So we could get a denied, rare, the other one is network, so this is-- we're trying to find the location, we can't get any GPS, and they're not connected to the network, so we can't use wi-fi either.
+05:55 Okay? Or a cell site for that matter, okay, so now we're really stuck and the thing is that the location services can detect that case, and they'll actually report this error, network, and we can tell the person still we can't-- same basic error, we can't figure out where the photo was taken, but at least we can suggest that they verify your connection to the network, okay?
+06:15 And oh, I forgot to turn wi-fi on, they turn wi-fi on, and oh, now it's able to figure out their location.
+06:20 And otherwise, we're just going to generically complain, okay?
+06:24 That we couldn't figure it out.
+06:26 Okay? So I just wanted to show you a little bit about getting that error code using this didFailWithError thing.
+06:32 And in general, in demos that I do in this class, obviously I hardly check any errors, it's just a time thing.
+06:38 You should, any time you get an NS error back, you should go check it and see what it is, and go look in the documentation and see what kind of errors you could get back and what you should do about them.
+06:45 Should always do that.
+06:46 I try to emphasize in the slides when errors are really important to check, but in general, we should always be checking those.
+06:53 Okay? So that's it, that's all I wanted to show you there.
+06:55 So back to our slides.
+06:57 Any questions about that?
+06:59 Yeah?
+06:59 >> Does Apple provide a service where you could log, sort of the statistics on the errors you get in your app and you could [inaudible]
+some of it?
+07:07 >> So the question is, does Apple provide a service where you can like log the errors you get, for what purpose, to kind of so that they know what errors people are-- ?
+07:16 >> Well to know what kind of errors [inaudible].
+07:18 >> Oh, I see what you mean, so you want to-- you have customers for your app, and they're having errors, and you want to find out about them.
+07:25 Apple doesn't provide that infrastructure, but there are plenty of third parties who do.
+07:29 That basically provide code you put into your app that provide metrics, not just errors, but how many times did people click on this button?
+07:36 How many times did they go to this page, you know, et cetera, so you can see how people are using your app.
+07:40 That's actually quite important.
+07:42 Obviously beyond the scope of this app, or of this lecture, to talk about it, but I really highly recommend putting metrics in your app so you really understand how your real users are actually using your app.
+07:52 It's a little more work for you, but it's really worth it.
+07:56 Um, okay, so...the camera.
+08:00 So all this camera business and basically getting images into your app is done with this class UIImagePickerController, which is a view controller.
+08:10 Okay? It's a UI view controller that you're going to put on screen, either modally or in a popover, depending on whether you're in iPad or iPhone, and you're-- so this is the first time you're going to have a view controller that didn't come out of a storyboard.
+08:24 Okay? This view controller you're going to alloc init, alright?
+08:26 And then you're going to want to put it on screen, so you're going to have to use this method that we did talk about weeks ago when we talked about presenting view controllers called "present view controller, animated." Okay? Completion.
+08:36 It's got a completion block as well.
+08:38 And so that's how we're going to put this thing on screen.
+08:41 And the argument to present view controller is a view controller, not a storyboard identifier for a view controller, but an actual instance of a view controller, okay?
+08:49 And then the iPad you're probably going to put the camera-- actually the iPad you probably put the camera up full-screen modally, if you're just looking at the photo library, you're going to probably put that up in a popover.
+09:00 Alright, so how does this work?
+09:02 You alloc and init this UIImagePickerController, you set it's delegate, you have to set it's delegate or you're not going to get any information out of it.
+09:09 Then you configure it for what you want, the camera, or photo library, things like that, whether you're going to let the user edit the photo after they take it.
+09:17 Then you present it, and listen to the delegate, and when the delegate tells you that the user has either canceled or taken a photo, then you, if they've taken a photo you get the image data, and if they cancel you're like "Okay well they're done." Alright? What the user can do, okay?
+09:32 In this UIImagePickerController, it depends on what their hardware can do.
+09:36 Almost everything has a camera now, so you're usually-- if this is going to be no problem, source type available, camera, you're going to find it, but you should always check this anyway.
+09:47 Just to kind of, to be good code, you want to call this UIImagePickerController, class method is source type available, and we actually did that in our demo last time.
+09:56 Remember? We had that class method can add photo, and in there we checked to make sure that the camera was actually available, so this is how you do it, just this class method, UIImagePickerController.
+10:07 Once you know the camera is available, then if you want to take video, you need to be able to make sure that camera can do video, because there are cameras in older devices that can't take video, they can only take images.
+10:18 And you do that with this class method, "available media types for source type," and the source type is the camera.
+10:23 Okay? So it's going to tell you, what are, it's going to give you an array back of what things this camera can do.
+10:29 And you're only going to have one of two or both of these two constants, UT type image, and UT type movie, unfortunately, these two constants come from MobileCoreServices, MobileCoreServices.h, they're not in foundation or UI kits, so you have to explicitly import this thing.
+10:46 You've got to link in the MobileCoreServices, but with the new mechanism in iOS7, that should get linked in for you automatically.
+10:55 And unfortunately, those two things, kUTType image and kUTType movie are not NS strings, they are core foundation strings, so we'll talk about how we deal with that in our code in a couple slides here.
+11:07 You can also find out about front-facing versus rear-facing cameras, all kinds of details about what your hardware has, just take a look at the documentation for UIImagePickerController and you can find that all out.
+11:18 Is that a question?
+11:19 >> Oh, does the view controller provide the ability for them to select which camera they're taking the picture with?
+11:25 Or do we have to set that before we display it?
+11:28 >> Uh, the view controller will provide UI for them to pick front camera or back camera, but you can also say only let them take a selfie, right?
+11:36 Only for, or whatever, you know what I'm saying?
+11:37 You can just determine it, but they also have the-- if you don't determine it, then they can choose.
+11:42 So the answer is yes.
+11:44 Alright, so this is what it looks like to configure the ImagePickerController here, so I'm creating one, I'm setting my delegate, I'm checking the source type to see if the camera, I want to do video here, so I'm going to make sure that it does video, and if it does, I'm ready to go.
+12:00 Okay? So that's a summary of what I just said, kind of in-code what I just said on the last few slides.
+12:05 Um, so let's talk about that kUTType movie and kUTType image, they are CF strings.
+12:13 You can just cast them to NS strings.
+12:16 There is a bridging mechanism between core foundation and foundation, which is what you're used to.
+12:23 And so you can just put this cast in here, and in iOS6 or 7, they introduced a thing where it will even do this bridging for you automatically in terms of arc and all that, so you just need to cast that, it's just something you need to know, is to put the NS string star in front of those two types.
+12:39 Alright, editability-- so when someone takes a picture with the camera, they can actually zoom in on it, and move around and pick what part of the image they want to report back to your app, if you allow that.
+12:49 And you have to allow that by saying allows editing to your UIImagePickerController instance, and you can also do things like limit the video capture to be low resolution or only a certain number of seconds, things like that.
+13:01 So I'm not going to go through every single thing you can do in UIImagePicker, but there's tons and tons of stuff you can do with flash, all these other things you can control.
+13:10 So then, you have this UIImagePickerController that you've instantiated yourself as the delegate of, now you present it, okay?
+13:19 And so on the iPad, if you're not offering the camera, so if you're-- sorry, we kind of glossed over this a little bit-- you can offer to get a picture from the camera, or you can also offer the user to have a picture come from their photo library, okay?
+13:35 Which is this thing they manage in app on their device.
+13:39 And so you can kind of pick either or both.
+13:41 On the iPhone, you can ask for both at the same time, so it will put up a UI where you can kind of-- the user can pick between the two.
+13:47 On the iPad you don't do it that way.
+13:49 On the iPad it's camera or photo library because the photo library you're going to bring up in a popover, the camera you're probably going to do full-screen modal.
+13:57 Okay? So that's why you're usually not mixing them at the same time.
+14:00 After the user has chosen a photo from by using the camera or from their photo library, you're going to get this delegate method, ImagePickerController, FinishPickingMediaWithInfo.
+14:11 Okay? And you are then going to dismiss that view controller.
+14:16 Okay? So you have to manually dismiss it right here, but before you dismiss it, you're going to look into that dictionary that just passed, this info dictionary, and get the information about what camera, what picture they took or whatever.
+14:30 If they didn't, if they hit cancel on the camera, then you're just going to get this imagePickerControllerDidCancel, and there's no dictionary there, so you don't get to find anything about the photo.
+14:39 Again, if you're in a popover, you're going to use the popover did dismiss popover business, you'll do the same thing.
+14:48 So what's in that dictionary that you get back?
+14:50 So if the user did finish picking with info, what's in it, there's the image that they took.
+14:56 Both the edited image, if they zoomed in and cropped it, and the original image, if they didn't-- whether they did or not, the original image is in there.
+15:03 If they cropped it, it will tell you the rectangle inside the image that they cropped to.
+15:08 If it's a video, you're going to get a URL to a file, with the video in there, okay?
+15:13 So that's how video comes back to you, as a URL to some file.
+15:17 And you can, if you get these images, and you want to save them, like in the user's photo library, that's-- API is in AL assets library.
+15:26 Not going to cover that, but that's where the API is, if you want to save it into their photo library.
+15:30 Some picture they've taken.
+15:32 Like in PhotoMania, we're not going to do that, we're actually going to save it into our own database, but-- and we're going to save our image into our documents directory, but we could put things in the photo library as well.
+15:43 The camera can have an overlay view on top of it.
+15:48 Okay? This is a view that sits on top of it.
+15:50 You can even provide your own buttons for like "take picture" and things like that.
+15:55 This is just a view, and you also are going to get this transform, see at the bottom there?
+16:01 Camera view transform, in case you want the image that the person's taking, for example, to be scaled up to full screen, because the aspect ratio of the phone itself is not the same as the camera, so it won't be full screen.
+16:16 You'll see there will kind of be some borders around it, when people like to zoom it up to full screen, you could do the transform to do that.
+16:22 If, in your overlay view, you provide the "take picture" button, then you want to say "show camera controls, no" otherwise you'll have the take picture button from iOS and also your own take picture button.
+16:33 Okay? So overlays, you can look those up offline as well.
+16:37 We're not going to do those in the demo.
+16:39 Let's go ahead and add this photo taking to PhotoMania.
+16:43 And this action sheet thing, we'll see how the time goes, whether we do the action sheet.
+16:49 Alright, so here we are in PhotoMania, and if you remember here, let's go ahead and go over here...and remind ourselves what it looked like right now...just...take this around...Alright so we have our photos here, we haven't taken any photos yet.
+17:16 Hopefully, this is probably loading in the background as well, yeah, there it is, from Flickr.
+17:21 But if I look at my photos, I can see I don't have any, but I have the camera in the corner, so I'm going to press the camera, we put that photo in.
+17:28 And see you notice it saying "PhotoMania would like to use your current location" okay?
+17:32 And I'm going to say "Ok," if I said "no," we probably would have to put up this fatal error that says you can't take a picture.
+17:39 And what we want to do here is you see the "take photo" button?
+17:42 I want to be able to press that "take photo" button and have this UIImagePickerController come up.
+17:47 Okay? So that's what we're going to do next.
+17:52 Alright, so take photo, we actually wired that up when we very first started here, where did we put it?
+17:59 It is right...here.
+18:01 Okay? And it doesn't do anything right now.
+18:04 So what do we need to do here?
+18:05 All those things I just told you in this slide.
+18:07 So let's do a UIImagePickerController, UIImagePickerController, UI, image picker controller equals UIImagePickerController, alloc init.
+18:18 So we just alloc init, there is no other thing we specify when we initialize it, that's all we need to do.
+18:24 And then we just need to set up this UIImagePickerController to specify any options we have.
+18:32 And we also need to set ourselves as the delegate.
+18:37 So I'm going to do that first.
+18:38 And you're going to see something interesting about this.
+18:40 So we know that as soon as we set ourselves as a delegate, we're going to get this warning that says we don't implement the UIImagePickerControllerDelegate method.
+18:49 Notice it also says we don't implement the UINavigationControllerDelegate.
+18:54 Okay? This is kind of a weird thing about the UIImagePickerController, it inherits from UINavigationController, so it inherits that delegate method, and so it requires that you be a delegate for both.
+19:07 So I have to be NavigationControllerDelegate, and I have to be the ImagePickerControllerDelegate.
+19:13 Now neither of those things have any mandatory methods, so it's not that onerous but this is just an error that a lot of people are like, "Huh?
+19:21 Why is it saying that?" It's just a weird thing about UIImagePickerController, you have to be a NavigationControllerDelegate.
+19:27 You're not going to implement any of those methods, just have to say you do implement that protocol.
+19:32 So now we're the delegate, and we're going to implement a couple of those methods in a minute, but first, I'm going to finish configuring this thing.
+19:40 So what else am I going to do?
+19:41 Well, I'm going to say what media types I want, and the only media type I want is an image.
+19:48 I don't want video, so, kUTType what's it called, image?
+19:55 Image. Yeah.
+19:57 Okay? So this is an array, but the only one I'm putting in there is this one thing, and I'm doing this weird cast.
+20:04 Okay? And then what else do I want to set up here?
+20:07 I want to set up the source type, which is I want the camera.
+20:11 So this is ImagePickerController, SourceType, Camera.
+20:17 Now, I could also say here vertical bar UIImagePicker SourceType PhotoLibrary, okay?
+20:25 On the iPhone this would be fine, where the UI would let me choose from either of these two places.
+20:29 I don't have anything in my photo library on my demo machine, so it's kind of a waste.
+20:33 And on the iPad I would have to do two separate UIs, so I couldn't really do that there anyway.
+20:38 I'm also going to allow editing, why not?
+20:42 Allows editing equals yes, so that allows me to crop and zoom in, allows the user to crop and zoom in on the image.
+20:48 And that's it.
+20:49 And now I just do this PresentViewController, okay?
+20:55 Animated, yes.
+20:57 Completion-- completion block, again, it would get called as soon as the view did appear happened, so in other words, once it was on screen, this would get called, I don't need to do anything then.
+21:08 So we're done.
+21:09 Okay? So this is going to cause a modal view controller to appear, and it takes over the screen, and it's going to be the camera, and the user's either going to have the option of using the photo they take or hitting cancel.
+21:22 So we have to handle both those cases.
+21:24 So let's do the cancel case first, because it's really easy.
+21:28 And we do that with this one right here...this is right here, ImagePickerController DidCancel.
+21:35 You can see there's only two methods here, there's an old deprecated one there, but there's only these two.
+21:39 Those are the two we're going to implement.
+21:41 So in cancel, our only responsibility is to dismiss this thing.
+21:45 Okay? Because we're not going to use the photo or anything like that, so I'm going to say dismiss, yes, completion again, I don't need the completion handler there.
+21:52 Okay? So that's an easy one.
+21:54 And then the other one, this guy...this is the DidFinishPickingMedia WithInfo, so we've got this dictionary right here, that provides the information about the photo that the user chose.
+22:07 So the user did choose a photo in this case.
+22:09 So this one's easy too.
+22:10 We're just going to say image equals info UIImagePickerController, edited image.
+22:18 Okay? So this is a key into this dictionary.
+22:22 Right? And that's the edited image, the UI image the user edited.
+22:27 Now, I'm also going to say if not image, then the image equals the info UIImagePickerController original image.
+22:36 Okay? Why am I doing this?
+22:38 Because I allow editing right here, okay?
+22:40 So I know I'm going to get this edited image.
+22:43 Well, someday I might turn this to no, and then my code here would break.
+22:48 So I'm just trying to make code here that would work in either case.
+22:50 It costs no skin off my nose to put this line of code in here, and it will make it so if it ever changes to no, then this is going to still work.
+22:57 Okay? Doesn't hurt me if I don't.
+23:00 Alright, so I got the image, so I'm just going to say help equals image, image, remember that we have this property set that we implement the setter and getter for, which is right here.
+23:10 Okay? Which is just setting the image view's image.
+23:13 Okay? If we're setting it to something new, then it's deleting the old URL, we showed that already today.
+23:20 So...we set our image, and then we dismiss [tapping sounds].
+23:28 Okay? And that's it.
+23:32 So using the camera, quite straightforward.
+23:34 Once you understand that you have to do this delegate thing to get the results out of there, it's pretty straightforward.
+23:40 So let's try and see if we can make this work [background sounds].
+23:42 Let's-- here something to take a picture of here.
+23:49 Alright, so we'll go to My Photos, I'm going to go here, and I'm going to take a photo.
+23:53 We're going to get this ImagePickerController that's going to come up Modally, so here's my picture controller, so we'll-- 2002, that's kind of old, but take it.
+24:02 So I'm just going to take this picture.
+24:05 Alright? That's a little blurry, so I'll take another one.
+24:08 That's a little better.
+24:09 And I could zoom in here, if I want.
+24:11 Crop it, because I've allowed user editing, right?
+24:14 So we can do that.
+24:15 And then once I got it the way I want it, hit "use photo" and it comes back and sets in our image view.
+24:20 One thing we also need to do is put in a title there, but that's...let's do that real quick.
+24:26 Giants. Alright.
+24:29 Okay. There we go.
+24:33 So now hopefully our photo, there's our thumbnail, if we click, we can see the detail of it.
+24:40 Okay? Any questions about that?
+24:43 It's pretty straightforward, the camera thing.
+24:46 Alright. Let's see what time we've got.
+24:47 Let's...I'm going to come back to doing the action sheet at the end, because I really want to show you this other stuff first, the core motion stuff, and the action sheet, I think you mostly understand that, so we'll come back to this later.
+25:02 So let's go keynote here, okay.
+25:08 Alright. So core motion.
+25:12 So, core motion is the API for accessing the hardware on your device that tells you about motion.
+25:19 Okay? And there's a lot of different pieces of hardware, actually, that senses motion on your device, and some devices have more hardware than others.
+25:26 Okay? So a lot of using core motion properly is kind of understanding what your device has, and how you're going to use it, and if it doesn't have things, can you still do what you want to do?
+25:36 Maybe not quite as nicely, et cetera.
+25:39 But, the primary inputs to where-- to the motion of your device, are the accelerometer, which is just telling you the acceleration of your device, in X, Y, and Z. A gyro, which is letting the device know when it's being rotated, which is an important thing for it to know, and magnetometer, which is telling it "where is true north?" Okay? So really it knows where magnetic north is, but if it knows your GPS location, then it knows where true north is as well.
+26:10 So...the class that you use to get this information about your device is called CM Motion Manager, kind of similar to this CL Location Manager, which is how we got where the device is in the world, and you create it just with alloc init.
+26:26 You have to be a little careful with this thing, because you can't really have two different places in your app alloc initing one of these things and asking for different information rates or something like that, because the rate at which it's going to report its information really is something that your whole application needs to be on the same page about.
+26:46 Okay? So you wouldn't want one place in your application getting data really really fast, because it's doing some really fine-tuned thing, and the other wants it really slow, and then they're kind of out of sync.
+26:54 So some people would argue that CM Motion Manager should just be global.
+26:59 You should have some global somewhere, some class variable, or your app delegate or something.
+27:03 I don't know that that's strictly necessary to go that far, but it is something where they can fight each other, so you've got to be careful about doing that.
+27:12 And that's just really because there's only one device, and there's only one gyro and one accelerometer, and so it makes sense that this is a global resource, in a sense.
+27:22 So how to use the Motion Manager?
+27:24 Just like Location Manager, you check to see what hardware is available, then you kind of have two choices to how you want to do it.
+27:32 You can set some sampling going, and then poll the Motion Manager.
+27:37 Okay? What's the current acceleration due to gravity in these three directions, for example.
+27:43 Polling we don't like.
+27:44 I have a slide on that, but you can see I'm going to blast right by it, because polling-- not so good-- as the second way, which is that you basically put a block on a queue that will get called every time, at whatever rate you say, to tell you here's the current acceleration to gravity, here's the current...just tell you over and over and over, and you can set the rate at which that's happening-- much better way to do that.
+28:06 Especially since you can have that block be executing on another queue.
+28:09 Okay? Collecting the data, coalescing it, whatever, and then communicating back to the main queue, maybe at a lower rate, where it's updating the UI.
+28:17 Okay? So mostly that's what we're going to focus on, is the way of posting a block to a queue.
+28:23 Okay? So how do you check the availability?
+28:26 There is this property in CMMotionManager called accelerometer available, gyro available, magnetometer available, and then the very important device motion available, and we will talk about that in a second.
+28:40 How do you start up these sensors?
+28:42 If you don't call start accelerometer updates, it will not give you any updates.
+28:46 And when you poll, you won't get any update-- any information that's up to date.
+28:51 So you have to start it.
+28:53 Now, normally we're not going to start it this way in poll, we're going to start it by giving it a block to go call us every time, you know, at whatever rate.
+29:02 So, but we do need to start it.
+29:04 It's important to understand you have to start it.
+29:06 If you don't start it, you get no data.
+29:08 You can also find out, is the hardware currently collecting data?
+29:12 In other words, is the accelerometer on and collecting data?
+29:15 Is the gyro on and collecting data?
+29:17 So you can find out that as well.
+29:20 And very importantly, you can stop it doing this.
+29:22 Why is that important?
+29:24 These things aren't free when it comes to battery, okay?
+29:27 Measuring the acceleration, measuring the gyro, position, all of that, it takes power.
+29:32 And so you want to turn it off when you're not using it.
+29:34 Just exactly like the CLLocationManager, right?
+29:37 Turn it off when you're not using it.
+29:39 So here's the polling thing.
+29:41 I have this slide, we're not really going to look at it, but for each of the things, accelerometer, gyro, magnetometer, and device motion, which is the magic one I'm going to talk about in a moment here, you can poll and say "what's the current state of this?" But you don't usually do that.
+29:54 And now I'm going to talk about the magic thing before we talk about posting the blocks on the queues, which is CMDeviceMotion.
+30:03 Alright? If you had a gyro and an accelerometer and a magnetometer, you really know a lot about this device's position.
+30:11 Okay? Really a lot!
+30:13 And in fact, you can use multiple of those devices together to get better information.
+30:18 For example, let's talk about acceleration.
+30:21 Really, there's an accelerometer in there, it's always measuring the acceleration due to gravity, which is 9.8 meters per second squared.
+30:28 So if you ask the raw accelerometer what's the current acceleration of this device?
+30:33 It's always going to give you 1 G down toward the center of the earth.
+30:37 Okay? No matter what's actually happening.
+30:40 Now, if you are holding your device like this, and you're going like this, you're also going to have acceleration in these other axes, but you're always going to have that one pointing down.
+30:49 So it's kind of like it's a little bit difficult for you to then figure out what's the user actually doing with my device?
+30:56 You see? Because you kind of have to filter out with like a low pass filter, the acceleration due to gravity.
+31:02 Well, you don't have to do that if you have a gyro.
+31:06 Because if you have a gyro, you know whether the device is tilted now, okay?
+31:11 And since you know whether it's tilted, you can factor out where the acceleration due to gravity is, you see?
+31:17 Right? And so the CMDeviceMotion is another thing you can ask for, just like you can ask for the accelerometer or you can ask for the gyro, you can ask for this magic CMDeviceMotion, it's actually a conglomeration of those other things.
+31:32 Okay? And so for example it can tell you what is the acceleration of the device with gravity taken out.
+31:38 So there's a property in the CMDeviceMotion called User Acceleration, which is the acceleration of the device, not including gravity.
+31:45 You can also find out where gravity is pointing based on the device's current orientation.
+31:49 Similarly, there's bias in there for rotation of the device.
+31:57 Okay? Bias due to electronics of the device.
+31:59 That can be taken out using the accelerometer.
+32:01 So the gyros reported information can also be helped by the accelerometer, so they kind of help each other, and you can also get more sophisticated answers about the position of the device, like roll, pitch and yaw.
+32:15 Okay? You all know what roll, pitch and yaw is?
+32:17 Roll is this way, yaw is like this, pitch is like this, okay?
+32:21 So now you really can find out where, like almost this is an airplane, right?
+32:25 You can find it's roll, pitch and yaw in space.
+32:28 Okay? And those are all possible when you know where gravity is, if you know where true north is, you kind of have a reference point, all those things.
+32:35 So CMDeviceMotion, that's where you're going to do any sophisticated analysis of things to position in space.
+32:43 Okay? And you can go look at the documentation, you can see already right there some of the properties you can get, roll, pitch and yaw, rotation rate, user acceleration.
+32:51 All those things come out of a CMDeviceMotion.
+32:54 Now, if you're on a device that doesn't have a gyro, the CMDeviceMotion is going to be there, but some things are going to give you unspecified results, like user acceleration can't be determined on a device where there's no gyro.
+33:06 Okay? It will give you the acceleration due to gravity, but can't give you the user acceleration.
+33:11 So you have to know.
+33:12 That's why you have to check what your device has.
+33:15 So...how do we do this block thing?
+33:20 Okay? So I want to start my device, checking what is going on with the accelerometer, and I want it to report to me what's going on.
+33:29 And the way I do that is I give it a block, a CM Accelerometer Handler block right there.
+33:35 You can see how it's defined, it takes an argument, which is the CM Accelerator data, and in this error, and it just keeps calling that block over and over at whatever rate you tell it to.
+33:47 And we'll talk about how you set that on the next slide.
+33:49 And you can do that for accelerometer updates, you can do it for gyro updates, you can do it for device motion as well.
+33:55 Okay? That roll, pitch and yaw, all that, it will tell you that.
+33:58 Okay? So couldn't be simpler, you just call this method start, accelerometer or gyro, updates to queue, you give it a queue.
+34:07 Now, that queue, if your rate at which you're asking it to tell you is pretty low, that can be the main queue.
+34:15 And what do I mean by low?
+34:16 Well, use your best judgment, I mean 60 times a second?
+34:20 That's going to be pushing the main queue.
+34:22 Ten times a second, no problem.
+34:24 Okay? It depends on what you're doing in that block.
+34:27 Hopefully you're not doing some very, very expensive graphics operation.
+34:30 But you could make that the main queue.
+34:32 Or you could make that be some other queue.
+34:35 Okay? And then coalesce events, and then just dispatch back to the main queue whenever you want to do the UI updating.
+34:42 Okay? So how often does this block get called?
+34:45 This is the device motion ones, by the way.
+34:48 Device Motion knows so much information it can actually have a reference frame about where's Z axis and X and Y axis, and all that, so you can look that up as well.
+34:58 But it's the same way, though, in terms of you just put a block on the queue and when device motion has changes, it's going to tell you.
+35:05 So in all these cases, you set the interval at which it's going to call your block using this update interval property.
+35:11 So whether you're doing accelerometer, gyro, magnetometer, device motion, you just set the interval.
+35:16 This is in seconds, so if you want it 10 times a second, you would say 0.1, if you want 20 times a second, 0.05, okay?
+35:24 How often can these things go?
+35:27 There are limits.
+35:28 These things can't report thousand times a second, probably you couldn't do much with 1,000 times a second, you couldn't respond in the UI or anything to that.
+35:36 I think most of these things are around 60 Hz, okay?
+35:40 60 times a second, probably about the maximum you're going to get out of them.
+35:44 I don't think the documentation specifically says.
+35:48 It is okay to have multiple handler blocks.
+35:52 In other words, to call start accelerometer updates with block, give it a block, and then later somewhere else, start accelerator updates with block and give it a different block, and both of those blocks will get called.
+36:03 They're both going to get called at the same rate, this update interval, but two different-- you could be doing two different things every time this interval happens.
+36:10 That's perfectly fine, say it's not like there can only be one block.
+36:14 Make sense?
+36:16 Alright, so I have a demo.
+36:18 This is all definitely best understood with a demo, and this demo lets me show you a couple other things as well, as usual, I try to make these demos count for multiple things here, so this is going to be a new app we're going to write, it's called Bouncer.
+36:33 And Bouncer is going to be a little square that I'm going to have appear on my device, and eventually we're going to have gravity determine where that square is animated to on screen, then we'll put another square on there, and then we'll bang those things into each other, and maybe we'll put a little score in there, and then we've made ourselves a little game.
+36:56 Okay? So it's a little, basically game where the input to the game is the accelerometer.
+37:01 So I'm going to use accelerometer, because it's the simplest of the device motion things.
+37:06 But they all basically do the same approach of how you get the information back.
+37:09 So we use the accelerometer to drive our UI, just like touching and swiping, or whatever, we're going to use the accelerometer as an input.
+37:18 Alright, so let's make a new project here.
+37:21 Whoops! Not a new file.
+37:22 Cancel. A new project.
+37:26 Okay. And we're going to call this project Bouncer.
+37:30 And it's going to be universal.
+37:32 I'm also going to do something with this app that I haven't done all quarter, which is I'm not going to do anything in the storyboard.
+37:38 Okay? We're going to do all of this 100 percent in code, just to see what that looks like, okay?
+37:42 So I'm not even going to touch my storyboard.
+37:47 Alright, in fact, I'm going to move my storyboards down to supporting files, because I'm not going to use them, okay?
+37:52 It's all going to be in this one file, the entire implementation we're going to do here.
+37:57 Alright, so what are we going to do to start?
+37:59 Let's start by just putting a little red square on the screen.
+38:03 So we'll start simple.
+38:04 I'm going to have a little property here, non-atomic, strong, just a little UI view, I'm going to call it red block.
+38:11 It's going to be a little red square that I'm going to put on screen.
+38:16 And I'm going to do it, I'm going to put in on screen in ViewDidAppear, so once this view appears on screen, then I'm going to put this little block out there, and I'm going to do that in a method called Start Game, so it's going to be the start of my game.
+38:30 I mean, eventually it's going to be more than just a red block there, so we'll say we're starting our game.
+38:35 So what do we do in Start Game?
+38:37 I'm just going to say self dot red block equals-- now I would need to create a block, I want to put it in the center of the screen, so I create a nice little method here, called add block, this little guy right here, and all it does, as you can see, is it just does init with frame and add subview.
+38:56 And all it's doing is calculating where that frame is.
+38:58 So it's putting in the center offset by anything I want, any UI offset.
+39:03 So I'm going to put it initially right in the center.
+39:06 By the way, we don't need this or this for this entire demo.
+39:10 Alright, so I'm going to do self, add, block, offset, and I'm going to do UI offset make zero zero.
+39:17 So it's going to put it right in the center.
+39:19 Okay? Everyone understand what this does, is just putting-- adding UI view to the center of the screen.
+39:26 And my block is red, so let's make it red.
+39:30 Dot background color equals UI color, red color.
+39:34 Okay? So let's go ahead and run that.
+39:45 Okay. Okay, alright, good start.
+39:47 So what we want now is I want some gravity.
+39:51 I want this block to go somewhere else besides in the middle of the screen.
+39:56 So we do that with something you're all very familiar from assignment 4, which is animators, dynamic animator.
+40:03 So I'm just going to add a dynamic animator here to add gravity and to make it so when the block gets to the edge, it's going to bounce off, okay?
+40:11 Instead of just going off the screen.
+40:13 So let's do that.
+40:14 Uh, that, I have since you all know about animator, I'm not going to type all that in, I'm just going to show it here, this is what I just added.
+40:24 Right here.
+40:26 Okay, I've got some properties.
+40:27 The properties I have here are...
+40:31 a dynamic animator, of course, I've got a gravity behavior, that's going to be the gravity pulling on my red block.
+40:37 Collider, that's just going to be the outer edges, that's the only collider I'm going to have for now.
+40:42 And then elastic is an item behavior.
+40:44 I want it to really bounce off the walls.
+40:46 So I'm going to set it's elasticity so that it's completely elastic.
+40:50 All of it's hitting the walls are elastic collisions, okay?
+40:55 And so here's the animator.
+40:57 Lazy instantiation not doing anything special there, here's the collider, okay?
+41:02 The only thing that does is translates reference bounds into boundary.
+41:06 Okay, you know about that.
+41:09 Here's gravity, just default gravity.
+41:12 It's going to start out with our gravity pointing down in our view.
+41:17 Okay? Whatever down is in our view, in other words, increasing Y, that's where gravity's going to start out, we want to replace that gravity with the real gravity of the world, that's what we're going to be doing in a moment.
+41:29 And then here's elastic.
+41:30 Elastic is an item behavior which just sets one thing, which is the elasticity, okay?
+41:35 This says how elastic the collisions are, and I'm going to have it be 1.0, which means fully elastic collision.
+41:42 You can actually make this greater than 1, and it will pick up speed when it hits a collision, and you can make it less than 1, and it will dampen, right?
+41:51 All the way down to zero, which is the default, I think, which is that's a block, hit the bottom and then just kind of settle real quick.
+41:57 That's what we had, I think, the elasticity of our blocks in Drop It, were that.
+42:02 Alright, so I have this animator and all these things, so now I just want to make sure that I take my red block and add it to all these, so I'm going to say I want the red block to be in the collider, and I want the red block to be elastic.
+42:22 And I want the red block to be affected by gravity.
+42:25 Okay, so I'm just adding the red block to these behaviors.
+42:32 Again, hopefully this is all really familiar to you from assignment 4.
+42:36 So let's run to see what we've got now.
+42:39 So we've got gravity, collision and elastic, so this red block, boom, it goes down and it bounces.
+42:45 Okay? So this is excellent, we've got a good start here.
+42:48 Unfortunately, this is not real-world gravity, I'm moving this thing around, it's still going straight down and bouncing.
+42:54 That's because the default gravity is down, in other words increasing Y in my view.
+42:59 So what I'm going to do now is use the motion manager to set the gravity to instead of being down, to be wherever the real gravity is, by using the accelerometer.
+43:09 Okay, remember, the accelerometer is always measuring acceleration due to gravity so I will always know where real gravity is.
+43:17 So let's do that.
+43:19 That's pretty straightforward too, we're going to d that here in Start Game.
+43:22 So to do anything with core motion, I need a motion manager.
+43:26 So let's go get a motion manager here.
+43:28 I'm going to make a property, non-atomic strong, CMMotionManager, okay I need to import.
+43:36 Core motion.
+43:38 Oops, not core media, core motion.
+43:42 Alright. And now I have a motion manager, and I'm going to lazily instantiate this thing.
+43:51 So let's do that down here.
+43:53 CMMotionManager, if not motion manager, then motion manager equals CMMotionManager alloc init, and then I'm going to set the motion manager to do accelerometer updates at 10 per second.
+44:17 Should be enough.
+44:18 I mean, I'm doing UI here.
+44:19 I think 10 per second is going to give me smooth enough changing of direction, of my red square as I move around, but you know, I could crank it up a little bit if it doesn't seem responsive enough to my moving, or I could crank it down if it seems plenty responsive and I just don't want to do any more drawing than I have to do.
+44:37 Okay? So we're going to set it to be that, and then let's return our motion manager.
+44:43 Okay, so now we have this motion manager, so now what I'm going to do is say first of all I'm going to check to see if I'm already doing accelerometer updates, so I'm going to say accelerometer active.
+44:58 Whoops! And I'm only going to start monitoring this thing if the accelerometer is not already active.
+45:07 Whoops, let me...erase...thank you...okay.
+45:10 So if it's not active, then I'm going to basically give it a block to call me, and all I'm going to do in that block is update my gravity behavior's gravity.
+45:21 Okay? So let's do that.
+45:24 Self dot motion manager, start accelerometer updates to queue, so we'll give it a queue, I'm only doing 10 per second, I think I can easily go main queue on this one.
+45:36 So I'll go main queue, whoops...and here's the handler.
+45:43 Okay? Double clicking to get the handler, we'll put this right here, in fact, we'll make it even easier to see, we'll move this back here like this.
+45:52 Alright. So here's our handler.
+45:53 And what do we want to do inside this handler?
+45:55 Well let's get the X and Y of acceleration, so let's get the X, that's accelerometer data, okay?
+46:04 So that's this argument here to our block, dot acceleration, that's the acceleration that is happening, and X is the direction I want.
+46:13 So here's the X direction, and then I'm going to do the same thing Y equals accelerometer data, acceleration, dot Y.
+So now I have the X 46:21 and Y acceleration due to gravity.
+46:23 Okay? And do the device moving.
+46:26 Okay? Both.
+46:27 So it's a kind of combination.
+46:28 So that way, if I tilt my thing down, my blocks are going to go down.
+46:31 If I tilt it back the other way, it's going to go the other way, right?
+46:34 If I shake it over, it's going to accelerate a little bit in that direction, okay?
+46:37 So it's kind of like that block is going to be responding to my acceleration and my device, but mostly acceleration due to gravity.
+46:44 So how do I set the direction of the gravity of that behavior?
+46:49 Well, I have self dot gravity, that's my gravity behavior.
+46:54 It has something called gravity direction, which is exactly what we want.
+46:59 It's a vector, a CG vector, and it just has a delta X and delta Y vector, right?
+47:05 So like in math, vector, and so we're just going to have the vector, let's try doing X and Y, see what happens here.
+47:12 Okay? It's not going to work, but we'll try it.
+47:15 And we can do semicolon.
+47:18 Okay. Now, hopefully in some of your minds you're trying to think why this is not going to work, because it seems like this should just work.
+47:26 But let's see what happens.
+47:28 Anyone want to hazard a guess why it's not going to work?
+47:30 Yeah?
+47:31 >> Uh the vertical axis is going to be flipped.
+47:35 >> Yeah, so the answer that was posited is that the vertical axis can be flipped, and that's true.
+47:41 Maybe a better way of saying it is that the acceleration of this device is always the acceleration where it's...down this way in the device, so if I have it turned sideways, okay, then look at my thing it's bouncing.
+47:57 I have this turned up, face-up, and it's bouncing this way.
+48:01 Okay? Why is it bouncing this way?
+48:03 That's because it's measuring this stuff all on this axis.
+48:06 I want it measuring it in this axis, basically, where here's Z, here's Y, and here's X. So I basically have to know which way the user has my device turned.
+48:17 Okay? So I have it turned kind of landscape, okay?
+48:21 Landscape left, the home button is on the left.
+48:23 So that's going to-- I'm going to have to flip the X and Y and go negative Y instead of Y, and if I were doing it this way, which I have my...locked in here.
+48:34 But if I do it the other way around, then it's flipped.
+48:36 It has to be the other way, and if I'm doing it up this way, then it's another way.
+48:40 Okay? So basically, which way the acceleration to gravity is affecting my view depends on what the orientation of my view is.
+48:48 So let's put some code in to deal with that.
+48:51 Turns out to be pretty straightforward.
+48:52 So we can't just do this simple one.
+48:54 So let's take that out.
+48:56 And...to save some typing, we'll do it this way.
+49:00 So all view controllers have this property called self interface orientation that will tell you whether you're portrait, portrait upside-down, landscape left or landscape right.
+49:10 Okay? That's telling you, the view controller, you can also get this from the device.
+49:15 And you can also get an interesting one from UI application, might even be better to use here, which is status bar orientation.
+49:22 That tells you where the status bar is.
+49:24 And that's really probably the most correct thing, and probably what we should be using here.
+49:27 Because from the user's standpoint, wherever their status bar is, that's the top of the screen.
+49:32 Okay? Even if it's been slow to notice rotation, and it's in the wrong place, to the user, it's still to them, they think that's the top of their screen.
+49:39 But this is mostly going to track that anyway, so we'll use this one, it's convenient.
+49:45 And so here, landscape right, you can see we are swapping the X and Y. You see?
+49:51 This is the X, and I'm using the Y. Alright?
+49:55 And so both of the landscapes we're doing that in, and whether Y is negative or positive depends, you know, Y increases as we go down, so it just depends on whether we're portrait upside down or portrait right side up, and same thing for landscape.
+50:10 So you can look at these, stare at these later, as in convince yourself these are the right Xs and Ys.
+50:15 But you can just see, that we're using different ones depending.
+50:19 So let's see how this works.
+50:22 Let's get ourselves into a nice orientation here.
+50:25 Just, here.
+50:28 Alright, so now it's bouncing around, and if I tilt it, see, it's going off to the side, or I tilt it to the other side, or tilt it this way or down.
+50:36 So now it's following me, however I tilt my device, it is following that gravity, and I can kind of use it to accelerate faster and faster even, see that?
+50:47 Okay? So this is exactly what I want.
+50:50 I've got this thing so that I can control where my red block goes, depending on how I tilt my device.
+50:58 Okay, now I've locked my user interface orientation here.
+51:01 Watch, if I unlock it, then it's a little disconcerting because okay I'm clicking here, now I turn, and whoop!
+51:07 My status bar moved, but it's still working, okay?
+51:10 Because every time I get an update, it's still readjusting to where down is.
+51:15 Okay? It's a little disconcerting to the user.
+51:17 If I were a user and really playing this game, I would probably, you know, lock my thing into some orientation, where's that switch, here it is, like this.
+51:28 It would just be a little more fun to play this game if it wasn't constantly switching my status bar, but it's still working, it's just a little...okay, this is better.
+51:35 Make sense what we're doing so far?
+51:37 Question?
+51:37 >> Can you programmatically do rotation lock in your app?
+51:41 >> The question is can you programmatically do rotation lock?
+51:43 Well, you kind of can, because you can specify that you're application only works in certain orientations, right?
+51:49 And so by doing so, then you can basically do orientation lock.
+51:54 So. I don't know that there's a way to kind of say "lock it in the current orientation," like I'm not sure there's a way to do that, there might be, but I don't know offhand.
+52:04 Alright. So now we've got this thing bouncing and responding to our thing, that's a good idea.
+52:08 One thing I'm going to do also here is I'm going to set the gravity direction before we start, equal to vector makes zero, zero.
+52:18 That's because I'm going to be starting this thing going off.
+52:20 I don't want, before the first one goes off, to have any kind of downward acceleration, so I'm basically going to set it so we have no gravity, and then I'm going to start this accelerometer to get the, this going.
+52:32 So that's good.
+52:34 Alright. This would be kind of cool if we added another block.
+52:38 So let's put another block in here.
+52:40 I'm going to create a black block.
+52:42 So I'm going to go up here, and set property, non-atomic, actually might as well make these weak, if they leave the view hierarchy, then we'll clean them up.
+52:55 Black block.
+52:57 Notice I made these behaviors all weak as well.
+53:00 Why did I make these weak?
+53:02 Well, because if this dynamic animator isn't holding on strongly to them, then I don't want them.
+53:07 Okay? Same thing when we make an outlet weak, right?
+53:10 If the view hierarchy isn't holding on to them, and since I'm not doing storyboards here, I'm doing code, I'm still kind of doing the same thing.
+53:16 I don't want my red and black block to be around if I take them out of the view hierarchy.
+53:21 Alright, so let's make my black block.
+53:23 Actually it's very similar.
+53:24 Let's copy and paste my red block, black block, and we'll do this, and...whoops...oh.
+53:38 Well that's interesting.
+53:39 Okay. That's very strange.
+53:41 Okay, black block, and then here's another black block, and the black block wants to be black, and we're going to have the black block do the collider, but I'm not going to have it be as elastic, nor am I going to have it do the gravity.
+53:57 So the black block, the only thing that's going to make the black block move is if we hit it with the red block.
+54:02 Okay? That's the only thing that can impart.
+54:04 Or if it collides with the edge, we'll get a little bit of reactive thing, but that's basically it.
+54:10 This is black.
+54:12 Alright? So let's put that black block on there, and let's not have them both start in the center, so we'll have that one start at minus 100 and this one start at plus 100.
+54:19 So we'll see what this looks like.
+54:21 You add a black block to our red block.
+54:28 Okay. So now if I can hit it, see you can see that they're both bouncing around.
+54:35 The red one has more elasticity, so it bounces off quite a bit more powerfully than the black block, okay?
+54:43 But I can still try and get that black block moving.
+54:45 So now you can imagine turning this into a game pretty quick, which is the object of the game is to keep that black block moving, okay?
+54:53 The more you can make that black block move, the more points you get.
+54:56 So let's go add some score.
+54:57 Let's add a score to this game, okay?
+55:00 Now this part is not really that much of a learning exercise, so I'm going to just type that in, real fast, you can go look at this later.
+55:09 It's got a whole bunch of properties involved in keeping score, like that, and all we need to do in our code is update the score.
+55:18 And I'm going to update my score when the accelerometer goes off.
+55:22 That's 10 times a second, that seems like a good rate to me, so I'm just going to update my score there.
+55:26 So let's look at that.
+55:29 All the scorekeeping does is just keeps track of where the black block is, how long it's been doing that, and then it puts the score in the middle there.
+55:37 You can see, and it keeps both the current score and your highest score so far, with this block, so.
+55:44 If you let the black block stay there, and you don't hit it, you can see that my score is going to start going down pretty soon.
+55:52 See, it's going down.
+55:54 But if I start hitting it again, make it move there we go, it will start going back up again.
+56:00 Okay? And the longer I keep doing this, the harder it is to get my score high, but it's doing okay.
+56:08 Okay? So you can try and see what's the highest possible score.
+56:10 Now I haven't done a very good job here of keeping that black block moving, so you can imagine the scores could be much, much higher.
+56:16 Notice also for fun, I made it so that the score bounces off.
+56:21 Okay? So it doesn't go over the scores.
+56:23 This will just kind of make it a little harder, actually, so you can't go straight to that block, you have to think about the score being in the way.
+56:29 So that's kind of cool.
+56:31 We're almost ready to ship this on the app store.
+56:33 What else are we going to do?
+56:35 Let's go ahead and think about an important part of a game like this, which is pausing.
+56:42 Okay? Why would you ever want to pause this game?
+56:45 A lot of reasons.
+56:46 What if this game were in a suite of games, where there was a tab bar, and you were switching between games.
+56:50 When you switch to another game on a different tab, like machismo or something, you would want this game to pause, and then when you went back to it, you would want to continue.
+56:59 Or what if I switch to another app?
+57:01 I go like this, and go switch to another app and doing some other things, you know, and then I come back to my game, it's like, "Oh!
+57:07 My score! Ruined." Because it was sitting there doing nothing for all that time.
+57:10 I want it to pause, and then continue when I come back.
+57:13 Or maybe I want to be able to just tap on it and pause, and tap again to continue, right?
+57:18 So pausing/resuming would be really cool.
+57:20 So how can we make our game pause and resume?
+57:23 Well, we can take this start game and turn it pretty easily into resume game, and all we need to do to do that is check to see if the game is already started, because if it's already started, well that's going to be not, if not red block, if we have them start a game, then we need to create the red and black block.
+57:44 But otherwise, we can just fire up this accelerometer, and what we'll do to pause is we'll just stop the accelerometer, okay?
+57:51 So I'm just going to say self dot motion manager stop accelerometer updates.
+57:58 Okay? So I've paused, I've just stopped the accelerometer from updating.
+58:02 Okay? Which is a pretty good thing.
+58:03 I also have pause scoring okay, because I want to do that.
+58:08 Don't look too closely behind the curtain for that one and then also I want my gravity direction to be back to being zero.
+58:21 Okay? I don't want my red thing to be trying to do gravity when it's paused, right?
+58:27 So that's all I really need to do to pause this game.
+58:30 So let's put a little tap gesture in that pauses the game, and then continues the game.
+58:35 Okay? This will, now can be resume, and so I'm going to do a tap gesture, I'm going to do it in ViewDidLoad.
+58:43 Told you I wasn't going to do anything in the storyboard, and so I'm just going to say self dot view add gesture recognizer, UI tap gesture, alloc init with target self, action is going to be tap, okay, that's it.
+59:05 So now I've added this tap gesture, so now let's make tap.
+59:08 And all tap needs to do is when you say if we're paused, then resume, otherwise, pause.
+59:21 Okay? So we need an "is paused," how are we going to tell if we're paused or not?
+59:27 Real easy, is paused, I'm just going to return if the motion manager's accelerometer is not active.
+59:39 Okay? So if the accelerometer in the motion manager is not active, then we must be paused.
+59:45 Okay?
+59:47 See what I did there?
+59:48 So let's go try this, see if this works.
+59:51 And this is going to work, but not quite exactly how we might want, as you'll see.
+59:59 Alright, so let's go get some motion happening here first.
+01:00:02 Alright, so we got this thing, motion, I'm going to hit pause.
+01:00:05 Okay, so it paused, okay, but it's still-- it paused in that my accelerometer is not working, but the red block still kind of kept moving, so here I turn it back on, gravity's back, I pause, it's like the red block keeps moving a long way.
+01:00:21 Okay, why does that red block keep moving?
+01:00:23 Well, because it already has a force applied to it, and it's just letting that force kind of play out.
+01:00:30 So what would be really nice when we pause is if we put some quicksand in here, and everything kind of slowed down, right?
+01:00:36 I don't want everything to stop immediately, but I want things to, you know, nicely slow down.
+01:00:41 Okay? So how do we add quicksand?
+01:00:43 Well, I can do that with another dynamic animator thing.
+01:00:47 Let's put this down here, I'm going to call it quicksand, in fact, alright?
+01:00:52 And so quicksand is just another behavior that I'm adding right here.
+01:00:57 And what does this quicksand look like?
+01:01:00 It's this, it's what I added.
+01:01:01 And as a UI dynamic animator that has resistance, so resistance is a item's resistance to forces being applied to it.
+01:01:10 So I'll start it out at zero, which means no resistance to it.
+01:01:14 That's the default.
+01:01:15 So it doesn't resist any of the forces, you know, the gravity, it doesn't resist any of that, just things are bouncing around.
+01:01:21 And then when we pause, I'm going to crank this resistance up to like at least 1.
+01:01:26 1 is it completely resists forces so it will slow down really quickly, but I can go even more than 1, which is it actively, you know, reduces its forces on it, its response to forces on it.
+01:01:37 But we've got this quicksand, all we need to do is add both the red item, the red block, and the black block, to the quicksand.
+01:01:50 Oops, okay.
+01:01:54 I missed a copy key quite a bit.
+01:01:56 Okay black block.
+01:01:58 So we'll put them both in this quicksand, and then we're just going to, when we pause, we're going to set the quicksand's resistance to let's say 10, which is pretty high resistance, they're going to slow down pretty fast with that.
+01:02:12 We could tweak that, whether we want it to be that much.
+01:02:14 And then when we resume the game, we're going to set the quicksand's resistance back to zero.
+01:02:20 Okay? So let's do that.
+01:02:23 And I'm mostly doing this so you can see the effect of pausing, because next we're going to show how to do pausing in a different circumstance.
+01:02:31 Okay so here, let's go, get this guy going again, right, he's moving around.
+01:02:35 Now, if I pause, let's see how quickly he stopped.
+01:02:38 He's still spinning, but he has stopped his motion.
+01:02:41 And if I continue, now gravity is going to work on him again.
+01:02:45 One thing about stopping him so quickly, it allows you to cheat a little bit, because if this guy's out of control and you're trying to get him back in control so you can get after the black block, this stops him, right?
+01:02:56 Too quick.
+01:02:56 So it might be that having 10 be our quicksand is a little too high.
+01:03:01 Maybe we only want 1.
+01:03:03 Which would mean it would slow down kind of at a normal or a much slower rate.
+01:03:08 So you could play with that.
+01:03:10 Alright, so when would we want to do pausing.
+01:03:14 Well, one of the real important places to pause is when someone clicks to go to another app.
+01:03:20 Okay? So I'm going to go back to the slides, really briefly, and show you this, and then we'll go back.
+01:03:32 So your applications state the life cycle of your application, it goes through certain states, and one of them is it's the active application.
+01:03:42 And being the active application means you're getting events, your views are getting events, right?
+01:03:47 Touch events are happening to you.
+01:03:49 You're basically responding to the world.
+01:03:52 That's only happens when you're the active application.
+01:03:54 Now, if you're the active application, you're bouncing, you're playing your game, what could cause you to stop being active application?
+01:04:01 Well, obviously someone could click on the home button and go to another app, but there's other things too that could happen.
+01:04:07 A phone call could come in on your iPhone, now you've stopped being the active app, whatever the UI is for handling a phone call.
+01:04:14 Even notifications, very important, system notifications can come up and, you know, they gray out your app, they put an alert view in the middle, and some notification happened, that could make your app stop being active.
+01:04:26 So it's important to know when your app stops being active, like Bouncer, so Bouncer can pause the game.
+01:04:31 So I like to think of active, the activeness of your application being the pause/resume of your application, okay?
+01:04:40 So you find out about these, your application delegates have these methods.
+01:04:43 Application did become active, application will resign active, right?
+01:04:47 That's going in between the two states, but there's also a radio station for it.
+01:04:52 Okay? And that's important to understand, there's this radio station too, and so you can have view controllers like this Bouncer guy, listen to the radio station and find this out and do the pausing.
+01:05:00 So we're going to do that in the demo in a second.
+01:05:02 While I'm here, though, let me talk about some other application state things.
+01:05:05 One of them is background/foreground, which is a different thing than active/not active.
+01:05:10 Okay? Active means you're in the foreground, and you're receiving events.
+01:05:14 Okay? When someone clicks to go on some other app, you stop being active, but you're not in the background yet.
+01:05:21 You can think of background as kind of being shelved.
+01:05:24 Okay? You're being put on the shelf.
+01:05:26 And when you're put on the shelf, you don't run.
+01:05:28 The only time you're ever going to run when you're on the shelf is a background fetch, which we saw a couple weeks ago, or your a special kind of app, like a VOIP app or a location services app, where you're getting locations, then you can come off the shelf and run for a little bit occasionally, but you're being shelved.
+01:05:43 So background is shelving.
+01:05:44 Active is just, you might still be the app that the user is using, but something has happened to interrupt that, maybe temporarily.
+01:05:51 So active is whether you're receiving events.
+01:05:54 It's kind of a pause/resume.
+01:05:55 Background is shelved.
+01:05:56 So before you get shelved, you want to definitely make sure your world's cleaned up and everything is a nice state, because one thing, the shelf can sometimes be cleaned off and you're thrown out.
+01:06:06 Okay? If memory became a problem or something like that you could just completely never run again.
+01:06:11 So when you get put in the background, you want to know about that maybe.
+01:06:15 But you find out when you come back in the foreground, too.
+01:06:18 So, you know, then you can undo.
+01:06:20 Usually in the foreground one, you undo what you did in the background one.
+01:06:24 There are some other application delegate items of interest that you can look up in the documentation.
+01:06:29 One is local notifications.
+01:06:31 Local notifications are a way for you to schedule something to happen in your app at a certain date and time, and when that happens, if your application is not running, you can be launched to handle it.
+01:06:43 Okay? So it's a way to kind of make sure your app runs at a certain time.
+01:06:47 So like the calendar app, this is how it would make sure that you got reminded that you're supposed to go to class or whatever, even if the calendar app is not even running.
+01:06:57 So local notification is something to look at.
+01:06:59 State restoration, if you got put on the shelf, and then you got killed, and the user ran you again, you don't want your UI to come up like in some base start UI, you still want to come back to where it was when you got put on the shelf.
+01:07:13 So state restoration is a formalism where you keep track of where your UI is, so when you get put on the shelf, if you get killed and have to come back, you can restore your state to where it was.
+01:07:23 Data protection is an interesting one.
+01:07:26 There are ways to protect files that say if this device is locked, in other words, at the lock screen, then you can't access this file.
+01:07:33 But if it's unlocked, then you can.
+01:07:35 So it's kind of a special kind of protection.
+01:07:37 You can find out about changes in that, i.e., when the thing is locked and unlocked, and also there's method in there for finding out currently is it locked or not.
+01:07:46 Then there's open URL.
+01:07:47 Open URL is kind of a cool thing, you can go into X code if you go to the info tab there in project settings.
+01:07:54 You can define a URL, like not http colon something but like PhotoMania colon something, for example, if PhotoMania wanted to do it.
+01:08:03 And then if other people in other apps say open URL PhotoMania colon slash slash, something something something, question mark, this, that, all the full URL things you can do in the world of URLs, then PhotoMania would get launched to go handle that URL.
+01:08:18 Okay? And there will be application delegate method called, handle this URL.
+01:08:23 So that's another thing to look at in application delegate.
+01:08:26 Okay. So. That's the end, that's all I wanted to cover on that.
+01:08:31 But now, let's go back to Bouncer, and show using this.
+01:08:35 I'm going to pause when I get, stop being active, and I'm going to un-pause when I go back to being active.
+01:08:43 And the way I'm going to do that, very simple, NS notification center, default center, add observer for name, and the one I want is UIApplicationWillResignActive, okay?
+01:08:58 So that happens when I'm going to resign being the active application.
+01:09:05 And object nil, I don't really care who-- whoops!
+01:09:09 Who this comes from.
+01:09:10 It's going to come from the application, whatever, application object.
+01:09:14 Queue, fine to do it on this queue that I'm calling this from.
+01:09:18 And then, here's the block I want to do, in my app, really simple, self, pause, game.
+01:09:24 Okay? I'm going to resign being the active application, so I'm going to pause.
+01:09:28 And similarly, can do the same thing when I come back, but here it's UIApplicationDidBecomeActive, and here I want to resume.
+01:09:41 Okay? So let's see if this works [background sounds].
+01:09:49 Alright, so let's get this doing something so we can see some points being scored, there we go.
+01:09:58 Okay so we've got some points, we're about 80, 90, 100, 110, okay so if I pause, I'll still be at 110-ish, see, pause again.
+01:10:08 Okay, my score is saying the same score, down now pretty fast because I'm not hitting that black block, let's get him going again.
+01:10:15 Get the score back up, okay now I'm going to go to another app.
+01:10:18 105, 113, so let's go to another app.
+01:10:21 Okay, maybe settings or something like that, and my app right now is paused, I hope.
+01:10:26 So let's go back and hopefully Bouncer will be about where it was, and it is, it was at about 100.
+01:10:32 Now, in fact, if we go away and come back, if you first look, you'll see it shows paused for a second because it was paused.
+01:10:41 Also, though, you'll notice that see this is 71, 70, 69, 68, 67.
+01:10:47 Okay? But now when I come back it's not going to be at 66, it's farther along, see 65.
+01:10:52 Why is that?
+01:10:53 Well that is because it does get to run for a few seconds.
+01:10:56 Okay? When I click to go to another app, I stay the active app for a few seconds, and it gets to run a little bit, and now I'm not the active app, so I pause, and then we come back.
+01:11:06 So there is a short amount of time there, just so you know there's that window.
+01:11:10 Okay? The last place that we want to pause and resume is here.
+01:11:14 Okay? Here's ViewDataPeer, we're already resuming here because we used to be starting and then we changed it to resume.
+01:11:20 Obviously in view [tapping sounds], whoops!
+01:11:26 View, will disappear [tapping sounds], we want to self pause game.
+01:11:37 Okay? That's again if we're in the tab bar, click on another tab, we want to pause and come back.
+01:11:44 Alright? Okay, so I didn't get to do action sheet.
+01:11:48 I will post the code for the action sheet thing.
+01:11:52 All I was going to do in the action sheet is just add another button in PhotoMania to do the little photo choosing, called filter photo, and it was going to put up an action sheet, and you could pick a photo like, or a filter, like I had noir, and chrome, and blur, you pick one of those, and it would apply the filter to it, and that's all we were doing on the action sheet.
+01:12:10 But it shows you how to put up an action sheet, load it up with some things, and respond to it.
+01:12:14 Okay? So I'll just post that code today and you'll get to see that.
+01:12:19 Okay, that is it.
+01:12:20 Uh, Thanksgiving next week so I will not see you for a week and a half.
+01:12:25 Don't procrastinate on your final projects everybody.
+01:12:27 Get them going and if you have any questions I'll be here.
+01:12:31 Thank you.
+01:12:33 >> Announcer: For more, please visit us at stanford.edu.

@@ -1,0 +1,1468 @@
+00:00 [ Music ]
+00:00 >> Stanford University [silence].
+00:08 >> So, welcome to Lecture 11 of CS193P.
+00:11 This is the fall quarter of academic year 2013/2014.
+00:16 And today we're going to talk about two major topics.
+00:19 One is UI TableView, which a very important class.
+00:22 And also we're going to talk about an iPad now.
+00:24 We've been doing everything so far on the iPhone, but we want to start doing things actually on both platforms now; iPad and iPhone.
+00:30 And then I'm going to do a demo, which is going to of course incorporate these two things.
+00:35 So let's dive right into TableView.
+00:38 This is a very important class, because a lot of times the data that you need to display in your applications comes in the form of a list.
+00:46 Okay? And TableView is basically a list view.
+00:48 It's a list of items.
+00:51 It's one-dimensional in that, you know, it's just -- it's not like a matrix or a spreadsheet or something like that.
+00:57 It's one, although it can be divided into sections which gives it a little more dimension.
+01:02 When we want to display multiple dimension things like a spreadsheet would be, then we just put multiple TableViews into navigation controllers.
+01:10 And so users touch rows and we slide in the next row basically if you want -- or let it -- next column, if you want to think of it in spreadsheet-type terms.
+01:19 So that's how we do it.
+01:20 The TableView itself doesn't manage multidimensional data.
+01:25 And there's a lot of different configuration and customizations for TableViews.
+01:30 And so I have some slides here to show you some pictures of what TableViews look like.
+01:33 So here's a couple of different types of TableViews -- the two main types -- which is the plain style, that's the one on the left.
+01:41 And then the group style which is the one on the right.
+01:44 The plain style one that I've shown there is also a dynamic TableView.
+01:49 Meaning that all of its contents are being filled up from some database somewhere.
+01:53 Okay? So you can see here I've got some contacts there.
+01:58 Some of you might be able to guess [chuckles] what all those people are.
+02:01 But anyways, it's just a list from some database -- a team database or something.
+02:05 And then on the right, okay?
+02:07 We have a grouped table.
+02:09 You can see the kind of -- the things are grouped, right?
+02:12 The little distances section.
+02:13 The map label section they're kind of grouped together more instead of just having section titles on the left.
+02:20 And also, that one on the right is static.
+02:24 In other words, the things that are in that aren't coming out of a database.
+02:28 They're just kind of fixed in there.
+02:29 It always says in miles.
+02:31 It always says in kilometers.
+02:32 It always says all this in English.
+02:33 It's just fixed.
+02:34 Okay? So it's a static table.
+02:36 So these two kind of encompass all the different styles that we can do.
+02:40 So let's talk about some of the particular parts of a TableView.
+02:45 I'm just going to give them some names so we can talk about them.
+02:47 So at the top of the there's a view.
+02:49 Okay? That comes before all the rows, which is the header -- the table header.
+02:54 There's a little bit of code at the bottom.
+02:55 That's more for your reference later.
+02:57 That's basically the properties you use to set that thing in the TableView.
+03:00 And of course there's the footer as well.
+03:03 So the table header and a table footer.
+03:05 In between is where all the rows are.
+03:07 And the rows are divided into sections, okay?
+03:11 And each section includes some rows -- some number of rows could be one row.
+03:16 Or it could be 100 rows.
+03:17 Or a 1,000 rows, whatever.
+03:19 And also a header and a footer.
+03:21 So each section has headers, so you can see header 0, header 1 for these two sections.
+03:25 We have two sections in this TableView, and each one also has footers.
+03:29 Okay? We don't really use the footers that much.
+03:31 We use the headers quite a bit when we have sections in our TableView.
+03:34 And then very importantly, there's the table cells.
+03:37 And this is where the actual data that's coming out of our database, or whatever, that we're displaying in our TableView are coming out of and putting into these table cells, which are actually UI views.
+03:48 Okay? A custom subclass of UI View.
+03:50 So that's what we call all of these various parts.
+03:52 This is what it looks like in the plain style.
+03:55 And this is the same things in the group style.
+03:58 So the group style you see kind of this little more grey background and kind of groups the sections together a little more.
+04:04 Okay? Let me talk a little bit about the sections, because sometimes that confuses people.
+04:10 A section is just a way to group the rows.
+04:13 So here I've got some information with no sections.
+04:16 It's just a bunch of cities.
+04:17 Right? Helsinki and Paris and Berlin.
+04:19 And on the right I've also got a list of cities, but they're grouped into sections by the country.
+04:24 You can see Japan.
+04:25 It's got Tokyo and Kyoto and the Mexico.
+04:29 It's got San Francisco, something or other there [chuckles], and Netherlands.
+04:33 It has Amsterdam.
+04:35 So they're grouped by country, but it's still just a list of cities.
+04:40 Okay? So that's the sections.
+04:41 They're not -- now in your homework you're actually going to have to do, in fact this exact thing.
+04:45 Where you're going to be grouping places by the country they're in.
+04:48 And so you will be using sections in your homework.
+04:51 Okay? In the demo today I'm not going to do sections.
+04:53 I have to leave you something to figure out on your homework.
+04:57 They type of cell.
+04:59 So each cell -- each row -- can have a certain types.
+05:03 There's the subtitle type that has like a title and a subtitle there.
+05:06 You see the city and then the country -- or the region and the country there is the subtitle.
+05:11 And then basic has no subtitle.
+05:13 There's the right detail and the left detail.
+05:15 That puts that subtitle information kind of off to the side with a little bit of color or whatever.
+05:19 So these are the four different types of cells.
+05:23 And you can also have custom cells.
+05:24 Where you lay out what's in there completely on your own.
+05:27 So how do you view as a TableView?
+05:32 Well 99% of the time we use it with a TableView Controller.
+05:36 So TableView Controller you can just drag it right out.
+05:39 So here we have X-code.
+05:40 I've got this TableView Controller example application here, and I'm just dragging a TableView Controller out of the object pallet and into my storyboard and it puts a whole scene there.
+05:53 Okay? Now that scene's controller is a UI TableView Controller.
+05:57 That's a class in IOS.
+05:58 UI TableView Controller.
+05:59 The view of that UI TableView Controller scene is a UI TableView.
+06:04 Okay? When we use UI TableView Controller almost always the entire view is a UI TableView.
+06:11 Okay? The complexity in that view cones in the cells -- what we put in the cells.
+06:15 That's where the information and the data is.
+06:16 We don't usually put a TableView and then some other things around it.
+06:20 Although you can do that, you just usually wouldn't use UI TableView Controller in that case.
+06:25 You're going to do kind of all the things UI TableView Controller does for you, manually -- which I'll mention what some of those things are.
+06:31 Alright? So we just drag this thing out.
+06:34 We are obviously going to want to subclass UI TableView Controller so that we can implement our own controller behavior for one thing.
+06:42 View did load and all those things.
+06:44 But also we're going to want to implement the TableView's delegate and data source.
+06:49 Which are a couple of properties that have a protocol, which we're going to talk about.
+06:53 And that's how the data gets loaded in the table.
+06:54 So we're going to do all that stuff in a subclass of UI TableView Controller.
+06:58 So you can see that I did new file, and now I'm creating it, and you can see that it's a subclass of UI TableView Controller and I'm calling it my -- actually probably "My TableView Controller" is what I should call it -- might have called it that on the next one [chuckles] yeah I did.
+07:10 And then of course, just like any other scene, you're going to click on the controller and go over to the identity inspector and set the class.
+07:18 That's exactly the same as you've done for all your controllers, right?
+07:21 You have to set the class, so here I'm setting it to My TableView Controller.
+07:25 A little out of sync between those two slides.
+07:27 Anyway, My TableView Controller we'll call it.
+07:30 And if I right-click on that controller, okay?
+07:33 And see what its connections are, you'll see that at the bottom of that black window there's referencing outlets.
+07:39 Those are two properties -- datasource and delegate -- those are ID angle bracket.
+07:44 UI TableView Datasource, or ID angle bracket, UI TableView Delegate.
+07:49 Okay? And the TableView controller, when we drag it out, automatically sets itself to be those two things.
+07:55 So all the methods in those two protocols are going to be implemented by our TableView Controller subclass right there.
+08:02 And of course we're actually going to inherit some of them from UI TableView Controller which is this nice package that IOS provides to kind of get you going with TableView's.
+08:10 And we're going to talk about the datasource and the delegate and what they -- what methods are in there and what we have to do to make this all work in just a moment.
+08:17 But first, let's look a little bit of how we can configure the TableView and make it look different ways.
+08:22 So this TableView comes out and it's in plain style by default, but I'm going to switch it to grouped so we can see what that looks like.
+08:29 It looks kind of similar.
+08:30 Again, more of a grey around it -- more grey area because the cell -- the rows are kind of grouped together more.
+08:36 These are dynamic cells right now.
+08:41 In other words, they would be loaded by some external data, using our datasource protocol.
+08:45 But I'm going to switch this to static cells.
+08:48 And when you switch to static cells, first of all it gave me three instead of one, which was nice.
+08:53 Now these cells are static.
+08:54 Meaning however I edit them in the storyboard, that's what they're going to look like in the program.
+08:59 They're not getting loaded up from any external datasource, I'm just editing them right here.
+09:02 It's almost like it's just three rectangular views.
+09:05 And you can drag buttons in here.
+09:07 You can drag labels.
+09:08 You can wire up outlets.
+09:09 You can do anything you want in this static TableView.
+09:13 Really the static TableView is for things like settings and things like that.
+09:16 Things that, you know, are -- the UI of them is fixed.
+09:19 It's not for, you know, contacts and things where you're loading it out of a database.
+09:23 So you can have static.
+09:23 But I'm going to switch back to dynamic here.
+09:27 Okay? Back to the dynamic cells.
+09:29 So -- and notice that when I switch to dynamic cells it says along the top, prototype cells.
+09:34 Because these cells are actually going to be prototypes -- whatever we do here in the storyboard -- that are going to be replicated over and over for everything that comes out of our database.
+09:43 So in dynamic mode we're getting all the data out of the database and we're replicating these prototypes.
+09:49 Also, this is still in grouped mode.
+09:51 Right? So I'm going to switch back to plain mode.
+09:53 It still sends prototype cells to the top, but now I'm getting more of the plain mode where there's not the grey around the group so much.
+10:01 Also you can see I have three of them there.
+10:03 It's pretty unusual to have three different prototype cells when you're loading the stuff out of the database.
+10:08 It would only be if you're loading kind of different things out of the database and you display them differently you might have different prototypes.
+10:14 But most of the time we only have one.
+10:15 So I'm going to change back to one prototype cell.
+10:18 So I have this one prototype cell.
+10:20 And it's going to be copied for every single thing that I load out of my database; every row.
+10:24 Okay? Does everybody understand what I'm saying by it's a prototype?
+10:27 It's like a template that's going to be copied.
+10:29 So whatever we do here in the storyboard to set this thing up, it's going to look the same.
+10:33 Except the data will be different because it's going to be loaded from a database, but the layout of it is going to look the same.
+10:38 So what kind of things can we do?
+10:40 Well, let's change this cell to have that subtitle look like a subtitle thing that we -- cell type okay?
+10:47 And so now we get a title and a subtitle.
+10:50 So when we pull data out of our database, we're going to want to pull some data that's the title and pull some data that's the subtitle for each row.
+10:56 We can also add a little accessory on the right-hand side of the row.
+11:00 So I'm going to put a special one in here, a detailed disclosure.
+11:03 You see it looks like that little information circle, right?
+11:06 An "I" inside of a circle.
+11:08 And that's actually a special thing -- which I'm going to talk a little bit about later -- but there's other ones there.
+11:13 You can put like check marks and just disclosure indicators and things like that.
+11:16 And I'm not going to go through all the things you can do to set up the cell you want.
+11:21 You can drag images in there and all that stuff, but suffice it to say, you can use the inspector there and set your cell up the way you want.
+11:28 So this cell is going to be duplicated for every row now in my dynamic table view.
+11:34 The most important attribute though to set in the attributes inspector for a TableView cell is this identifier.
+11:41 You see where I've typed in Flickr Photo Cell right there under identifier?
+11:45 This is the string that we're going to use in our code so that our code knows the cell to replicate.
+11:53 Okay? So you know, just like when we did a segway and we would type in the name of a segway like display photo or something like that?
+12:01 And that -- and then we used it in our code by name?
+12:04 Xcode uses names to sync up between your code and what's in the storyboard.
+12:08 Because you want to be able to copy and paste entire scenes from one storyboard to another, for example, and you want them to hook back up when they get to the new place.
+12:17 And they do that because by names.
+12:19 As long as the names match.
+12:20 Names of classes.
+12:21 Names of identifiers, then it will be hooked back up.
+12:24 And we're going to see that in the demo.
+12:25 I'm going to copy and paste an entire scene from a completely different application that we wrote into my demo application and it's all going to stay hooked up.
+12:31 Which is really kind of cool.
+12:33 Okay? So some people think this is kind of unwieldy to have these strings.
+12:36 And you have to match them up in your code, and if you mistype a character, now they don't match up anymore.
+12:40 But it's really just using naming to hook these things up.
+12:44 Okay? So that's very important, that identifier, and we're going to see that in the code in just a moment.
+12:49 Okay. So let's talk about these two really important protocols.
+12:52 The datasource protocol.
+12:53 And the delegate protocol.
+12:54 Okay? The datasource protocol -- which is ID angle bracket TableView datasource -- that is the contents of the TableView.
+13:02 That's the data that's coming out of our database that's going into the table.
+13:04 In other words it's the what that is being displayed.
+13:07 It's basically displaying our model.
+13:10 And remember our model is what?
+13:11 And so the datasource brings the model into the table.
+13:15 The controller uses -- the datasource is a protocol implemented by the controller to bring the model's data into the view -- the TableView.
+13:22 The delegate on the other hand, is for how the table is displayed.
+13:26 How we arrange things.
+13:27 What views we use to show those headers and footers; those kinds of things.
+13:31 What if someone touches a row?
+13:33 And we want to react to that.
+13:34 That's all the delegate.
+13:35 Okay? It's not about the data that's being displayed, it's more like how are we displaying this table and how is it reacting to touches and things like that.
+13:41 So we're going to talk about both of these delegates -- the datasource and the delegate.
+13:47 The UI TableView Controller, just to be clear -- I showed this a couple slides ago -- it automatically wires itself up as the datasource and delegate.
+13:55 If you were going to bring out a generic view controller and drag out a TableView into it -- which you can do.
+14:01 You would have to control drag the datasource and the delegate to UI TableView Controller yourself.
+14:06 You'd have to hook them up.
+14:07 Or in code you could hook them up too.
+14:09 But you have to connect them up.
+14:10 But UI TableView controller automatically hooks it up.
+14:13 The datasource and delegate are almost always going to be your controller.
+14:16 Right? That just makes sense because the controller's job is to interpret the information of the model for the view.
+14:22 So obviously the controller wants to be the delegate.
+14:25 And again, back to the MVC thing that we did the very first day, this is that blind, structured communication between the view and the controller.
+14:34 Okay? The UI TableView Controller also has a property called TableView which lets you get the TableView that's in your controller.
+14:41 So that's nice to be able to do that so you can configure it and talk to it and things like that.
+14:45 So that's a nice one.
+14:47 It actually happens to be self.view in a TableView controller which is a little weird.
+14:51 That was a strange design choice I think on Apple's part, but it is what it is.
+14:56 Okay. So what are the important methods in this datasource protocol?
+15:00 Well, there's really three important ones.
+15:02 One is, how many sections are in this table?
+15:05 How many rows are in each section?
+15:07 And then give me a view -- a UI TableView cell -- give me a view that I can use to draw this row.
+15:13 Okay? Obvious, right?
+15:15 These are the three things.
+15:16 Know how much data there is, and then it just asks -- constantly asks you for the data by asking for these -- this view.
+15:21 This UI TableView cell over and over.
+15:24 So let's cover the last one first, because that's the most important.
+15:26 It's really easy; the sections and rows, it's just asking you for a number.
+15:29 But the -- getting the cell for each row is a little more complicated, so let's talk about that one first.
+15:34 So this is the third method in the datasource protocol.
+15:38 And it's called, "TableView Cell for Row and Index Path".
+15:44 Okay? It's kind of exactly what you'd expect it to be called, in the sense, once you understand that index path is just an object that describes the section and row within that section.
+15:54 So index path and object.
+15:55 It has two properties; row and section.
+15:58 Okay? So that argument is basically just encapsulating the row and section into one object.
+16:03 So that -- so we're being asked here to provide a cell -- a UI TableView cell, which is a UI view to draw that row in that section.
+16:13 And we only do this for dynamic tables, okay?
+16:16 Because for a static table we set all this up in the storyboard, so we don't need -- you know, there's no need for the TableView to be asking us for this view, because it's already set up in the storyboard.
+16:25 Okay? This is only for dynamic ones that we have this.
+16:28 And what are the two things that we need to do in here?
+16:32 One is, we need to create a cell.
+16:34 And then we need to configure that cell.
+16:36 So we're going to talk about those two things separately.
+16:38 First of all, how do we create a cell that we're going to return?
+16:41 Because we have to return a cell here -- UI TableView cell.
+16:44 And we do that using this kind of funky method called, "DQ Reusable Cell with Identifier for Index Path".
+16:52 Okay now, what this does is it essentially goes and looks in the storyboard.
+16:57 Finds that identifier -- Flickr Photo Cell -- remember I told you that was an important thing to type in, in the storyboard.
+17:03 And it copies that prototype -- makes a copy of that prototype.
+17:07 Okay? And returns it.
+17:10 However, it's a little more sophisticated than that, and the reason it's called DQ Reusable Cell, is that it only creates those things for the rows that are on-screen.
+17:23 Okay? I might have a thousand rows in my TableView and I don't want to make a thousand views.
+17:29 That would be incredibly inefficient.
+17:30 So I only make nine views, okay?
+17:33 Because only nine rows can fit at -- let's say 9, it could be 15, 7, 4, whatever.
+17:38 However many will fit on-screen, I'm just going to make that many.
+17:40 And as I scroll through my TableView, as rows go off the top of the screen, I'm going to grab that view and put it into a little reuse pool.
+17:48 And then when a new one comes on the bottom, I'm going to reuse it.
+17:52 So I'm basically going to just, you know, only using the ones on screen.
+17:55 And when they go off screen, I reuse it for a new one that's coming on-screen.
+17:59 Does that make sense?
+17:59 So I'm just constantly re-using these things.
+18:01 Okay? So that's why it's called DQ reusable cell.
+18:04 But if I don't have one, if there's not one to reuse, it copies that prototype that's in the storyboard, using this name.
+18:11 Okay? Questions about that?
+18:13 Yeah?
+18:14 >> Just a quick clarification.
+18:15 You said that to access the TableView it was actually self.view?
+18:19 But when we get into TableView are we looking at something different?
+18:22 >> Okay. When I said that self.tableview is the same as self.view, that's only in UI TableView Controller.
+18:29 That's an implementation detail that I say because it might trip you up.
+18:33 But we always would use self.tableview.
+18:35 We would never use self.view; we couldn't.
+18:37 In fact, we tried to call DQ Reasonable Cell with identifier with self.view, the compiler would complain.
+18:42 Because self.view is a UI view.
+18:44 It doesn't implement that method.
+18:45 Self.tableview is a UI TableView.
+18:47 It does, okay?
+18:49 Good question though.
+18:50 Alright. So anyway, this is how I get a cell.
+18:52 So I'm getting UI TableView Cell -- remember that's a subclass of UI View.
+18:56 And now I need to load it up basically.
+18:59 And the way I load it up is I just go look at the documentation for UI TableView Cell and I see what I can do in there.
+19:05 And one thing, for example, is it has a property called, "Text Label", which is a UI label.
+19:10 That happens to be the thing that draws the word "Title" in those subtitled cells.
+19:13 Remember we saw the cells there that said title and subtitles?
+19:16 That's the thing that draws the subtitle, so I just get that cell.textlabel.
+19:20 I set its text to be some text that's coming out of my database at that row and section.
+19:26 Okay? And I can call it anything I want here.
+19:28 There's also cell.detailtextlabel.text.
+19:31 That allows me to set that little subtitle.
+19:34 I can set the image.
+19:35 There's all kinds of things I could do.
+19:36 I could even subclass UI TableView Cell, and put my own views in there and create outlets to them and go crazy with what's in each row of the TableView cell.
+19:45 So it's infinitely expandable.
+19:47 Well basically we just set this UI TableView Cell to look like we want, based on what information's coming out of the database that matches that row and section.
+19:56 And that's it.
+19:56 Okay? And then we return the cell.
+19:58 And the TableView uses it to draw that row.
+20:01 Okay. Any questions about that [pause]?
+20:05 Okay so that's it.
+20:07 So now the only other two ones are how many sections and how many rows.
+20:10 And that's just these two methods.
+20:12 Number of sections in TableView.
+20:14 If you don't implement number of sections in TableView, it actually has a default, which is one, okay?
+20:19 So if you don't implement number of sections in TableView, it's all one big section.
+20:23 Okay? That's kind of the default.
+20:26 The other one, how many rows are in each section?
+20:28 It's going to ask you that repeatedly for every section.
+20:31 There's no default there, so this one's required.
+20:32 You must say how many rows are in each section.
+20:35 If you only had one section, you could obviously just answer that.
+20:38 That's what we're going to do in our demo.
+20:39 But you could have multiple sections like you will with your homework when you have the countries.
+20:43 Some countries will have two cities in them; some countries will have 12.
+20:46 And you'll have to answer this question correctly for every section.
+20:50 Okay? What about a static table?
+20:53 You don't have to do any of this for a static table.
+20:55 You don't have to do self-row index path.
+20:56 You don't have to do number of sections of table.
+20:58 You don't have to do number of rows and sections.
+20:59 It's all just taken care of for -- taken care for you by UI TableView Controller.
+21:03 So static, just edit in storyboard how you want it; and don't worry about any of this stuff for that.
+21:10 Okay? There's a bunch of other methods in this datasource protocol that we're not going to talk about.
+21:16 They're mostly about getting the titles of the headers and the footers.
+21:19 You will need the one that returns the name of the string for a header, because you're going to have a header -- a section header -- and it's going to be the name of the country in your homework.
+21:28 There's also -- these tables can be edited.
+21:31 Rows can be removed.
+21:32 They can be moved around.
+21:34 Okay? Change the order.
+21:36 All that stuff.
+21:38 It has to be kept in sync with the model, and so there are methods in the datasource protocol that lets you know when things are happening in the rows moving and deleting, so you can keep it up to date with your model.
+21:48 Question?
+21:49 >> Is the number of rows in the section something that's the same for every section?
+21:54 Or do you declare -- >> Okay, so the question is, is number of rows and section the same for every section?
+22:00 And the answer is absolutely not.
+22:01 Because some countries only have two cities, so you'd return two when it asks you about that section.
+22:07 Some countries would have ten.
+22:08 So you'd return ten.
+22:09 So you're going to be asked that question repeatedly, once for every section and the answer could be definitely different for each one.
+22:16 Okay. So that's it for the datasource.
+22:18 Alright? The other one is called the UI TableView Delegate.
+22:22 And this one, again, is more how we're going to display this table; not what the data is we're displaying.
+22:29 And it's common though for the datasource and the delegate to be the same object, namely your controller.
+22:34 Okay? Because the TableView is part of the view -- it's just a view.
+22:37 TableView is a UI view, it's part of your view.
+22:39 So datasource delegate uses your controller.
+22:42 The delegate lets you observe what's going on in the table too.
+22:45 Okay? Always will do this; did do that.
+22:48 And one especially interesting one is user did select a row.
+22:53 Okay? So the delegate protocol can tell you when the user tapped on a row.
+22:57 Now we're going to -- mostly when the user taps in a row we're going to segway -- which I'm going to talk about in a moment -- but it's also possible to implement this method in the UI TableView delegate protocol called TableView:did selectrowatindexpath.
+23:12 Exactly what you think.
+23:13 It tells you the index path.
+23:15 In other words the section and row where something was touched, and you can do something.
+23:19 Now what would you ever do in here?
+23:21 Well if you're segwaying, you wouldn't do anything in here.
+23:23 But if you're on the iPad, when you touch on a table, maybe the thing you're updating is already on screen.
+23:29 You're not going to segway to it, it's already on there.
+23:31 Because the iPad's so big, it's got room to do that.
+23:34 And we'll see that in the demo today.
+23:35 We're going to have an image where we click on a table row and it shows an image.
+23:40 And that image viewing thing is already going to be on screen.
+23:42 So we don't want to segway to it, it's already there.
+23:44 So we just need to update it and now we're going to do that in this method so you can see how that works.
+23:49 Remember that little circled I that I showed you earlier?
+23:53 That special detail disclosure thing?
+23:55 When you tap on it, it won't do what the row normally does.
+23:59 Okay? If you tap somewhere else in the row, the row will do its normal thing.
+24:02 But if you tap on the little I, instead, it will call this method in the UI TableView Delegate Protocol, called TableView Accessory Button Tap For Row with Index Path.
+24:10 Okay? And it does exactly what you might think it tells you, the index path of the little circle that was pressed.
+24:16 So this is usually where you would provide some ancillary information, okay?
+24:20 You wouldn't do the main thing that the row does.
+24:22 You would go do something related to what's in that row, but different.
+24:26 Question?
+24:26 >> So you pick out the row [inaudible]?
+24:29 >> Yes. So the question is, can I click on the row or on that little I?
+24:33 And the answer is yes.
+24:34 And different things will happen.
+24:35 So clicking on the row would segway, or we'd call that previous slide, did select row and index path, clicking on the I we'd call this method.
+24:45 There's lots and lots and lots of other delegate methods [chuckles], probably over a dozen; maybe 15 of them.
+24:51 They also have to do with handling the rows -- editing of the rows with a graphical -- how it happens graphically and animation of it.
+24:59 Not as -- not the data that's involved, but just how it's going on on screen.
+25:03 And copying and pasting rows.
+25:05 And notifications for when things move.
+25:07 All kinds of stuff.
+25:08 So I'll leave that to you to go look up.
+25:10 You won't probably need much -- any of that for your homework, but it's good to, you know, familiarize yourself with that protocol.
+25:15 So let's talk about segwaying from cells.
+25:18 So how do we set up a segway?
+25:20 Well, we just control drag of course.
+25:21 So here's a cell, and I just control drag from that cell to some other view controller.
+25:26 And let's say I make it a push segway.
+25:28 Right? I'm going to put this stuff in a navigation controller, and it's going to be a push segway.
+25:32 And it creates a segway.
+25:34 Now what's interesting about this, is that that's a prototype cell.
+25:38 It's going to be copied many, many times.
+25:40 So in prepare for segway, how are we going to know which cell we're segwaying from?
+25:45 Because if we're going to prepare that view controller on the right -- that big, blank, white view controller -- we've got to know what data to prepare it with, right?
+25:54 Because it depends on which row they clicked on as to how we're going to prepare it.
+25:57 So let's look at prepare for segway, in the case of a TableView.
+26:03 Okay? So it's the same thing.
+26:04 Preparefor segway:sender.
+26:06 But now that sender argument -- which we've been ignoring so far -- matters.
+26:10 That sender argument is the UI TableView Cell that was clicked on.
+26:14 Okay? And sometimes it's really nice to know the index path of that thing.
+26:19 You know? The row and section, because usually you're looking up in your model by row and section.
+26:23 And so there's this really important method called indexpathpercell in UI TableView, and it will tell you the index path for a given cell.
+26:31 So we almost always, in the prepare for segway sender of TableViews do -- this first line is almost always indexpath=self.
+26:37 Tableviewindex pathforcell.
+26:39 Now that we have index path, we can look it up in our model.
+26:42 We can prepare the thing we're segwaying to and off we go.
+26:46 Okay? Any questions about this [pause]?
+26:49 Otherwise a normal segway.
+26:50 Normal segway.
+26:53 Okay. Spinner.
+26:55 So remember in Imaginarium we spin when we're waiting for the URL to load or whatever.
+27:02 TableView often the contents of the TableView are being loaded from the network, okay?
+27:07 And we want to spin there too.
+27:09 Okay? We want to spin to let the user know that in some other thread; on some other queue, we're downloading data to fill up this table.
+27:17 And it's really easy to do in TableView.
+27:19 TableView Controller.
+27:21 Okay? It's easy to do in TableView Controller.
+27:23 It's not part of TableView.
+27:24 It's part of TableView Controller.
+27:26 TableView Controller has this property called "Refresh Control", and it's a little spinner.
+27:30 And you just send, "Begin refreshing" to it and it will start spinning.
+27:34 You say, "End refreshing" to it and it will stop spinning.
+27:37 And in fact, what's really cool is if you want, you can make it so the user can pull down on the TableView to reveal that spinner.
+27:45 And that will call a target action thing and you can refresh your table; reload it.
+27:50 So in other words you can let the user control the refreshing.
+27:53 And so it would look like this: So here's my TableView Controller there.
+27:58 I haven't added the spinner yet.
+28:00 If you look over on the right, in the attributes inspector for the TableView Controller, down towards the middle there there's refreshing.
+28:07 And I'm switching it now from disabled to enabled.
+28:10 Okay? It says "Refreshing" is what it says on -- that's kind of covered there.
+28:14 And when I hit "Enabled", watch the document outline on the left -- okay, the document outline on the left, something's going to be added.
+28:21 Okay? Which is bloop -- a refresh control.
+28:25 Now it only shows up in the document outline because it doesn't really exist anywhere except for when it's animating.
+28:30 So that's the only place that you can see it.
+28:32 But you can control drag from it into your TableView Controller, right?
+28:37 And put some method there that goes and forks off some thread on another queue to go reload this table.
+28:44 And you just say, "Begin refreshing" at the beginning, and then once it's all finished loading, when you dispatch back to the main queue, you're going to say, "End refreshing." Question?
+28:55 >> End refreshing, does that thing disappear?
+28:58 >> Yes. When you end refreshing, the little spinning thing, bloop, collapses back up.
+29:02 So the TableView hides it.
+29:03 And then if you begin refreshing, bloop, it will show it again.
+29:06 Okay? And remember, user pulling down on it causes this message to be sent.
+29:10 Refresh in this case, right?
+29:12 But it's just target action.
+29:14 You can do anything you want.
+29:15 You don't have to do it.
+29:16 If you don't wire -- control drag something, then pulling down won't do this.
+29:23 Okay?
+29:25 What if your model changes out from under your TableView?
+29:29 Okay? So your TableView is running along fine, and then all of a sudden the model changes in some fundamental way.
+29:35 Like it completely changes.
+29:36 The model will download a completely new set of information.
+29:39 You can call this method in TableView called, "Reload data".
+29:42 And when you call reload data it's going to call number of sections.
+29:45 Number of rows in section to get table -- you know, cell for index -- cellforrowatindex path over and over and over again to reload the entire table.
+29:52 So this is a fairly heavyweight operation.
+29:54 It's going to completely redo your whole table.
+29:56 But if your entire model changes, this might be an appropriate thing to do.
+30:01 Okay? That's certainly going to happen in our demo that we're going to write today.
+30:05 You can be -- if you know the changes in your model are finer tuned, you can call methods like reloadrows andindexpaths.
+30:13 And only change those rows.
+30:15 So it's kind of more fine-tuned reloading of your UI when your model changes.
+30:20 You know what changed.
+30:22 Okay? And there's some other methods too.
+30:23 So familiarize yourself with UI TableView you'll find out the kinds of things you can do.
+30:28 There's dozens of other methods in UI TableView itself.
+30:32 It's a ScrollView -- UI TableView inherits from ScrollView, so it's got some nice methods for scrolling to certain rows.
+30:38 So it happens in a nice, animated way.
+30:41 You can set those headers and footers that we talked about at the very beginning; things like that.
+30:46 So you should familiarize yourself with UI TableView also and all the things you can do to configure it the way you want.
+30:50 And you can configure it also in the storyboards in the inspector there.
+30:55 Okay. So that's it for TableView.
+30:57 Any questions on TableView before we go on?
+31:01 Okay. Now we're going to talk about universal applications.
+31:03 Okay? A universal application is a single app that will run on iPhone and iPad.
+31:09 Okay? A single app.
+31:10 And how do we do that?
+31:11 How do we make it so it works on both?
+31:13 Because they're kind of different idioms.
+31:14 You know, you've got a lot more screen real estate in an iPad, and the answer is, we have two separate storyboards.
+31:19 So we have the same view controllers, usually, and we just have different -- we arrange them in a different way in another storyboard.
+31:27 So we have two separate storyboards.
+31:29 Okay? And they don't really share anything -- although you can copy and paste things between them -- you'll see me doing that -- but they don't really -- there's no way to like link them.
+31:37 Okay? They're really separate.
+31:38 And that's because the UI's want to generally look quite different.
+31:42 Okay? They're going to have the same functionality, so the same MVC's, but they're going to be drawn in different places on screen.
+31:49 How do you create a universal application?
+31:51 Well, when you say, "Project New", one of the questions there is, what platform do you want to create this for?
+31:57 iPhone? iPad?
+31:58 Or Universal?
+31:59 Okay? And if you hit Universal, you'll get two storyboards and you're on your way.
+32:03 If you have an existing app that's only iPhone or only iPad, then you have to actually change our project settings.
+32:10 And this is the first time in this class we've looked at the project settings.
+32:12 You get to them by clicking on the name of your app in the upper left-hand corner of the navigator there.
+32:17 See where it says Imaginarium?
+32:19 And you'll see all these properties.
+32:21 Well in the general tab -- see where it says general in blue there at the top?
+32:26 There is some general project settings.
+32:28 And the second one is deployment info.
+32:30 Which is where you're going to deploy this.
+32:31 So this app is iPhone only because it says under deployment info, deployment target 7.0, devices, iPhone.
+32:37 So I'm going to change that devices iPhone right there to say universal.
+32:42 And when I change that to universal, it's going to offer to copy my existing storyboard to the new storyboard.
+32:50 So in this case it's iPhone copy to an iPad.
+32:52 I recommend against this.
+32:54 I recommend saying, "Don't copy" here.
+32:56 And if you say don't copy, then you'll have to make the storyboard yourself, and the way you do that is with new file.
+33:02 That's how we make everything anew in Xcode.
+33:06 And when you go to new file, you go -- instead of saying object to C class or something, you go down towards this user interface -- it's the third one down right there.
+33:14 See? And then inside there you can make a new view or a new window.
+33:17 You're going to make a storyboard.
+33:19 So you click storyboard.
+33:20 It's going to say what kind do you want?
+33:23 I want an iPad storyboard.
+33:25 Put it in the same place that your existing storyboard is, which is probably going to be a directory called base.lproj in the main project [inaudible].
+33:34 But just go find your other storyboard and put it in the same place.
+33:37 You probably want to give it a good name like, mainunderbar iPad or iPad or something like that.
+33:43 And then put it in a group -- a good group.
+33:45 You see down there I've put it in the Imaginarium group.
+33:47 The top group -- top level group.
+33:50 And then you -- now I have this iPad storyboard.
+33:54 You see it at the top of my file navigator there in the mainunderbar iPad.storyboard.
+33:58 So now what I need to do is tell, in my project settings, tell Xcode that that's the storyboard I want to use for iPad.
+34:05 And I do that by clicking on where it says iPad there, in about the middle of the screen.
+34:09 Right now it's saying iPhone.
+34:10 So I'm going to click on iPad.
+34:12 It's going to switch over.
+34:13 And then I'm going to say, my interface file -- main interface there -- is main iPad.storyboard.
+34:21 Okay? Now it's going to use that storyboard whenever it runs on iPad.
+34:26 Okay? If you forget to do this step, then when you're on an iPad, it's going to look like a gigantic iPhone.
+34:31 You know, the interface is just going to be a gigantic version of your iPhone one.
+34:35 So you'll quickly realize, oops I forgot this step.
+34:37 I've got to go back and do this.
+34:39 Okay? Alright.
+34:40 So now we've got this app and it's got two different storyboards.
+34:44 Why are -- why are storyboards different and in what ways are they different between the two?
+34:50 Well, on an iPad we have a couple of other view controllers that we can use to put MVC's on screen.
+34:56 One is the split view.
+34:57 So split view is where we're going to split the screen up into two MVC's.
+35:01 Kind of a narrow one on the left and a bigger one on the right -- see that?
+35:05 And then also popovers.
+35:06 Popovers are where we're going to pop an MVC up in a little rectangle.
+35:11 So that little white area where the equations are there?
+35:14 That is a little TableView that's popping up in a popover.
+35:17 Okay? So we're going to talk about split view and popover and how those work.
+35:20 But first in your code, how can you tell you're on an iPad so that you can do something different in your code?
+35:26 Because you have this shared code base.
+35:27 The only thing that's different is the storyboards.
+35:29 So sometimes you want to tell if you're on an iPad.
+35:31 Well, that's the way to do it, okay.
+35:33 I kind of recommend thinking about if there are other things to check first before checking if you're on an iPad.
+35:39 Like are you in a SplitView controller?
+35:41 Right? Is your current MVC in a SplitView controller and I'm going to show you how you can check that.
+35:45 Or is the MVC that I want to talk to, or is myself -- my MVC -- on screen right now?
+35:52 Because on iPad it might be on screen because there's more room for -- and more MVC's to be on screen.
+35:57 Whereas on iPhone might not be on screen.
+35:59 So there's something to check first before checking am I on iPad, just check am I on screen?
+36:04 Or am I in a SplitView controller?
+36:05 Or am I in a popover?
+36:07 Okay? So we're going to show how to check -- or how to check if you're in a SplitView controller in a second here.
+36:15 So here's what a SplitView controller looks like.
+36:18 We have a name for the left view, we call that the master.
+36:22 And the right view we call the detail.
+36:24 And that's usually because there's a master/detail relationship between the two.
+36:27 With changing in the master usually is affecting what's driving; what's happening in the detail.
+36:32 Okay? So here's one in landscape mode and another one in portrait mode of the SplitView controller.
+36:37 Okay? This is a calculator, so it's got two MVC's.
+36:39 Kind of a calculator keypad MVC and then a calculator graph -- or graphing MVC that knows how to graph things.
+36:45 Okay? So it's like a graphing calculator.
+36:48 The SplitView controller is designed to be at the top level.
+36:52 So don't put a SplitView controller inside a navigator controller or inside a Tab Bar controller.
+36:56 Just don't do it.
+36:57 Okay? It's not really designed to work that way.
+36:59 You can put those things inside it, in either side, but don't put the SplitView inside them.
+37:05 It's very simple to add one to your storyboard.
+37:07 You just drag it out and then it's going to give you a couple of -- it's going to give you a master and a detail, which you're going to delete almost all the time.
+37:14 And then you just control drag to your master and control drag to your detail.
+37:18 Okay? Just like a Tab Bar controller, it gets hooked up the same, exact way.
+37:22 In your code, you want to be able to access the master and the detail.
+37:28 And there's two properties you need to know about that.
+37:31 One is the property in UI's View Controller, called SplitView Controller.
+37:36 So if you send SplitView Controller, getter, to any UI View Controller, it will return what SplitView Controller it's in.
+37:45 If it's in one.
+37:46 Anywhere in it.
+37:47 Okay? If it's not in it, it will return nil.
+37:50 So this is a good thing to check if you have conditional code that works one way in an iPad and one way on an iPhone.
+37:57 Is whether you're in a SplitView Controller or not.
+37:59 If your iPad interface is built on a SplitView Controller.
+38:02 Now, once you find out what SplitView Controller you're in, you can ask the SplitView Controller, please tell me the detail -- the master and the detail.
+38:10 And the way you do that is with this array in UI SplitView Controller called, "View Controllers".
+38:15 And that array always has two items in it; 0 is the master.
+38:19 1 is the detail.
+38:20 So for example, if I had a master VC and it wanted to find out what the detail was in the same SplitView Controller it's in, it would say, self.splitviewcontroller.
+38:30 viewcontrollersub1.
+38:32 Okay? And that would return nil if it's not in a SplitView Controller at all.
+38:36 And if it is a SplitView Controller, it would return the detail.
+38:39 Okay? Make sense?
+38:43 And so one thing that's kind of interesting about SplitView Controller, similar to the TableView datasource is it requires its SplitView Controller delegate to be set.
+38:56 Okay? And why is this that it's required to be set?
+38:59 The answer is portrait mode.
+39:01 And I'm going to show you this in some pictures in the next couple of slides.
+39:04 Why you need the delegate.
+39:05 The delegate is annoying.
+39:07 It's the most annoying delegate in all of IOS.
+39:10 Firstly it has to be set very early.
+39:12 Meaning in away from NIB.
+39:13 You can't wait till viewed load to set your SplitView Controller's delegate.
+39:18 Okay? So that's annoying.
+39:19 Second of all, it starts calling the delegate methods from the SplitView Controller before viewed load happens.
+39:26 So none of your outlets are set while its calling its delegate methods.
+39:29 So that's annoying.
+39:30 So it's very difficult to deal with the SplitView Controller delegate.
+39:34 Fortunately it only has one, simple responsibility.
+39:37 Which is to control when the master and the detail appear in the landscape versus portrait modes.
+39:43 So in -- so you implement this method.
+39:47 This is kind of the gateway SplitView Controller delegate method called SplitViewcontroller shouldhighviewcontroller inorientation.
+39:54 And it's going to ask you in landscape or in portrait, should I hide the master?
+39:59 Now if you return no, that means never.
+40:02 That means the master and the detail will be on screen in both the landscape mode and the portrait mode.
+40:09 But that does mean that in portrait mode the details can be kind of tall and skinny.
+40:12 Okay? The master's always tall and skinny.
+40:14 The details can be kind of unusually tall and skinny.
+40:17 But sometimes UI this makes sense.
+40:20 Another thing to return, besides no, is to say only in portrait.
+40:23 Okay? So only hide the master in portrait.
+40:26 So now in landscape you'll see the master in the detail; in portrait you won't.
+40:30 But the important thing about this is, if I'm in portrait, how do I get at the master?
+40:35 And the answer is, it's going to give you a little bar button.
+40:38 You see that little blue bar button up in the corner there?
+40:40 You can barely see it.
+40:41 It's being pointed to by that yellow call out?
+40:44 That button, if I click on it, it's going to slide the master out.
+40:50 See? Slides the master out.
+40:52 If I click anywhere else in the detail it goes away.
+40:55 Click on the button again it slides the master out.
+40:58 Okay? So that's how I can get at the master even in portrait mode.
+41:02 Okay? But I have to put that button somewhere.
+41:05 That's my responsibility unfortunately.
+41:07 Okay? And I have to do it before all my outlets are set, so that makes it difficult to do.
+41:12 But how would that work?
+41:13 Okay, so to put that button there, the SplitView Controller is going to send you -- oh by the way, if you don't implement the delegate, what's going to happen is in portrait mode, there's not going to be a button there and so the user won't be able to get at the master.
+41:26 Okay? And that's a little frustrating for users.
+41:28 You could just say, well just switch the landscape.
+41:30 You could have the master back.
+41:31 Ehh, well maybe that's okay.
+41:32 I don't know.
+41:33 I don't think it's that great.
+41:35 Users would expect to be able to get at the master, even from portrait mode.
+41:39 Okay? So if you don't do the delegate, you won't have a button there.
+41:42 People won't be able to get at the master.
+41:45 So the way you put the button there is, another SplitView delegate method.
+41:49 Willhideview controllerwithbar buttonitem.
+41:51 And what's that's saying is, I'm going to hide the master.
+41:53 Here's a bar button to put somewhere on the screen, that when the user clicks it, it will slide back.
+41:59 Okay? So here's a simple way to implement it.
+42:01 Put your detail in a navigation controller.
+42:05 You put your detail in a navigation controller.
+42:07 Then you can set the left bar button item to be that bar button.
+42:11 Okay? What's cool about this way is that you can set the left bar button item by setting it on the navigation item of a view I view controller.
+42:18 Which means even though you're not set up yet; you don't have any outlets, you can just put that bar button in there and when the view appears in a navigation controller at any time, it's going to use that left bar button item.
+42:29 So that's how you put it in the left [inaudible].
+42:30 So this is kind of a tricky way to do it.
+42:32 To make this really easy to implement.
+42:35 I kind of recommend it.
+42:36 It's a good trick.
+42:37 There's nothing bad about it.
+42:38 The only thing that's bad about it is you would never want to have navigation going on both in your master and your detail.
+42:44 So even though your detail's in a navigation controller, don't allow any actual navigation there.
+42:48 You're only using it to have a place to put this bar and get a title at the top, okay?
+42:52 We'll do that in the demo.
+42:54 And then similarly, when it switches back to landscape, then it's going to say, okay you can take that bar button away now.
+43:00 Because the master is visible always in landscape.
+43:03 Okay? So that's it.
+43:05 Those are the three SplitView ones.
+43:07 These slides are here for you to review.
+43:08 This is a difficult delegate, but to make SplitView really work right, unfortunately you have to implement these three methods.
+43:16 Okay. So updating the detail when the master changes.
+43:19 That's a fundamental thing about what happens in SplitView.
+43:21 How do you do that?
+43:22 Okay? Because the detail and the master are both on screen at the same time.
+43:25 How are we going to update the detail when someone clicks in the master basically.
+43:30 And there's two choices.
+43:31 One is target action.
+43:32 So just have your master have a target action method to itself.
+43:37 And when it gets that target action it's going to go find its detail and update the detail.
+43:42 Basically do the same thing it would do in preparing for segway.
+43:44 Just set whatever's necessary on that detail.
+43:46 That's what we're going to do in our demo.
+43:49 Of course if it's a TableView in master, you have to use that didselectrow atindexpath.
+43:54 That's target action for TableView.
+43:56 But if it were just a button in your master like that calculator thing, you could just click a button that says show the graph, it could just be normal target action and it would do something like this.
+44:05 Okay? Find the detail and go update it.
+44:08 The second way is with a segway.
+44:10 It's called a replace segway.
+44:11 This segway replaces the entire detail view.
+44:15 Okay? Completely replaces it.
+44:17 This one's kind of annoying because of all of those delegate methods.
+44:19 Because it's going to replace the entire view including the navigation controller with the little button.
+44:25 Okay [chuckles]?
+44:25 So you segway to a new one, and now you've got to somehow get that button out of there and put it back into the new one.
+44:30 It's quite a pain in the neck.
+44:32 Okay? So we don't really use toreplacesegway that much in the SplitView Controller.
+44:36 It's pretty good in the ones where the master is always visible.
+44:39 But if we're ever doing the one where the master hides and we put a button up there, it's a pain to keep that button up there when it's constantly replacing the segway on the right side.
+44:47 Remember by the way, segways always give you new versions of new controllers.
+44:53 Right? So when we were doing Imaginarium, every time we'd click on a new flower or jellyfish or whatever, it would push to a brand new instance of view controller.
+45:01 Segways are always new instances.
+45:04 They're never reusing, ever a view controller.
+45:07 Okay? That's fundamental to a segway.
+45:09 It gives you a new instance all the time.
+45:11 So here it would be a new instance and it would replace the detail.
+45:15 It's called a replace segway.
+45:16 And to do that you just control drag.
+45:18 And the kind, it's instead of being push, you pick replace.
+45:21 It will only work when you're doing it inside of a SplitView.
+45:25 Okay? Alright.
+45:27 Last thing we're going to talk about on iPad is popovers.
+45:30 So this is what a popover looks like.
+45:32 Okay. There's the little TableView with the equations in it inside a popover.
+45:36 And popover controller, the class, is actually not a UI View Controller.
+45:41 Okay? Popover controller is an NS object.
+45:43 But what it does is it controls another view controller popping up on screen.
+45:48 Okay? And it does that with this property content view controller.
+45:52 You set that on the UI popover controller.
+45:54 Usually you control -- drag it into storyboard.
+45:56 So you almost never actually set this property directly.
+46:01 And when you set it, that segway, okay?
+46:04 When the person clicks on it -- the thing that's going to cause the segway -- you're going to get -- prepare for segway because it's a segway.
+46:11 But there's a special thing there, which is that the segway you get is going to be a subclass of UI storyboard popover segway.
+46:19 And so you can check this kind of class, and if it is, you can ask the segway, give me the popover controller -- UI popover controller -- that controls this thing that's going to popover.
+46:28 But mostly popovers are just a matter of finding the view controller that you want to pop up.
+46:33 Control drag into it.
+46:35 Setting the type of segway to be popover, and letting it go.
+46:40 Okay? And just prepare for segway and off you go.
+46:42 It's a normal segway.
+46:44 And again, it's a segway so the view controller that's going to be put inside the popover is instantiated.
+46:48 A brand new one; using whatever's in storyboard.
+46:52 Okay? So popovers are actually really easy in the storyboard.
+46:54 You just control, drag, boom you're done.
+46:56 And sometimes you don't even need to do this business and prepare for segway because you don't need to talk to the popover controller.
+47:00 You just need to talk to the thing you're segwaying to.
+47:03 Set up that TableView with the equations in it -- y=x cosign x or whatever was in there.
+47:09 You just need to set that up.
+47:09 So you don't even need the popover controller.
+47:11 You just need to talk directly to the thing inside the popover.
+47:16 The user dismisses a popover by just touching anywhere outside of it.
+47:20 If they touch outside of it the popover dismisses.
+47:23 Okay? You can -- there is an exception if they touch outside of it, but they touch on a view that's in this array of views in the popover controller, those are like exceptions.
+47:33 Those won't cause it to dismiss.
+47:35 Alright? One thing -- annoying case of this is a toolbar.
+47:38 The entire toolbar is in the path to reviews.
+47:40 So if you bring up a popover from a button in a toolbar, then if the user clicks anywhere else in the toolbar -- like on another button -- it won't dismiss that popover.
+47:49 Why they decided to do that, I do not know.
+47:51 But that's what this pass through views thing is.
+47:54 It can be annoying.
+47:55 But you can set it yourself too.
+47:57 You can say, well if they click over here, I don't want to dismiss that popover.
+48:01 You can dismiss popovers from code by just saying, dismisspopover animated, in UI Popover Controller, and that will dismiss it.
+48:08 And you can find out if the user dismissed it using popovercontroller diddismiss thispopover.
+48:15 This is a UI Popover Controller delegate method.
+48:18 So if UI Popover Controller has a delegate, and if you start that delegate you'll get this message when the user dismisses the popover.
+48:24 You usually don't need to find this out, but sometimes you want to know.
+48:28 Okay? So that's popovers.
+48:29 We're not going to -- I'm not going to ask you to do popovers in your homework this week.
+48:32 I'll try to fit it into next weeks, and it's not in my demo either.
+48:35 So popovers are going to remain probably a little bit, you know, fuzzy to you until we do a demo.
+48:41 So here is the demo.
+48:43 It's called Shutter Bug.
+48:45 And what it's going to be is I'm going to have a TableView full of a list of a couple of hundred of the most recently posted photos on Flickr.
+48:57 Okay? So I'm going to query Flickr with, you know, URL.
+49:00 Go out there and query Flickr and get this information.
+49:02 Load up the TableView with it, and when you click on it we'll use our image view controller from Imaginarium to display the photo.
+49:10 And then I'm going to do that on the iPhone; and I'm going to do it on iPad as well.
+49:14 Okay? So that's what the demo's going to be.
+49:16 And you'll see a lot of stuff here.
+49:18 Alright. So let's get this out of the way.
+49:24 Okay. Alright let's go -- let's actually -- I'll show you the coming attractions here.
+49:31 Your homework that's going out today is due in a week -- next Wednesday -- it's about all this stuff.
+49:37 Again, Friday we have the Stanford only section.
+49:39 And then next week we'll be covering core data.
+49:41 And maybe we'll get to some multitasking API as well.
+49:46 Alright.
+49:47 Let's close that.
+49:49 We're going to create a new -- oops -- new project here in Xcode.
+49:55 Okay? I'm going to call it Shutter Bug.
+49:58 And it's going to be universal.
+50:01 Okay? So I'm not making it iPhone only; I'm going to make it universal.
+50:03 So I'm going to get two storyboards out of this when I click this.
+50:07 We'll put it in at the same place we always put everything.
+50:10 So here it is, and you can see two storyboards.
+50:12 There's an iPhone storyboard right here.
+50:15 And here's an iPad storyboard.
+50:17 Okay? And so I don't really want anything in either of these, so I've got this gigantic view here, so I'm just going to delete that.
+50:24 And same thing iPhone.
+50:25 I've got this one right here, I'm going to delete that.
+50:26 So I'm going to start with completely blank storyboards in both.
+50:29 And we'll build the iPhone one first.
+50:31 Then we'll switch over to the iPad.
+50:35 So this is going to be a TableView-based app.
+50:37 So I'm just going to pick up a TableView out of here and drag it out.
+50:41 Okay? So here's my TableView.
+50:43 Of course I'm going to want to set its class to be some subclass of UI TableView Controller.
+50:49 So let's go do that.
+50:50 Let's make that.
+50:51 Alright. It's a class.
+50:54 It's going to be a subclass of UI TableView Controller.
+50:57 I'm going to call this thing Flickr Photos TVC -- for TableView Controller.
+51:03 Okay? Because that's what it's going to do.
+51:04 It's going to be a TableView Controller that shows Flickr photos.
+51:07 And I'll put it in the normal places.
+51:10 Here we go.
+51:11 Let's go over here and we'll set that to be our class for now.
+51:16 And so now, if I look at this class, this is going to have all of my code in it.
+51:22 Now it comes with a lot of stuff.
+51:25 Here's my view controller lifecycle stuff that it has, I'm going to get rid of that.
+51:29 It comes with this TableView datasource stuff -- by the way I like to change this pragma to be -- to look like this.
+51:36 It's a little easier for me to see.
+51:38 And this is the -- going to be the TableView datasource method.
+51:41 Do you recognize those three?
+51:43 Right? Number of sections?
+51:44 Number of rows?
+51:44 So we're going to implement those.
+51:46 Comment it out down here it gives you a lot of stuff for editing the table.
+51:50 Moving things around, stuff like that.
+51:52 We're not going to cover any of that today.
+51:54 You can review at your leisure.
+51:55 And then of course navigation, which is prepare for segway, we are going to do that a little bit later.
+52:01 So we have a new class here.
+52:03 Let's talk about its public API.
+52:04 And this one's going to have easy public API.
+52:07 Which is a strong NS array, which we'll call photos.
+52:13 And this is going to be of Flickr photo NS dictionaries.
+52:17 So these are going to be dictionaries that I'm going to download from Flickr.
+52:20 And these dictionaries have information about photos that are on Flickr.
+52:24 Okay? So that's all these are.
+52:26 Dictionaries with a bunch of keys and values in there about photos.
+52:28 Not the actual image data -- I'll have to fetch that separately.
+52:31 But just information about it.
+52:34 And one thing I really want to make sure that I do, is that when my model changes -- so someone sets the photos -- oops [inaudible].
+52:41 I do this again -- this is doing this again -- so if someone sets this array of photos [pause] -- then I'm going to make sure that I update my TableView [pause].
+52:59 Is that what it's called when you reload [inaudible] yeah.
+53:05 And that's just -- any time a model changes, obviously I want to reload my data in my table.
+53:10 That makes sense.
+53:11 Now how am I going to set this?
+53:13 How am I going to call set photos?
+53:15 How am I going to get this Flickr data?
+53:17 Where am I going to put that code?
+53:18 Well I don't actually want to put that in this class.
+53:20 Because I want this class to be a generic, Flickr photo viewing class.
+53:24 I don't want it to be specific to any particular set of photos, so I'm going to make a concrete subclass of this -- okay, so this is not really an abstract class because it kind of works on its own.
+53:34 But I'm going to make a -- essentially like a concrete subclass of it.
+53:37 It's a subclass of Flickr photos TVC.
+53:41 And I'm going to call it, justposted flikrphotostvc.
+53:45 Okay? So it's going to be a subclass of that and it's going to show me the ones that have just been posted.
+53:53 So let's create that in here.
+53:57 So we have this new one here.
+53:59 And it's just -- all it's going to do is call self.photos to set this model right here.
+54:05 So in our storyboard, let's change our class here.
+54:09 Instead of being flickrsphotostvc, I'm going to change this to be justpostedflickr photostvc.
+54:15 Okay? So now that's going to show my just posted ones.
+54:21 So what about the implementation of this just posted?
+54:23 It's really easy.
+54:24 I just in my viewed load -- superviewed load, I'm just going to call selffetchphotos.
+54:33 And then we'll make a fetchphotos method here.
+54:38 And I'm just going to say self.photos= something.
+54:41 Okay? That's -- I'm going to get my photos here.
+54:46 Alright, what's the problem here?
+54:47 Root class -- hmm that's weird.
+54:51 Oh. Strange [pause].
+54:55 Flickrphotostvc.
+54:56 Okay. I'm not sure why it didn't add that.
+55:02 Okay. So there we go.
+55:06 Alright so that's good.
+55:08 So that's where -- so in here is where we're going to have to go out to make a fetch to Flickr and do that.
+55:12 So let's go ahead and write that code.
+55:13 Pretty straight forward.
+55:15 One thing we're going to need though is a little bit of helper code to help us with those Flickr fetches.
+55:19 And I've provided this to you for your homework.
+55:21 Here it is right here.
+55:22 This Flickr fetching code.
+55:24 Oops. Let's go over here to this.
+55:27 We can drag this in.
+55:27 We'll take a brief look at this.
+55:30 I'm going to copy it in.
+55:32 Alright. So if you look at this Flickr fetcher, it has this API right here that provides these class methods with some URLs that you can fetch information from Flickr.
+55:43 So we're going to do, for example, recent georeference photos.
+55:47 For your homework you're going to want to do top places.
+55:49 Because in your homework you're going to be asked to show places from Flickr.
+55:53 And I'm just going to be showing only photos.
+55:55 Okay? So we're going to use those URLs to do some fetching.
+56:01 So I better import flickrfetcher.h so I can do that.
+56:05 And how does this work?
+56:07 Well, let's get the URL that we're going to use to get those just posted photos from this Flickrfetcher thing, URL.
+56:15 And so I want this one, recent photos.
+56:18 So now I have a URL.
+56:19 I need to get that data.
+56:21 So that's NSdata.
+56:23 Now the data that comes back from Flickr comes back in a format called JSON.
+56:28 Raise your hand if you know what JSON is.
+56:30 Okay, so almost everyone knows what JSON is.
+56:32 So I don't want it in JSON, but that's my only choice.
+56:36 So I'm going to get those results in JSON by saying NSdata -- datawithcontentsofurl.
+56:43 Same thing we used datawith contentsofurl.
+56:48 Same thing we did before.
+56:50 But I don't want them in JSON format.
+56:52 Really the format that I want them in is arrays and dictionaries.
+56:55 That's a much nicer format for us to deal with than JSON.
+56:57 JSON is like arrays in dictionaries but not exactly the same.
+57:01 Luckily, there is a way in IOS to do that.
+57:05 So we'll change that to basically property list results.
+57:09 To turn a JSON thing into a property list, and that's with the [inaudible]
+JSON -- what's called again?
+57:16 NSjsonserialization.
+57:18 And the method is called jsonobjectwithdata.
+57:21 You give it the JSON data.
+57:23 Options. We'll say 0 -- you can look those up if you want.
+57:26 And it will return an error and that's -- you know, NS error, but we're not going to check for errors because it's a demo.
+57:31 And so now I have this stuff in dictionary format.
+57:33 So before we go any further, let's just log this.
+57:36 Flickrresults =%+property listresults.
+57:40 So I'm just going to log this so we can take a look and see what this looks like.
+57:44 So let's just run this.
+57:45 It's not going to do anything in our UI yet, but hopefully it will log this particular fetch of the fetchworks.
+57:54 So -- oh, well, no that's not working.
+57:58 Well, that's not good -- oh that's okay, let's do this.
+58:00 Alright let's do it here.
+58:03 Because we haven't done our iPad one, it's trying to run it on an iPad.
+58:05 So we're just going to run it on the simulator here.
+58:09 So much for our little simulator.
+58:12 Okay we're not actually going to be looking at anything in UI.
+58:14 So it's doing this fetch, and here's the information right here.
+58:16 Let's go ahead and make it big so you can see it.
+58:20 And you can see that it's a dictionary.
+58:22 This is kind of this little format that is used to log in as dictionaries.
+58:26 And inside this dictionary there's a key right off the bat called, "Photos" which is another dictionary.
+58:31 And inside that dictionary there's which page this is -- 98,000 pages available [chuckles] okay?
+58:37 Or 250 items each.
+58:39 So a lot going on in Flickr.
+58:41 And there's another key here, and the value of this key is an array.
+58:44 And this is an array of the photos.
+58:46 Each one of which is a dictionary.
+58:48 And you can see there's a lot of stuff in these dictionaries including the title of the photo right here.
+58:55 And there's also this one right here.
+58:57 Description.
+58:58 Which is a description of the photo.
+59:00 And this one's actually another dictionary.
+59:02 And inside it is a key that's the actual description -- this one had a blank description.
+59:06 So this one's going to be a little more tricky to get this value out of this photo.
+59:11 But anyway, we're going to have to pull this stuff out of this dictionary in this kind of odd format.
+59:17 So let's just do that.
+59:18 So we can get the photos out of there by saying how about this: propertylist resultsvalue forkeypath.
+59:31 And then in Flickr fetcher, I have a nice little pound sign define here to get those photos -- that photo array out of the photos dictionary at the beginning.
+59:43 Okay? But this has a dot in it which is interesting.
+59:46 A dot means this key -- this key, inside of this key -- the dictionary for this key.
+59:54 So it's kind of like following dictionaries inside dictionaries.
+59:57 Okay? That's what this thing does.
+59:59 So I'm going to use this, but to make it work we have to use this value for key path method instead of using object for key, right?
+01:00:07 Which would be a normal dictionary method.
+01:00:09 Okay?
+01:00:10 So I'm going to do that.
+01:00:12 I'm going to deal with the too many [inaudible] brackets issue.
+01:00:16 Okay. So that is going to pull those photos out of there.
+01:00:20 So now I have the photos as an array of dictionaries.
+01:00:23 And I'm just going to set my model to be that.
+01:00:29 Okay? So that wasn't too hard.
+01:00:32 Question? [Background question].
+01:00:32 What's the difference between null and nil?
+01:00:36 Okay that's a good question.
+01:00:38 Nil means an object pointer is 0.
+01:00:42 Right? A pointer that doesn't point to anything is nil.
+01:00:45 Null means a C pointer is -- points to nothing.
+01:00:51 And in that case that was an ampersand error.
+01:00:53 In other words a by reference NS error.
+01:00:56 So this is not an NS error pointer.
+01:00:58 It was an NS error star-star okay?
+01:01:03 Do you understand that?
+01:01:07 This thing right here, if I wanted to get the error I would have said @error.
+01:01:12 Like this.
+01:01:13 And I would have had NSerror star error.
+01:01:17 Okay? So this is -- and I -- this would be =nil.
+01:01:24 But an ampersand error is a pointer to this pointer.
+01:01:28 So that would be null.
+01:01:33 Okay? Alright.
+01:01:35 [Inaudible].
+01:01:36 Okay. So one thing that's bad about this, this guy right here.
+01:01:40 What's that going to do that's bad?
+01:01:45 [Pause] block the main queue.
+01:01:47 So we're not going to fix that because we're going to be time constrained here.
+01:01:49 But I'm going to put a warning in.
+01:01:50 So there's a nice little pound sound warning thing you can put in that lets you add your own warnings.
+01:01:58 Oops. It really blocks the main thread that is used by the main queue.
+01:02:03 But this is to basically create a warning and this will remind you to go back and fix this before you submit it, for example, because you don't want to have any warnings in your code.
+01:02:11 Okay? So we're not going to do this right now because we want to get on to some of the other things.
+01:02:14 And we're going to run overtime as it is.
+01:02:17 But I'll do this at the end and then I'll post it.
+01:02:20 Okay? But the good news is that we have set our model back in our superclass, right here.
+01:02:26 Okay? So we have all the information we need now to use our tables -- use datasource to load up that table.
+01:02:33 Alright? So first, how many sections in this TableView?
+01:02:36 Well we're going to put it all in one big section.
+01:02:38 We're not going to have, like countries or anything else -- any subsections.
+01:02:43 So we're all going to have one big section.
+01:02:44 So we can get rid of this nice warning actually.
+01:02:46 And of course, if I deleted this whole method, that would be the same because the default is one.
+01:02:51 And here, number of rows in section -- well again I only have one section, so I can just return self.photoscount -- that's the number of photos I have.
+01:03:01 Now if I had multiple sections I would need to find -- return a different number.
+01:03:05 But here I only have one section so I can do that.
+01:03:07 And then here is our table self row and index path.
+01:03:10 Here it's saying, what did you put in the storyboard for the identifier for the cell?
+01:03:14 Well what did we put?
+01:03:15 Let's go look back here.
+01:03:17 We'll inspect this cell.
+01:03:19 The attribute inspector.
+01:03:20 Reuse identifier; we didn't put anything.
+01:03:22 Let's try Flickrphotocell.
+01:03:24 That would be a good name for that.
+01:03:27 Okay? And so now here in our code, we want to make sure we put the same thing here.
+01:03:31 And that's how it's going to know to duplicate this particular prototype cell over and over.
+01:03:37 We could also, by the way, set this to maybe do subtitle.
+01:03:39 Kind of set this thing up the way that we want, this cell.
+01:03:42 So that it gets copied -- the right thing we want gets copied.
+01:03:47 Okay so we have this cell now, okay, from the DQ Reusable Cell with Identifier there.
+01:03:51 And then we need to configure the cell.
+01:03:53 Well to configure the cell, we need the information from our model.
+01:03:56 So we need to get the dictionary for the photo that's at this index path.
+01:04:01 In other words this row and section.
+01:04:03 And again, we only have one big section, so we really just need the photo that's at that place in the array.
+01:04:08 So that will be photossub indexpath.row.
+01:04:13 Okay? I would use indexpath.section if I had multiple sections like you're going to have.
+01:04:18 So now I have the photo.
+01:04:19 I have that dictionary that you saw -- there were a bunch of dictionaries there.
+01:04:22 So let's configure the cell.
+01:04:24 Let's set the text label of that one to be, let's say the photos.
+01:04:29 And I'm going to use this same value for keypath here, in case any of these things have Flickr have dots in them.
+01:04:37 Or -- okay, yes important for Flickr fetcher.
+01:04:43 Flicker fetcher also has all of these things for the keys inside of a photo.
+01:04:49 The keys inside of a place -- which you'll need.
+01:04:52 Some keys that are in kind of all different things.
+01:04:55 And so let's go here.
+01:04:57 We want Flickr photo title.
+01:05:00 Yeah okay.
+01:05:02 Like that.
+01:05:03 Alright. And then we'll say the detail text label -- that's the little subtitle -- we'll do photovalue forkeypath.
+01:05:10 And we need that because this one has dots.
+01:05:13 And that is the description.
+01:05:15 And the description one -- as you'll see here -- is description.
+01:05:19 underbarcontent.
+01:05:20 And if you remember -- if you go back and look at the Flickr thing, you'll see why this is description.
+01:05:24 underbarcontent.
+01:05:26 Okay? So we got that.
+01:05:28 We return to the cell, and that's really all we need to do.
+01:05:31 So let's go ahead and run this [pause].
+01:05:32 Okay, we got that warning there.
+01:05:36 Block main thread.
+01:05:37 And this is blocking the main thread right now as it goes out to Flickr to fetch.
+01:05:41 But it did get it.
+01:05:43 So here's a whole bunch of photos.
+01:05:44 Some of them have subtitles; some not.
+01:05:47 Okay. That's cool.
+01:05:48 Cool. We can click on them.
+01:05:49 But it'd be sure nice if we could see these photos [chuckles]
+01:05:51 when we click on them.
+01:05:52 Right? But of course we need to do a segway to do that.
+01:05:55 So let's go ahead and do that.
+01:05:56 Alright? So let's go back to here.
+01:05:59 And you know, this segway is really easy to do.
+01:06:03 Let's go back to our iPhone storyboard here.
+01:06:05 What we need though is the -- what we want is from Imaginarium, we want that nice, image view controller.
+01:06:12 Okay, well watch how we can get that.
+01:06:14 I'm going to go back to my Imaginarium.
+01:06:18 Okay? Here's Imaginarium.
+01:06:20 First of all I'm going to take the image view controller code and just drag it from one project to another.
+01:06:27 That's perfectly legal.
+01:06:28 I'm going to copy it in this case.
+01:06:30 You could link them, but be careful if you do that.
+01:06:32 But even more amazingly, I'm actually going to go to the storyboard and grab this scene right here -- this scene that has all this scroll view and all this stuff in it.
+01:06:40 And copy it and go over to this storyboard in Shutter Bug and paste it.
+01:06:45 Okay? It did do it.
+01:06:48 It's just a question of finding it.
+01:06:50 Put it over on the side, there it is.
+01:06:52 Okay. So now I have this thing here.
+01:06:55 And all of the links that were in here, since they're all by name, all will still work as long as I have this particular class.
+01:07:05 Which is image view controller.
+01:07:06 Right? It even still sets the thing here to be an image view controller.
+01:07:10 And if I go look at this -- all these things, they're linked -- they're still linked up.
+01:07:15 Sorry for the scrolling here.
+01:07:17 But see, you can see the activity indicator, that's all linked up.
+01:07:19 Because it's all being done by name.
+01:07:22 Okay? So we have this nice thing.
+01:07:24 So we'll -- let's segway to it.
+01:07:26 We're just going to control drag -- we got this cell right here, sorry.
+01:07:29 This cell and we're just going to control drag from it to here.
+01:07:32 Let's do -- we're going to put this in a navigation controller.
+01:07:34 So we'll push, okay?
+01:07:36 Here's our thing.
+01:07:37 We need a nice name for our segway here.
+01:07:39 We'll call this display photo.
+01:07:42 Oops display photo.
+01:07:44 We can call it again, anything we want.
+01:07:46 Let's put this stuff all in a navigation controller -- embed in navigation controller.
+01:07:51 So we have an ICUI here.
+01:07:53 Really, with almost no work for us to develop.
+01:07:57 While we're here, let's go ahead and call this one Shutter Bug.
+01:08:00 We will set the title of this one, based on the title of the photo.
+01:08:05 So all we need to do to make a segway work is what?
+01:08:07 Prepare for segway.
+01:08:08 So let's go back and do prepare for segway.
+01:08:10 It's actually commented out down here.
+01:08:13 Plug it back in.
+01:08:16 And all -- the only trick we need to know here is that we need to get the index path from this sender.
+01:08:22 Which is the TableView cell that was clicked on.
+01:08:24 So let's do that.
+01:08:26 NSindexpath.
+01:08:28 indexpath=self .tableview -- remember all TableView controllers have this TableView property that you can use to get this stuff.
+01:08:38 And I want indexpath forcellsender.
+01:08:41 Okay. So now I have this index path.
+01:08:44 If I want to be really safe, I could say, ifindexpath.
+01:08:48 That way if somehow this sender, you know, I could even be super safe and say, ifsender iskindofclass suitableview cellclass.
+01:08:58 Okay? Some people are really -- want to be careful about, you know, using ID and they want to use introspection.
+01:09:06 And I certainly appreciate why you want to do that.
+01:09:08 Sometimes it's better to let your app just crash.
+01:09:10 And when you do that you'll find the bugs faster sometimes.
+01:09:13 Or in some of these ifs, you want to put elseloga -- you know, an internal error or something like that.
+01:09:19 But anyway, we've got this index path.
+01:09:21 It's not nil, so we were able to find this TableView cell in this TableView so that's good.
+01:09:26 We're off to a good start.
+01:09:28 Let's see if this is the display photo [pause] segway.
+01:09:37 Okay? If it is, let's see if the segway destination view controller is kind of class -- that image view controller class, because that's what we need it to be.
+01:09:50 Image view controller.
+01:09:53 Right? So if it is an image view controller class, then we are good to go.
+01:10:04 Kind of got everything we need at this point [chuckles].
+01:10:06 And I'm actually going to create a little helper method here, which is prepare imageviewcontroller imageviewcontroller todisplayphoto NSdictionaryphoto.
+01:10:17 So this is just going to be something -- a little helper thing that does the actual preparation.
+01:10:26 And this is really easy.
+01:10:28 Ivc.imageurl -- remember that from the Imaginarium?
+01:10:31 Right? That's what the image view controller's public API is.
+01:10:35 We need to get the URL for this photo.
+01:10:38 And it turns out Flickr fetcher can help us with that too.
+01:10:40 Flickr fetcher.
+01:10:42 There's a thing called URL for photo.
+01:10:46 Okay? And we just give it the photo dictionary and it uses stuff inside the dictionary to get the URL.
+01:10:51 And then we can pick what format we want, and I'm going to pick the large format.
+01:10:55 The choices there are large, original, or square.
+01:10:59 Square is like a thumbnail -- really small -- so only use that if you need a thumbnail, which you don't need for this assignment.
+01:11:05 An original is high res.
+01:11:06 And then large, it's kind of a good size, like 1024 x 768 or something like that.
+01:11:11 And then I told you also I'm going to set the title of this thing to be the photovalue forkeypath flickrphototitle.
+01:11:20 Okay? So I'm going to set the title of that image view controller as well.
+01:11:25 Okay? So now let's call this little helper thing prepareimage viewcontroller.
+01:11:31 The image view controller is segway.destination view controller, to display photo.
+01:11:36 The photo is self.photosindex path.row.
+01:11:41 Everyone understand that?
+01:11:44 Okay. I'm just reaching into my model here at this index path that was the sender.
+01:11:50 Alright? So let's see if this works [pause].
+01:11:56 Again, this is blocking our main thread here, which is a bummer.
+01:12:00 You'd know how to not do that.
+01:12:02 So here we have now, we're in a UI navigation control.
+01:12:05 That's cool.
+01:12:06 We got that.
+01:12:06 Let's go ahead and click on something that hopefully is innocuous [chuckles] here it is.
+01:12:11 And we can zoom in and out.
+01:12:14 That's cool.
+01:12:14 Alright we can go back and click on something else.
+01:12:18 Another Rome picture.
+01:12:19 That was the Coliseum.
+01:12:20 Okay. Hopefully things are work here too.
+01:12:23 So that's pretty cool.
+01:12:24 That was pretty easy to get a pretty powerful app together.
+01:12:27 We did it in a bout 20 minutes.
+01:12:29 So now let's do this on iPad.
+01:12:32 Okay? This turns out to be quite easy as well.
+01:12:35 So we're going to go to the iPad storyboard.
+01:12:38 I'm actually going to move the iPad storyboard up near the iPhone storyboard.
+01:12:41 So it's blank right now.
+01:12:43 And I'm going to drag out a SplitView controller.
+01:12:46 So here it is right here.
+01:12:48 Now this will not be in this list if this is not an iPad storyboard.
+01:12:52 So sometimes you have your iPhone on, and there's no SplitView controller, you're like, what?
+01:12:56 Where's the SplitView controller?
+01:12:57 Okay you've got to be -- selected your iPad I.
+01:12:59 So I'm going to bring this out.
+01:13:00 Here's the SplitView controller.
+01:13:01 Notice it gave me these for free.
+01:13:03 I got what I paid for, which is I don't want either of these things.
+01:13:07 Okay? So I want my master in my iPad I to be this right here, okay?
+01:13:15 This Shutter Bug list.
+01:13:17 And I want my detail to be that image view, right?
+01:13:20 So I'm just going to select all and copy here.
+01:13:23 And go over to my iPad storyboard and paste.
+01:13:25 Okay? Put some in here.
+01:13:27 Kind of makes a bit of a mess of it.
+01:13:29 But let's move it around here.
+01:13:31 So here -- this is the same thing.
+01:13:33 Doesn't look the same because the sizes are different, but it's the same thing we had.
+01:13:37 And I'm just going to make this -- these two be the master by control dragging from my SplitView controller over here.
+01:13:45 And I can pick master or detail -- I'll take master.
+01:13:47 And then I'm going to control drag from here over to this guy, and make that the detail.
+01:13:53 Okay? So now I've got master and detail.
+01:13:56 Exactly what I want.
+01:13:57 So I'm going to have a SplitView that has a little narrow thing on the left, which is the list of photos.
+01:14:02 And the big space is going to be the photo that I chose.
+01:14:05 I've got one slight problem here though, which is this little segway still is here.
+01:14:09 So when I click on things here, it's going to try to replace this little view controller with this.
+01:14:15 And I don't want that.
+01:14:17 So I'm going to delete this segway.
+01:14:20 Okay? Now that gives me what I want.
+01:14:23 But now the problem is if I click in here, it's not going to update this.
+01:14:27 So how do I do that?
+01:14:29 That's doing what that delegate method did select row at index path.
+01:14:33 So we're just going to go to back to here.
+01:14:35 And we're going to have another -- a new pragma here.
+01:14:38 Pragmamarkui tableviewdelegate -- not datasource but delegate -- and we're going to type here and start typing, and you can see there's a lot of UI TableView delegates, okay?
+01:14:53 So we want the one right here.
+01:14:54 See it did select row at index path.
+01:14:57 Right? We want that one.
+01:14:59 And here what we need to do is get the detail in the SplitView controller.
+01:15:04 And I told you that that is -- the detail view controller is self.splitviewcontroller.
+01:15:09 viewcontrollerssub1.
+01:15:11 Okay? And again, if we're not in a SplitView -- because this code is going to be executed on the iPhone as well.
+01:15:18 And if we're not in a SplitView this is going to be nil.
+01:15:21 So this whole thing is going to be nil.
+01:15:23 So this is going to do nothing because this is going to be nil.
+01:15:25 So this is great code.
+01:15:27 I didn't have to say if iPad or anything.
+01:15:29 It's just this is only going to happen if I'm in a SplitView controller.
+01:15:33 So I'm going to be a little, you know, worried here, and I'm going to say iskindofclass -- and make sure that that's an image view controller.
+01:15:39 Okay? But if it is, then I'm just going to call my prepare image controller thing down here, and this is going to be the detail.
+01:15:48 And the photo is going to be self.photos indexpath.row.
+01:15:55 Okay? Because it gives me the index path that got selected.
+01:15:59 Right? So that's all that needs to happen here.
+01:16:01 So let's just go ahead and run this.
+01:16:05 Oops. Well it's running on an iPad how about that?
+01:16:07 Well we'll run it on the real device how about.
+01:16:09 [ Pause ]
+01:16:24 Okay. So again, it blocked until it had loaded that thing, which is unfortunate.
+01:16:29 That thing is spinning.
+01:16:30 I don't really like that because I haven't picked a photo yet.
+01:16:33 So I'm just going to go quickly, before I even forget, go back to my iPad storyboard -- and only in my iPad storyboard, not in the other one.
+01:16:41 Okay? I'm going to pick that activity view controller, which is right here.
+01:16:46 And I'm going to inspect it.
+01:16:48 And I'm going to not start it out animating.
+01:16:50 It's still going to do it in my other one -- which is okay because that's creating a new view controller every time I segway -- but not in this one -- but hopefully if I click on a picture -- like Rome here -- it loads up Rome.
+01:17:01 And so here is Rome.
+01:17:02 I can zoom in.
+01:17:03 If I pick another picture, let's say Barkley Center -- That's -- oh well, that looks okay I guess.
+01:17:09 This worked.
+01:17:11 It's kind of a little off.
+01:17:13 You'll see there's the white at the top.
+01:17:15 That's not really quite right.
+01:17:16 And this white on the left -- you see the white on the left -- what's going on with the white on the left?
+01:17:21 Why is this happening?
+01:17:22 Well we didn't design our image view controller that well to be reused like this.
+01:17:28 This image view controller is staying on screen all the time and being reused.
+01:17:32 And it has a couple of bugs in it that are causing when I zoom in, and then I replace it with another photo.
+01:17:38 First of all it's not resetting the zoom scale back down to one -- which it should -- but also it's sizing to fit and causing it to no longer be in the upper left-hand corner of our scrollable area.
+01:17:48 So let's fix that real quick.
+01:17:49 Let's go to our image view controller.
+01:17:51 Those are easy fixes.
+01:17:52 Every time we set an image, we're going to take our SplitView and reset it's zoom scale back to one.
+01:18:00 And instead of just doing size to fit right here, we're going to explicitly set the image views frame to a rectangle that we're going to make, which is at the origin.
+01:18:12 And is the images size.width and the images size.height.
+01:18:19 Okay. So that will fix that bug.
+01:18:20 We don't want size to fit anymore because we're doing -- this is sizing it to fit essentially.
+01:18:25 So we fixed that bug.
+01:18:26 That's nice.
+01:18:27 The other thing that's not so great about this is it'd be nice to have a title along the top.
+01:18:31 We set the title, but it doesn't appear anywhere on the detail side.
+01:18:36 Right? So it'd be nice if we had a title just like on the -- this side over here.
+01:18:40 That says Shutter Bug at the top, it'd be nice if it said Jake at the Breakers over here on the right.
+01:18:46 Okay? So how are we going to do that?
+01:18:47 I'm going to do that with that little trick I told you.
+01:18:50 I'm just going to go here to my iPad storyboard.
+01:18:53 Okay? I'm going to pick this detail view and I'm just going to embed it in a navigation controller.
+01:19:00 Okay? And that's just going to fix that problem.
+01:19:02 So let's go ahead and -- well we've fixed three problems there.
+01:19:04 Let's make sure all these problems actually got fixed.
+01:19:07 And you're going to see that we fixed them, but we introduced a problem as well.
+01:19:11 [ Pause ]
+01:19:19 Okay so we have this -- oh this is better.
+01:19:21 We've got this space on the top right there.
+01:19:23 Hopefully when we click on something like Rome or free tickets.
+01:19:27 We'll get -- oh it's not working anymore.
+01:19:29 Why is it not putting anything on the right?
+01:19:31 And the reason for that is we changed the detail to not be an image view controller.
+01:19:37 Instead, it's now a navigation controller.
+01:19:40 So our code over here, where we update with didselectrow andindexpath.
+01:19:47 It's checking if detail is kind of class image view controller.
+01:19:51 And that's failing because it's not.
+01:19:54 But this is an easy fix as well.
+01:19:56 We're just going to say if the detail is kind of class, UI navigation controller.
+01:20:01 So if there's a UI navigation controller in the detail, then the detail is really the UI navigation controller detail.viewcontrollers firstobject.
+01:20:14 In other words the root view controller in navigation controller.
+01:20:17 So I'm just -- if the detail is in the navigation control, I'm just going to look in and get its root view controller instead.
+01:20:22 Okay? So [pause]
+fixes that problem.
+01:20:29 Hopefully [pause].
+01:20:35 Okay. So let's try Rome again -- oh now we got the title Rome up there at the top.
+01:20:40 Okay? Even if we zoom in on this and switch to another one that's different, it went back to zoom scale one, and we don't have white on the left edge, right?
+01:20:49 So even if -- again, we'll make it really small this time.
+01:20:52 We'll click to Newport, Rhode Island here.
+01:20:54 Okay it went back to zoom scale of 1 with no white.
+01:20:57 So we fixed all of our problems.
+01:20:58 We didn't have that the animating thing -- animating at the beginning although it does animate when we pick a new 1, so that's all good.
+01:21:07 So this is really looking good.
+01:21:08 Okay? So this is a typical kind of -- I wanted to do this because it's kind of a typical iteration process; speeded up of course because we're in a demo here [chuckles].
+01:21:17 Where you find something that doesn't quite work.
+01:21:19 Hmm. What's going on?
+01:21:19 You go back to your code; you have to fix some things, etcetera.
+01:21:23 So the last thing that I want to show -- now we do have another problem here.
+01:21:28 I've been showing this in landscape.
+01:21:30 Let's look at this thing in portrait.
+01:21:32 Okay. This is awesome in portrait.
+01:21:33 This is great.
+01:21:34 Except for I can't get at the master.
+01:21:36 I can't change my photo.
+01:21:37 It's -- the only way to change a photo is to go back here.
+01:21:40 Okay? So that's not so nice.
+01:21:42 It would be nice if we had this button in the upper left over here, that would bring out that thing.
+01:21:46 So let's do that real quick.
+01:21:48 That turns out to be quite easy to do, because we're in a navigation controller there.
+01:21:53 And we're going to do that in the image controller.
+01:21:55 The reason I'm going to do it in the image view controller is because it's on the detail.
+01:21:59 It's what's visible right here.
+01:22:01 Okay? So I'm going to make it be the SplitView controller delegate.
+01:22:04 So just go down to the bottom here.
+01:22:06 Pragmamarkview isplitviewcontroller delegate.
+01:22:12 Okay. And I'm going to do this awake from NIB.
+01:22:15 I'm going to say self.splitview controller.delegate =self.
+01:22:20 Okay. That's okay to do in awake from NIB because this will be set by the time awake from NIB happens.
+01:22:25 Even though that's really, really early.
+01:22:27 I'm getting a warning because I have to save.
+01:22:29 And I'm going to scroll UI SplitView controller delegate.
+01:22:33 Okay. Now I've got to implement the methods in that protocol.
+01:22:37 They look like this, SplitView so there's a whole bunch of them here.
+01:22:40 Actually I'm going to do the one which says whether to hide the thing first -- that's this one.
+01:22:48 So tab. Up here I'm going to make some space so this stops scrolling all the way to the bottom.
+01:22:53 So this is the one that says should I hide the master in a certain orientation?
+01:22:58 And I'm going to say, only hide it -- let's see if I can remember what this thing is called -- UI interface orientation is portrait.
+01:23:10 Okay. So in portrait mode only, I'm going to hide the master.
+01:23:15 So now when I hide it, I have to do this SplitView.
+01:23:18 I have to do these two things, will hide -- will hide and will show [chuckles] okay.
+01:23:22 So let's do will hide right there.
+01:23:25 And then let's do with SplitView will show.
+01:23:30 That's a mouthful.
+01:23:32 Okay. So let's do that.
+01:23:34 And because I'm in a navigation controller, these turn out to be really, really easy to implement.
+01:23:38 Okay. When I hide it gives me this bar button right here.
+01:23:42 And I just need to put that in my navigation item so that it will appear as the left bar button item.
+01:23:53 I'm going to do another little trick here.
+01:23:55 Is that I want my image view controller, I don't want it to know anything about that Flickr photo thing.
+01:24:02 So I'm actually going to set this bar button item's title equal to the master title.
+01:24:09 So whatever the title of the master that's being hidden, that's what I'm going to make that little button say as its title.
+01:24:15 So I better go back to my iPad storyboard and set this, which is, the thing I better set its title, which I can set in the storyboard.
+01:24:22 We'll call this Shutter Bug.
+01:24:25 So that's going to get -- that's going to make this code for the SplitView controller more generic here.
+01:24:30 And then when the thing goes away, I'm just going to set this left bar button item equal to nil to make that thing go away.
+01:24:39 Alright? So that fixes that.
+01:24:40 Let's go see what that looks like.
+01:24:42 [ Pause ]
+01:24:56 Okay. So here I have in landscape it shows.
+01:24:59 When I go here to portrait it goes away.
+01:25:01 But now I have this button in the upper left.
+01:25:03 If I click it, it slides that thing out.
+01:25:06 Okay? If I click somewhere else it goes away.
+01:25:08 So I can click here, get some photo.
+01:25:11 Maybe Rome would be better.
+01:25:12 I don't know what the bargain center's about.
+01:25:14 Rome seems safe [chuckles].
+01:25:16 So here's Rome, right?
+01:25:17 And this is nice, we can do this.
+01:25:18 But if I want something else, I can just slide this thing out.
+01:25:21 Look down; find a different Rome.
+01:25:23 Okay? Makes sense?
+01:25:25 And if I slide back to landscape, you take that button away.
+01:25:28 That button is no longer there.
+01:25:29 Okay. So that's what that delegate's doing.
+01:25:31 It was easy for us to implement because we put the detail into a SplitView controller.
+01:25:36 It wouldn't always be so easy to do that.
+01:25:40 The last thing I'm going to do here is fix that problem with the blocking of the main thread.
+01:25:48 I'm going to do this super fast.
+01:25:50 So hang onto your hats.
+01:25:52 I'm going to do that here.
+01:25:54 And I'm going to do it in a different way than we did before.
+01:25:56 Okay? Because I want to show you a different way to do this.
+01:26:00 Which is, I'm going to create my own queue.
+01:26:02 So dispatchunderbar queueunderbarT -- fetchqueue I'll call it.
+01:26:08 I'm going to create it with dispatch createqueue create.
+01:26:13 I'm going to call it Flickerfetcher -- that's just the name I'm going to call it.
+01:26:18 And it's a serial queue.
+01:26:19 So I just created my own queue.
+01:26:21 Okay? Brand new queue.
+01:26:23 And now that I have my own queue I'm just going to dispatch A sync onto that queue.
+01:26:28 A block. And that block is just going to have this blocking stuff in it.
+01:26:38 Okay. All this stuff here.
+01:26:41 But self.photos -- okay?
+01:26:43 Which does need to be in here, unfortunately this is going to do stuff on -- that's in the UI so it needs to be dispatched back to the main thread.
+01:26:53 [ Pause ]
+01:26:58 Alright. Put that there.
+01:27:00 Put this here.
+01:27:01 Okay? So that's going to do this.
+01:27:04 We're not going to block the main thread anymore.
+01:27:06 So this is a way to do it by creating your own queue.
+01:27:09 Instead of doing all that stuff we do with the URL session and all that stuff we can just do this.
+01:27:13 Is that a question right there?
+01:27:14 >> Yeah.
+01:27:15 >> Yeah [background question].
+01:27:15 Why do we not have to do weak self in this thing?
+01:27:19 Because this block is not held on too strongly by ourselves.
+01:27:23 We -- it holds us strongly, but we don't hold it strongly so we're good to go.
+01:27:27 And the last thing I'm going to do -- which I'll do at the same time here -- is that little refresh thing, because that's really easy to do.
+01:27:35 And let's do that here on the iPad version -- we'll have to do it on both versions, but here's our TableView right here.
+01:27:41 And we wanted to have a little refresh spinner when all that business is going on.
+01:27:45 So to do that we just inspect it.
+01:27:47 And down here you see it says refreshing, right here.
+01:27:50 So we're going to say enabled.
+01:27:52 And when we did that, in our document outline you'll see that we got this refresh control right here.
+01:27:57 And really, for free we can get it -- the pull down support if we just make fetch photos here be an IB action.
+01:28:06 Okay? Because if that's an IB action, then we can control drag to it.
+01:28:11 Okay? Because we can control drag to any IB action.
+01:28:14 And so now that pull down is going to call this fetch photos.
+01:28:17 Now we still are required, inside this fetch photos, to say self.refresh controlbegin refreshing.
+01:28:24 And then when we're done, down here, okay?
+01:28:27 We need to say self.refresh controlendrefresh.
+01:28:32 Okay? Everyone understand this?
+01:28:35 This is going to make things start spinning and make it go down.
+01:28:38 But this target action we did makes it so we can pull down on it.
+01:28:41 So let's take a look at that.
+01:28:43 [ Pause ]
+01:28:53 Okay so it loads up, and you can see it's refreshing.
+01:28:55 See it's doing all the Flickr fetch now instead of doing it all before, you know, and blocking our UI.
+01:29:01 And in fact, if I pull down on it, it does it again.
+01:29:04 But my UI is still active because it's doing that in a different queue.
+01:29:07 Okay? So I can still scroll around, but it's doing that fetch in the background and it's going to update this.
+01:29:11 Now Flickr only updates this most recently posted thing every 15 minutes or so, so that's why you're not seeing the list change.
+01:29:17 But if I waited 10 minutes and did it, then that would happen.
+01:29:22 And so there we go.
+01:29:25 By the way, if you pull this down partially it doesn't do it.
+01:29:27 You have to pull it down all the way and start it spinning.
+01:29:31 This is part of the UI.
+01:29:33 To make sure you really wanted that.
+01:29:36 Okay? That's all I wanted to show you.
+01:29:39 Sorry to have -- run a little over -- a little extra time.
+01:29:41 I'm here if you have any questions.
+01:29:42 Thank you [silence].
+01:29:44 >> For more, please visit us at stanford.edu.

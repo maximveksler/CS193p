@@ -1,0 +1,906 @@
+00:05 >> Stanford University.
+00:11 >> Okay. Well, welcome to CS 193P fall of 2013/2014.
+00:17 Today we're going to continue our discussion of attributed string from last time and talk about UITextView, which is basically a mutable attributed string viewer, okay?
+00:28 It's kind of like a UILabel but much more powerful.
+00:32 And we'll talk about that.
+00:34 Then we're going to talk about a very important kind of conceptual thing in iOS 7 -- or in iOS in general -- which is view controller lifecycle.
+00:41 So that's just the lifecycle of the controller part of your MVC and how it gets notified at different times in its lifecycle about what's going on.
+00:50 Then we're going to talk about the radio station that I referred to in MVC.
+00:54 We're going to talk about it in a little different context that we see in MVC because I just want to introduce it to you now.
+01:02 And then throughout today's thing -- so I'm going to be -- slides here.
+01:08 I'm going to be stopping every once and while and we'll do a little demo.
+01:11 And then we will move back to the slides and back and forth as we cover various topics.
+01:18 Okay? So let's start with UITextView.
+01:22 Like UILabel in that it displays text but way more powerful because the text is multiline.
+01:29 UILabel, if you want it to be multiline, you kind of have to say how many lines it is in advance, whereas UITextView, as many lines as it needs.
+01:36 It's also scrollable, editable, or just selectable if you want.
+01:41 And of course, you get all the mutable attributed string setting of various things like colors and all that stuff.
+01:48 So UITextView, super powerful object but very easy to use.
+01:54 The way you use it is that it has a property called "text storage," which is an NSTextStorage.
+02:01 NSTextStorage is a subclass of NS mutable attributed string.
+02:05 So you get this text storage, and you can just start setting attributes or if it's editable, the user will start editing it and the attributes will just show up on this mutable string.
+02:14 It's a super great programming interface new in iOS 7.
+02:18 Okay. It's having a mutable attributed string be just vended like this by UITextView and editable on the fly by both the user and by you is all new and it's really incredibly awesome and easy to use.
+02:32 There are some methods on UITextView like, you know, property font where you can just set the font.
+02:38 Understand, though, that when you set the font, all it's doing is going through every character in the mutable string and setting the font attribute name -- font, you know, that thing -- to this font.
+02:49 So remember that bold and italic are attributes of the font.
+02:55 Okay? And so is the size, actually.
+02:57 So if you call this method set font -- you know, call the set font setter there -- it's going to blast all of your bolds, and italics, and size, okay?
+03:07 So you be a little careful of that.
+03:09 If you want to set the font, though, of every character and have that stuff preserved, just do a little for loop, go through all the attributes in the mutable string, get the font that's already there.
+03:18 You can grab the symbolic traits that are off of it using the symbolic traits method in UIFontDescriptor and then create a new font that is the font you're trying to set, plus those traits, and then set it back as the attribute.
+03:31 So a little for loop there to do that.
+03:33 But I just want you to be careful about methods like set font, which are going to set the font attribute of all the characters, okay?
+03:41 UITextView has incredibly advanced text layout mechanisms.
+03:45 For example, you can specify the container that the text is going to be in and it can even have exclusion zones.
+03:52 So if you had an image that was dropped in the middle of your text and you wanted text to flow around it, even if it's funny-shaped thing -- you know, image -- you can flow around it.
+04:03 And you just -- it's so easy to do it.
+04:05 Unbelievable.
+04:05 You just create a Bezier path that encompasses the thing you want it to flow around.
+04:09 You just set that as an exclusion zone in the text container property here of UITextView, and it will just flow around.
+04:15 So we're not going to talk about that advanced stuff.
+04:19 It's all part of Text Kit, which is new for iOS 7.
+04:23 The layout manager is the thing that lays out the glyphs.
+04:26 So it takes all the characters and all the attributes and stuff and it laying out the glyphs one by one.
+04:31 For those of you who don't know what glyphs are, they're kind of how you represent a character or a sequence of characters on screen with some things.
+04:39 So the layout manager is the thing that lays the glyphs out inside the text container.
+04:43 So if you're interested in typography or you're going to do a final project that has a lot of text layout and stuff in it, this is where you get started there.
+04:52 Okay? So let's have a demo where we kind of combine all the things we saw in last lecture in this UITextView.
+04:59 I'm going to call this demo "Attributer" because we're going to be doing attributed strings here.
+05:06 And it's going to look like this.
+05:08 It's going to be a totally new app, totally unrelated to Machismo.
+05:12 So I'm going to say create new project.
+05:14 Let's go ahead and also hide others here.
+05:17 Well, we'll do it in a second.
+05:18 So I'm going to do a single view application.
+05:22 We almost always start with that, a single MVC.
+05:24 This demo I'm eventually going to make into a multi-MVC application at the next lecture, but we're going to start here with this.
+05:33 So I'm going to call it Attributer.
+05:34 I'm going to have the class prefix be attributer so that our controller is called "attributor view controller." Just do that.
+05:41 I'm going to put it in Developer, same place I have Machismo.
+05:44 This is my home directory, Developer.
+05:45 I'm not going to use source control.
+05:48 And here we go.
+05:49 So this is just a regular app just as you're used to.
+05:53 Again, I like to move these delegate things into supporting files because we're not really going to be doing the delegate.
+06:00 This quarter we might actually do the delegates when we start talking about multitasking in iOS 7.
+06:04 But for most of the time you can just kind of move that out of the way.
+06:08 Here's my blank storyboard.
+06:10 Again, I'm going to go down to small size instead of the tall size just so it fits.
+06:16 Okay, there's no reason to do that, except for that it fits.
+06:18 By the way, you're welcome to use the larger size in your homework if you want because as I ask you to do more and more in the homework, then you kind of need more and more space, which is fine.
+06:29 Of course, we need to think a little bit when we design user interfaces that this application might run on some users on smaller phones and on some users on larger phones, right?
+06:39 So we kind of need a user interface that can stretch.
+06:42 And next week we'll be talking about autolayout, which is a mechanism in iOS for you to design a user interface and specify how it stretches and shrinks, okay, which is really important.
+06:52 And not just on different size iPhones but different devices -- iPads, you might be using them in a little window inside an iPad, etc. We want to make our views of our MVCs be shrinkable to at least some extent.
+07:06 And of course, don't forget device ration.
+07:08 When you turn your device, it all of a sudden gets wider than it is tall.
+07:11 Okay? Well, everything needs to move around to deal with that, too.
+07:14 Okay? So we'll talk about all of that next week.
+07:17 So let me show you the user interface I want to build here first so that you can kind of understand where I'm headed, and then we'll write the code to do it.
+07:23 It's going to be primarily centered around a UITextView.
+07:27 So here I am looking at all my various things that I can drag out.
+07:31 So I'm going to go down here to UITextView, which is right -- where is that thing?
+07:39 Too far down.
+07:40 UITextView -- I can't find it.
+07:41 It's right there.
+07:44 Okay? So UITextView displays multiple lines of text.
+07:46 So I drag it out.
+07:47 By default it wants to be the whole size of the screen.
+07:50 But I'm actually going to put some other buttons and stuff in here, so I'm going to resize this to be smaller.
+07:56 I also want it to have a little bit of edges here.
+07:59 Now, notice that as I do everything the UI, I'm using these blue lines.
+08:03 And I haven't really told you exactly why that is, but when we start talking about having these flexible-sized views that are going to want to resize, these blue lines play a crucial role.
+08:15 And so when you're building your UIs, use the blue lines as much as possible because then when we start doing autolayout, the blue lines are going to help the autolayout system kind of get a clue as to what they should be doing.
+08:26 All right.
+08:27 So I'm going to have this text view here.
+08:29 And what I want to do is have some text.
+08:31 And I'll just use the default text.
+08:33 If you look over here when you create a text view, you see you get this kind of pseudo-Latin text here.
+08:38 Then I'll just use that as the default.
+08:41 So that's going to be the text that's going to be in this one I run.
+08:43 And if I run this, I'll just get this text.
+08:46 But what I want to be able to do is select some of the text.
+08:50 So I'm going to make this text selectable, okay -- not editable, though; just selectable.
+08:55 And so I can select words in here.
+08:57 And I want to be able to change the color of the words, maybe put a little outline around the characters, okay?
+09:03 Do some fun stuff that we can do with attributed string in here.
+09:08 And what am I going to allow us to do?
+09:10 Well, let's see.
+09:11 Let me go get some buttons down here at the bottom.
+09:13 How about let's allow outlining.
+09:17 So I'm going to create a button down here called "outline." And of course, let's also let us unoutline.
+09:25 So I'll create another button up here.
+09:26 I'll call it "unoutline." That's probably not a word, but we know what we want.
+09:31 Again, I'm going to use the blue lines to try and get things, you know, lined up as much as possible.
+09:37 This guy, let's put him right in the corner.
+09:38 These guys will line the base lines up.
+09:40 That's what the double line right there means, that the baseline of the other button line up.
+09:45 And we got, also, this right line was lined up.
+09:48 So they're going to stick to the edges and stay lined up.
+09:50 So we'll allow outlining and unoutlining.
+09:54 And then also, I'm going to allow setting colors.
+09:58 And the way I'm going to do that is kind of fun.
+10:01 So let's get a button out here.
+10:02 This is a good way to talk about if I'm resizing, I want this button to be 64 by 64.
+10:08 I know that that's a good size.
+10:09 And I could try and get it exactly the size I want.
+10:12 But it's actually much easier -- if you know the size you want -- to go over here in the size inspector.
+10:17 You see this size inspector?
+10:19 And you can just type in, "I want 64 by 64," okay?
+10:23 So this size inspector, we're going to see when we start talking about autolayout a lot there's going to be a lot of stuff down here, describing how this thing gets constrained when things change size.
+10:33 But it's also good for setting the size.
+10:35 And then once the size is set, I'll move into a nice spot like that.
+10:39 Now, I could put, like, the word "red" here and make this a button that has the word "red" on it.
+10:44 And I could make the text be red.
+10:46 That's what I want this button to do.
+10:47 When I click here, I want whatever's selected to turn red.
+10:50 But instead of using words, I'm actually going to use the color.
+10:54 I'm just going to go to the inspector.
+10:56 And since a button inherits from control and control inherits from view -- see how that inheritance hierarchy is working in the inspector -- I'm going to go down here and change its background color, which is the same thing we did when we set the background of the whole view to green.
+11:14 And I'm going to set this one to -- let's say this one's red.
+11:18 Okay? So now I have a nice red button here.
+11:20 And when I click on this, I'm going to have to wire it up to make this turn red.
+11:23 So let's make some more buttons here of different colors.
+11:26 Again, I'm using the blue lines.
+11:28 See how they're snapping in place?
+11:31 Okay. Getting blue lines -- definitely want blue lines as much as possible.
+11:35 So here let's make this background be green.
+11:40 I'll make this one be orange, make this one be -- oh, I don't know -- purple.
+11:45 Okay? So now we have some colors and some outlines.
+11:48 And then let's also make this thing -- well, let's put a headline at the top here, too.
+11:55 So let me grab another button -- actually, let's do a label for this one because we're not going to make it clickable.
+12:00 So I'm going to put a label here at the top.
+12:02 I'm going to put something like "CS 193P Rocks." Okay. So that's just going to be my title of this thing.
+12:09 I want it nice and centered.
+12:11 Let's move this up so that it's locked.
+12:14 Let's resize it so it's maximum space.
+12:16 It locks. And so now I've got this nice user interface.
+12:19 I've used blue guidelines for everything; everyone's sticking on a blue guideline.
+12:22 That's going to be really advantageous for us when we try to do autolayout with it.
+12:27 Now, let's talk a little bit about the fonts I want to use here.
+12:29 And I told you in the slides that when you're displaying user content, okay, you want to use the preferred fonts of the system.
+12:39 Okay? And that's what I'm going to do, both for this guy.
+12:42 This is clearly the user content.
+12:44 These two buttons are not user content.
+12:47 They're going to stay the system fonts, okay, because they're buttons.
+12:50 But this title and this body are kind of user contents.
+12:54 You could argue that the title is not quite user content, but it kind of is.
+12:57 It might get localized to another language or it might change, depending on what's going on.
+13:01 I don't know.
+13:02 But it's really kind of a headline.
+13:04 So I'm going to use the headline font to display this guy right here -- actually, I also want this centered.
+13:11 All right.
+13:12 So let's make sure that's centered.
+13:14 And so the way you pick the headline font, the preferred font which is headline, is you inspect the label and you go here to the fonts.
+13:23 And you can see that it's currently set to be a system font.
+13:25 And I'm going to go down here to text styles and pick headline.
+13:29 And that's basically in the code like saying preferred font of a text style headline.
+13:34 And you can see it change there.
+13:36 Kind of got a little bold to it.
+13:39 It's now the headline font.
+13:41 And the same thing here, the text view, I'm also going to set it to use a preferred font.
+13:46 But in this case I'm going to use the body font because this is clearly, like, the body of this content in this window.
+13:52 So now I've set these things to have the preferred fonts rather than the system fonts.
+13:56 And that's pretty much all that's required to set that up.
+13:59 So that's my UI.
+14:00 All right?
+14:02 So yeah, question?
+14:03 >> In iOS is there an easy way to round out the corners of those buttons, or do you have to go through, like, a lot of masking?
+14:12 >> Yeah, so the question is: If I wanted these to be, like, rounded rect buttons -- which it's not really a thing in iOS 7 to have rounded rect buttons, by the way; it was a thing in iOS 6, but not so much a thing in iOS 7 -- how difficult would this be?
+14:25 And the answer is it wouldn't be that bad.
+14:26 It wouldn't be that hard.
+14:27 There's a mechanism.
+14:28 Rounded rect is a one-liner to create a rounded rect.
+14:31 And probably we wouldn't make these UI buttons; we'd just make them views.
+14:35 And it's really a one-liner to have a tap gesture, to tap on it and cause it to do something.
+14:40 So, you know, a few lines of code is really not that difficult.
+14:44 In fact, you can make it not just rounded rect but any shape that you wanted there, whatever.
+14:48 Question?
+14:48 >> Is there any way to include, like, CSS in it though or no?
+14:52 >> So the question is: Is there any way to include CSS?
+14:55 Not really directly.
+14:57 However, these preferred fonts, for example, are plugged into the CSS system.
+15:01 So if you have content in your app that is coming from CSS source, you know, on a web view or something -- we haven't talked about any of that yet, but you could do that -- the fonts can match up and all synchronize with each other.
+15:12 So there's some synchronicity there, but you can't directly display.
+15:17 Okay. So let's look at the code to make this user interface do what we want.
+15:22 So I'm going to get my system editor up here.
+15:24 Let's put that right on the edge.
+15:26 Let's make some more space so you can see more code.
+15:31 And you can see that my default view controller has this method here, viewDidLoad, which is part of the view controller lifecycle that we're going to talk about in a second and also did receive memory warning, which is not strictly speaking part of the view controller lifecycle but I'm going to talk about it as part of the view controller lifecycle.
+15:50 I'm not going to demo that today, but I am later going to demo viewDidLoad.
+15:55 So we'll leave that in there for now.
+15:56 Right now it doesn't do anything except for call [inaudible].
+16:01 Okay?
+16:03 So what do I need to do here?
+16:04 Couple of things.
+16:05 One, I'm going to want to be setting the mutable string attributes of this thing, so I need an outlet to this.
+16:11 So I'm just going to control drag here to create an outlet.
+16:15 I'm going to call it "body," okay, because it's kind of like my body text view.
+16:20 And you can see that it's a UITextView.
+16:22 And I'm going to be able to send a message to this body to get its text storage mutable string.
+16:27 And then I'm just going to start setting attributes.
+16:29 Okay? It's as simple as that.
+16:30 You know, I'm also going to grab one to this, and you'll see why later.
+16:34 I'm going to call this my "headline," okay?
+16:37 And so I could call that my "header," or my "heading," or "title label," or something like that.
+16:43 I'm going to call it "headline" just here to emphasize that we're talking about preferred fonts because I'm going to be showing that in the demo as well.
+16:49 So we've got this body in the headline.
+16:51 We could conceivably set things about the headline.
+16:55 I don't really have time for that, but we will be setting things in here.
+16:59 We've got these colored buttons.
+17:00 Let's do those first.
+17:02 So I'm going to control drag here to have an action sent when we press on that button.
+17:07 I'm going to call this action "change body selection color to match background of button." Okay? Now, you might laugh and say, "Whoa, that's a long name method." But long name methods are kind of preferred generally in Objective-C and especially in iOS because Xcode's going to help you escape complete these things.
+17:35 And if you can have a method name like this that really matches and says exactly what it does, that can be a good thing.
+17:41 It's an art of programming thing.
+17:43 I'm going to change the argument to be a UIButton, just like we did before in Connect.
+17:49 So what does this method do?
+17:50 Well, hopefully with that long name it's clear what that does, right?
+17:54 It changes whatever the selection is in our body right here, it changes the color of that to match the background view of this button.
+18:03 Okay? That's what this method is going to do.
+18:05 This method is one line of code.
+18:07 Okay? So let's look at that one line of code.
+18:10 We need to set attributes of the mutable string of our body.
+18:14 So I'm going to say self.body.text storage.
+18:18 Now I have the NS mutable attributed string -- text storage is a subclass of it -- but it is an NSMutableString.
+18:25 And I just want to add an attribute, which is the foreground color of whatever's selected there.
+18:33 So the attribute is called "NS foreground color attribute name." Okay? The value -- that's the color we want to set it to -- well, I said we're going to have it match the background of the button.
+18:45 So I'm going to say sender, which is the button that's sending this thing, background color, okay?
+18:51 And then the range is what range of this text view's storage do I want to set to be that color?
+19:00 Well, I said I want it to be the selection -- the body selection -- so there's a method in text view called "selected range." And it returns an NSRange of what's selected, okay, what the user selection is.
+19:15 Okay? So you can see one line of code, and we've got our color -- all four color buttons -- working as long as they're all wired up, which we know that this one is, right?
+19:25 Okay, because we wired that one up.
+19:26 There it is right there.
+19:27 We haven't wired this one up, but let's do that.
+19:29 And this one.
+19:31 And this one.
+19:33 Okay? So let's go ahead and run.
+19:35 We'll try and see if we can run it on the device over here if that works today.
+19:41 Hopefully no technical issues will arise.
+19:46 Now, this is an iPhone app that we're running here, and we're running it on an iPad.
+19:51 My demo machine happens to be an iPad.
+19:54 So this is running kind of in iPhone emulation mode, okay, which is actually better in iOS 7 than it was in previous versions of iOS.
+20:01 It's not quite exactly the same.
+20:04 You notice that this status bar at the top, you don't get the, you know, what your carrier is, and the battery life, and all that stuff.
+20:12 That's kind of cut off.
+20:13 But otherwise it's pretty similar.
+20:16 So you can see that we got that kind of pseudo-Latin text in there, and it's scrollable.
+20:22 And it's also selectable.
+20:25 So I just double tapped on that word.
+20:27 And we got it now.
+20:30 You get things for free on this, like defining words -- looking them up in the dictionary.
+20:35 So if we hit define right here, it goes and looks it up -- not found, not understand, no surprise there.
+20:42 But you can look that up.
+20:45 And of course, hopefully all our buttons work.
+20:47 So let's try red.
+20:48 That worked.
+20:49 And orange and purple.
+20:51 Okay? Green.
+20:52 So that's working.
+20:54 That's setting things right.
+20:55 I could actually extend my selection, go orange.
+20:58 Sets it all orange.
+20:59 Pick another word, red.
+21:00 So that's working.
+21:02 Super easy.
+21:03 Okay? Everyone understand what we've done so far?
+21:07 So now let's go on and do the outline button and the unoutline button.
+21:13 So I'm just going to control drag from there.
+21:18 I'm going to call this "outline." I don't need any argument here because I'm not looking at the button to determine how to do it.
+21:27 And in fact, in spirit of not long message names, let's call it "outline body selection." Okay, because that's kind of even clearer exactly what the outline is going to outline.
+21:37 So let's do that.
+21:38 Here we have outline body selection.
+21:40 Again, this one's same thing as before -- body text storage -- and we're going to add attribute.
+21:47 But actually, to do an outline we need to do two things.
+21:51 One thing is we need to set the stroke width, okay?
+21:54 That's the width that the character gets stroked -- not filled but stroked, its outer edge.
+21:59 And we also want to set the color of that stroke.
+22:01 I want it to be black.
+22:03 Okay? So if we have a word and its color is selected, it will still fill with that color, okay, because I'm going to specify a stroke that does a fill and a stroke.
+22:11 But the outline's going to be in black.
+22:13 So when we do add attribute, we need to do add attributes -- plural -- because we're going to add two attributes.
+22:19 Now, this is a dictionary, and I can just create this dictionary right on the fly here with our at sign curly brace.
+22:26 And one of the things we want is the stroke width.
+22:30 So here's the stroke width attribute name.
+22:32 And I'm going to set the stroke width to minus three.
+22:35 Okay? Minus three, if you'll recall, means stroke width of three and also fill.
+22:42 If I said stroke width of at sign three, it would not fill.
+22:45 It would be clear.
+22:46 Right? In the middle of it would be clear.
+22:49 So we don't want that.
+22:49 We want to fill.
+22:50 Whichever color we pick, we want that to.
+22:52 So that's that.
+22:53 And then let's also set the stroke color attribute to be UIColor black color.
+23:03 So I'm just doing this mostly so you can see how to put, you know, an actual color in there instead of here where we grabbed a color from somewhere else.
+23:11 You can use these class methods in UIColor to do that.
+23:15 And we need the range.
+23:16 Same thing as before: Selected range.
+23:19 Okay? So now we're going to add both those attributes to outline it.
+23:26 That's all we need there.
+23:27 Let's do unoutline while we're here.
+23:29 Save ourselves a little bit of time.
+23:31 I'm going to call this "unoutline body selection." Done. And just again to show you a different method, let's unoutline by removing any stroke width attribute.
+23:45 I could probably set the stroke width to zero as well.
+23:48 But I'm going to remove so that you can see how in NS mutable attributed string we can remove attributes.
+23:54 We just say "Remove attribute NSStroke width attribute range self.body.selected range." Okay? So that's going to remove that attribute.
+24:06 We don't really need to remove the stroke color because if it's not being stroked, then the color doesn't matter.
+24:12 So it's kind of in there.
+24:13 It's a little extra.
+24:15 You could argue maybe wasted storage.
+24:16 Although the storage of attributed string is really optimized to the nth degree.
+24:21 Okay? So I wouldn't worry too terribly much about that.
+24:25 All right.
+24:26 So let's go see if that works.
+24:34 Okay. So let's pick another word here like this one, outline it.
+24:38 That is outlined.
+24:39 It just looks bold because it's filled with black still.
+24:43 Okay? Because black was the color that's there.
+24:44 But if I fill it with orange, you can see it looks a little different.
+24:47 Right? Or go over here to this word.
+24:49 Let's make it red and then outline it, okay?
+24:54 Everyone cool with that?
+24:56 Then we can unoutline as well.
+24:58 Go back to red.
+24:59 So outline, unoutline.
+25:01 Okay? Everyone understand that?
+25:05 Okay. So that's it for now.
+25:06 We'll be back to this in a second.
+25:14 Yeah?
+25:14 >> Yeah, I'm not quite sure that I understand the difference between the negative three and positive three.
+25:23 Like, what's getting filled or isn't getting filled?
+25:26 >> Okay. Great question.
+25:28 So let's just be a hundred percent clear: What's the difference between the negative three that we have right here, okay, and positive three?
+25:37 Negative three means -- in fact, you know what?
+25:40 I'll show you a demo of it a little later.
+25:47 See the button that says "outline"?
+25:51 Later we're going to change it to be outlined.
+25:53 Okay? And we won't fill it, and you'll see the difference, that it's not going to be filled with a color, okay?
+26:02 So let's get back to the slides, though.
+26:04 And over here.
+26:05 Next. Okay?
+26:06 View controller lifecycle.
+26:09 Okay. So this is important thing to understand, the view controller lifecycle, because a lot of the things that you're going to control about how your view controller moves through time are going to be controlled by the methods that are part of the view controller lifecycle.
+26:25 Now, all the view controller lifecycle is, is a series of methods, okay, that are sent to UIViewController when things happen.
+26:33 Now, your controller is a subclass of UIViewController.
+26:39 You probably noticed that.
+26:40 If you look at your code, you'll see that your controller that gets created for you by the template when you create a new app is a subclass of UIViewController.
+26:50 So it's going to be sent these messages, and you're going to override them if you want to find out when these things are happening.
+27:00 Don't forget to call super.
+27:02 Okay? Why do you need these things?
+27:03 Well, you need to be able to initialize your controller; you need to be able to find when you come on and off screen; you need to know when your bounds change, right, your geometry changes.
+27:19 You got to know these things for your view controller's view to successfully live in the iOS world.
+27:26 So the start of this lifecycle is creation, okay?
+27:29 Most view controllers are created out of storyboards.
+27:32 And I told you that storyboards don't generate code.
+27:35 You're basically editing those objects live -- that UI text view, those buttons -- you're editing them live in Xcode.
+27:44 And when that storyboard gets saved, they kind of get freeze-dried.
+27:52 And then when your application runs, water gets added back to them and they come back to life, okay?
+27:59 So that's the creation part of the lifecycle.
+28:02 And we don't really do much at creation.
+28:05 In fact, I'm not even going to talk about creation until the very end of the view controller lifecycle.
+28:12 Even though it is chronologically the beginning, it's by far the least important.
+28:17 So I'm emphasizing that by putting it at the end.
+28:19 But after it's created, you go through the following process.
+28:24 Your outlets get set, okay?
+28:26 Got to have those outlets set.
+28:28 Then your view controller appears on screen and it might disappear from screen.
+28:32 You haven't seen that yet because right now you've only had one view controller in your whole app.
+28:40 It only disappears when the app quits.
+28:42 But when you have multiple view controllers, they'll appear and disappear on screen.
+28:48 Their geometry changes -- either device rotation or something else can cause their bounds to change of your view of your MVC.
+28:57 Low memory situations -- again, not strictly speaking part of the view controller lifecycle but that can happen while you're running.
+29:05 And at each of these steps a method gets called.
+29:07 So let's look at the first one: ViewDidLoad.
+29:10 So that's the one we saw in the code that I didn't delete.
+29:12 This is a really great place to put initialization code for your controller.
+29:16 You can kind of think of it as where you would put all the stuff from your init, okay, because your init is not going to get called -- as you're going to see -- for your view controller.
+29:30 So why is this better than init?
+29:32 Because your outlets are set.
+29:33 Okay? Very important for your outlets to be set usually if you want to initialize your view.
+29:40 Because you want to set your labels to say something or whatever.
+29:43 You know, in the Machismo game we started with the cards facedown because we didn't really know how to start faceup.
+29:46 Okay? Well, this is where you would set the first card.
+29:47 All right?
+29:48 You'd draw the first card, have it -- this is the Machismo, not your assignment but what we did in class -- have it start with the card faceup.
+29:51 You would do this in viewDidLoad because here your outlets are set.
+29:53 So I can talk to that button.
+29:54 It was a single button in Machismo at the time.
+29:55 But I'm not on screen yet.
+29:56 ViewDidLoad gets called before you come on screen.
+29:57 So it's a great place to do stuff like that.
+29:58 ViewDidLoad will only ever be called once in the lifetime of your controller.
+30:00 Period. Once.
+30:00 It never gets called more than once.
+30:01 Okay? It is a spectacularly great place to put initialization code.
+30:03 However, there are limits to what can go in viewDidLoad, most especially geometry code.
+30:05 At the time viewDidLoad is called, the bounds of your view is not finalized.
+30:07 It's probably just sitting at whatever it was in the storyboard, which may or may not be what's going to happen when it's on screen because it might be on a little different device, or different place, or it might be rotated, or something like that.
+30:13 So you do not want to put geometry-related code -- in other words, any initialization that has to do with what the shape of your view is -- in viewDidLoad.
+30:17 Okay?
+30:18 That's the major restriction in viewDidLoad.
+30:20 But otherwise, it's a great place because it only gets called once before you go on screen after your outlets get set.
+30:25 It's an awesome method.
+30:26 Okay? Highly recommend it.
+30:29 Now, just before your view controller view appears on screen, you get viewWillAppear.
+30:37 Okay? This is a pretty good place to put things.
+30:41 It's not really as awesome as viewDidLoad in some ways.
+30:45 And I'm not even sure I'd put geometry-related stuff in here, as you'll see in a couple of slides.
+30:51 However, there are some things you do want to put in here.
+30:53 Now, one thing you want to be careful about not putting in viewWillAppear is one-time initialization that really belongs in ViewDidLoad because, again, when you have multiple MVCs in your app, they're going to be appearing and disappearing.
+31:06 And so viewWillAppear is going to get called multiple times, okay?
+31:10 Every time your view appears back on screen, viewWillAppear gets called again.
+31:14 So if it's a one-time initialization, you put it in viewWillAppear, it's going to happen every time your thing reappears.
+31:19 So what does go in viewWillAppear?
+31:20 Well, one thing is if there's some initialization you need to do, based on some data that might have changed while your view controller's view was off screen.
+31:32 Okay? So like your model.
+31:33 Something changed in your model.
+31:35 Your view controller was off screen, so it wasn't really listening for changes in the model.
+31:39 And then coming back on screen, you better sync up with the model.
+31:43 Does that make sense?
+31:44 Because you were off screen and now you're appearing.
+31:47 And so this is a good thing to put in viewWillAppear: Synchronization with things that might have changed while you weren't visible, including things that, you know, were changing before you appeared for the first time.
+31:58 Because viewWillAppear, of course, gets called the first time you appear as well.
+32:01 Okay? This is not view will reappear; it's viewWillAppear.
+32:04 Okay. So that's a good thing to put in here.
+32:07 We'll talk later in the course about putting code in here for optimization purposes because if you put something that's going to take lot of resources, like you're going to make some network call in viewDidLoad, and what if your MVC never appears on screen?
+32:23 Well, you wasted that time doing that network call on viewDidLoad.
+32:27 Whereas if you do it in viewWillAppear, even though you're going to have to design it -- because if you do something in the network, it's going to come later; it's not going to be instantaneously available, that's okay, we'll talk about how to do multithreaded, make that all work -- kicking it off in viewWillAppear might be a little better performance because you know when you get viewWillAppear that your view is going to appear on screen.
+32:45 Okay? So it's worth it to do something expensive.
+32:48 But that's kind of advanced stuff.
+32:49 So I won't worry about that too much for now.
+32:51 The view's geometry is set here.
+32:54 So you could do some initialization based on geometry here.
+32:57 And a lot of people do it because it's kind of simple.
+32:59 But there's actually a better place to do geometry-based initialization.
+33:04 But it's okay.
+33:05 It's quote "okay to do it in viewWillAppear" as long as you understand that your geometry could change after viewWillAppear.
+33:13 In other words, you can be on screen and someone could rotate the phone, and now your geometry just changed.
+33:18 Okay? So you better deal with that, okay, that you're not going to get viewWillAppear when you rotate, you're going to get other things.
+33:26 Okay. You also get notified when you're view goes off screen.
+33:29 So that viewWillDisappear, okay?
+33:32 And what do you want to do in here?
+33:34 You don't usually do a lot of stuff in here.
+33:36 If you're doing something like animation or something, obviously this would be a good place to stop doing that because when viewWillDisappear happen, really you want your controller to become a good citizen: Stop using resources.
+33:48 You're not on screen, stop it.
+33:50 Okay? You'll get viewWillAppear when you go back and you can sync back up to the world.
+33:55 But after you disappear, you kind of want to lay low, right, in terms of memory usage and certainly CPU -- you don't want to be using CPU.
+34:03 So this is a good place to do stuff like that and to maybe remember state that you're going to restore in viewWillAppear again, whatever.
+34:10 Kind of what you might think.
+34:11 There's also did versions of these.
+34:13 ViewDidAppear and viewDidDisappear.
+34:16 And that happens exactly what you might think, right?
+34:18 ViewDidAppear gets called after you're now on screen.
+34:21 Okay? You just appeared and you just got called, okay?
+34:24 Same thing, viewDidDisappear -- you just disappeared.
+34:28 Okay. Now, let's talk about geometry.
+34:30 Okay. I put this off to this slide.
+34:33 Your geometry, in iOS 6 they introduced these really cool two methods: ViewWillLayout subviews and viewDidLayout subviews.
+34:42 This is where to put geometry-related code.
+34:46 So viewWillLayout subviews is called just before iOS 7 tries to layout your subviews, tries to layout your view.
+34:55 Okay? So your geometry just changed maybe from portrait to landscape.
+34:59 And there's a lot of automated stuff in iOS 7 called autolayout that will try and move everything around to fit.
+35:06 Now, it can't always do it but it tries.
+35:08 Okay? So viewWillLayout subviews is called before that.
+35:12 And viewDidLayout subviews is called after it's done that, after it's made that attempt.
+35:18 Okay? Now, if there's some things that have been moved manually, you have to move them by hand, okay, that there's just no way to express in the automatic layout rules where things go, then best place to do it is probably in viewDidLayout subviews, okay, because the system's already laid things out.
+35:35 Now you can move around the last few pieces that need to be laid out.
+35:40 But things like buttons, you know, like that outline and unoutline button, it's really easy to make it so that when you rotate to landscape they move down to the corners.
+35:48 Okay? That's what you probably want there.
+35:51 Same thing, the text view: Pretty easy to make it widen out and get shorter when it goes to landscape.
+35:56 Okay? But like in Machismo, you got all those cards.
+36:00 When you turn it, you might want to use some logic to figure out: Where are you going to lay the cards out in a landscape orientation versus portrait?
+36:10 Okay? And you're going to have to do that next week.
+36:12 Okay? Not this week.
+36:14 So I want to talk a little more about autorotation.
+36:19 So this is the thing where you turn the phone and your geometry automatically gets changed.
+36:24 That automatic change to the new geometry only happens if these conditions are true.
+36:29 Your view controller has to return yes from should auto rotate, which is the default.
+36:34 Your view controller has to return that new orientation from supported interface orientations.
+36:40 That is a method that returns an e num with landscape and portrait, portrait upside down in there.
+36:47 So you have to say that you support the various rotations.
+36:50 I believe by default it supports all rotations.
+36:53 And your application as a whole has to say that it supports that new orientation.
+36:59 Okay? And that is set -- remember when we first built our application and it ran?
+37:03 There was, like, all these kind the settings for our app that I just waved my hand and said, "We'll look at this later"?
+37:09 Well, one of the settings in there is which orientations of a device -- portrait, landscape, portrait upside down -- do you support?
+37:17 Okay? So you have to click on the ones that you support.
+37:20 And if you do all these things, then when the device rotates, your bounds of your view will automatically be changed and you'll get the whole viewWillLayout subviews, viewDidLayout subviews, autorotate, autolayout, all that happening.
+37:32 Okay? There are also methods that get called.
+37:36 I put them in gray here because we're not really going to look at them.
+37:39 They're rarely needed.
+37:40 Autolayout and viewDidLayout subviews are usually going to cover everything you need.
+37:45 But if you wanted to get involved in the animation of the rotation and all that, it's all possible.
+37:49 But we're not really looking at that.
+37:52 Okay. In low-memory situations, you're going to get this message to your view controller called "did receive memory warning." Okay? And low memory doesn't necessarily mean your app is using a lot of memory; it just might be all apps on the phone combined are using a lot of the memory and it needs some of it back.
+38:09 So it might be sending this to lots of applications.
+38:12 It's completely up to the system so decide whether it wants to generate this warning.
+38:17 And your only responsibility when you get this thing is to try and free up memory.
+38:22 Okay? That means in the heap.
+38:25 And that means setting strong pointers you have to nil.
+38:28 Okay? Now, if you display an image, okay, if your MVC displays an image, that's big memory.
+38:35 Images are a lot of memory.
+38:37 Okay? Or it plays a sound -- that's a lot of memory.
+38:41 But if your thing is on screen, if your view controller is on screen, you can't throw that image out.
+38:46 It needs to be on screen.
+38:47 So there's really not much you can do when you get did receive memory warning if you're on screen.
+38:52 Now, however, if you have an alternate image or something that's not on screen right now, you could set that to nil as long as you can recreate it, okay -- either recreate it by getting it from the file system, even making network call to download an image as long as the image doesn't need to be instantly available.
+39:09 But that's an example of how you could respond to this.
+39:13 Especially if you're off screen you could respond to this, although my argument is when you go off screen and you get viewDidDisappear or viewWillDisappear, you should free up that stuff anyway.
+39:23 Okay? And get it back when you do viewWillAppear.
+39:26 Because you don't want to be a memory pig.
+39:28 Okay? Now what does it matter to be a memory pig?
+39:31 Why do we care?
+39:32 Well, couple of things.
+39:34 Okay. First of all, by the way, only things that use a lot of memory are things like images, video, sound -- those can use a lot of memory.
+39:42 Small things like little dictionaries with five things in them, that's using virtually no memory.
+39:47 I wouldn't even waste your time freeing those up.
+39:50 Okay? That's just going to make your code complex for nothing.
+39:53 So we're talking about good-sized things, okay, when we say "free things up." But anyway, why do we want to be a good citizen here?
+40:00 Well, iOS has the right to kill your app if it thinks you're being a memory hog.
+40:04 Okay? If there's not enough memory on the system and your app happens to be using a lot of memory, it can just come along and say, "Bam-o, killing that baby." It's perfectly within its rights.
+40:15 If you're a good memory citizen, it's never going to do that.
+40:19 Okay? But being a good memory citizen means you shouldn't be using a lot more memory than, you know, a single MVC that's on screen right now.
+40:26 Or if you're on the iPad, maybe it's three or four MVCs, depending on what your layout is.
+40:30 You know, however much memory, that would be reasonable to use.
+40:33 A video in there, no problem, etc. That's fine.
+40:36 But if you have, like, twenty videos sitting in the heap, okay, you're going to be a candidate to get blasted.
+40:42 Okay? So the other thing is you obviously want other applications to have as much memory available to them when the user switches back and forth.
+40:49 If you've got a reputation as a memory pig like, "Oh, when I run this app, all my other apps slow way down.
+40:56 Oh, it's terrible." Then on the App Store people are going to say that, and you're going to get a bad reputation, and people aren't going to want your application.
+41:02 So that's another reason not to be a memory pig.
+41:04 >> Can Apple check this kind of stuff to see how much memory you use before they approve an app?
+41:09 Is that a thing?
+41:10 >> So the question is: Does Apple go and check to make sure you're being a good memory citizen before they approve you?
+41:15 I would say I don't know.
+41:18 I don't work for Apple.
+41:18 I don't know what's going on behind the scenes there in terms of their approval process.
+41:22 My guess is if they ran your app and it just immediately ballooned up a huge amount of memory, they would not approve it.
+41:27 That's just my guess.
+41:28 I mean, I wouldn't if I were them.
+41:30 And you know, certainly apps that are out there that have a reputation of being big memory pigs, maybe when you submit your next version or something, they're like, "Wait a second, did you fix that memory thing?" You know what I'm saying?
+41:40 It's common sense, common sense.
+41:43 Okay. So that's that.
+41:45 Okay. Now I told I would talk about creation of the view controller.
+41:49 And so I'm going back and talking about it here.
+41:51 I'm only going to talk about it briefly because it's really not super important because viewDidLoad is where you want most of your initialization.
+41:58 But when your view controller is created, when it's pulled out of that storyboard and unfreeze-dried, your init method is not called.
+42:08 Okay? A different init method is called.
+42:10 The unfreeze-drying init method, which is a generic init method mechanism that we're not going to -- well, we might talk about it in week eight or nine of this course.
+42:20 Not that important.
+42:21 But that's what Xcode uses to freeze-dry your apps.
+42:24 So that init -- you don't subclass that init, okay?
+42:29 Okay, it's an init; I'm not even going to tell you the name of it.
+42:31 You don't subclass it.
+42:35 Instead, when something gets unfreeze-dried from a storyboard -- anything, not just your controller but even, like, a button or anything else comes out of there -- this method, awakeFromNib -- Nib is an old historical name; you could think of it as awake from storyboard -- this gets called.
+42:54 And you can put in here things that you might normally put in your init.
+42:59 Although, again, your outlets are not set at this point.
+43:01 So you're better off putting stuff in viewDidLoad.
+43:04 Okay? But if there's some reason you can't put something in viewDidLoad -- I can't even think of a good example why that would be -- you can put things in awakeFromNib.
+43:12 Now, to make this a little more complicated but also a little more correct, it is possible that your view controller could be created in code using alloc init.
+43:24 It is legal for someone to alloc init -- init is not the designated initializer for view controller but init calls the designated initializer -- so it is legal for people to do that.
+43:35 Not going to happen in this class.
+43:39 Okay? We're going to make things out of storyboards for 100% of this class, so don't worry about it.
+43:44 But the designated initializer for UI view controller is init with nib name colon bundle colon.
+43:50 Okay? Again, historical reasons here with old nib files.
+43:54 And so to be correct, we usually like to call whatever we're going to call away from nib also in that init method.
+44:02 And so you use this little template where you have some method called setup or something, awakeFromNib calls that, and then init with nib name says self super init with nib name bundle -- because that's the designated initializer -- self setup return self.
+44:15 Okay? So if you're going to put awakeFromNib in there, go ahead and put this little three-line init with nib name also in there, just to be correct.
+44:24 Okay? Probably not necessary in this class.
+44:26 I don't think you're going to need awakeFromNib in this class; viewDidLoad is what you want.
+44:32 Okay. So here's a summary of the view controller lifecycle: It's instantiated from the storyboard or someone could say alloc init, okay; awakeFromNib gets called if it came out of a storyboard, otherwise init with nib name with bundle gets called; the outlets get set that comes from a storyboard; then viewDidLoad is called; then when the geometry is determined, viewWillLayout subviews and viewDidLayout subviews -- there should be no colons there; I don't know what, that's a mistake -- get called; then viewWillAppear gets called; then if the geometry changes again while it's visible, viewWillLayout subviews and viewDidLayout subviews will get called again.
+45:16 Okay? If there's auto rotation, you also get those autorotation things.
+45:20 But don't worry about those because you're usually doing what you want to do in viewDidLayout subviews.
+45:24 Then when your view controller goes off screen, it will get viewWillDisappear.
+45:28 Okay? If you have a low memory thing at any time going on there, you'll get that.
+45:33 That could be while you're visible or not.
+45:36 And that's it.
+45:37 That's the view controller lifecycle from start to finish.
+45:41 Okay? All right.
+45:44 So let's see a little demo of using the view controller lifecycle.
+45:48 So what I'm going to do is that outline button we talked about before.
+45:52 Let's make it so the outline button is itself outlined.
+45:54 That would be kind of a good UI.
+45:56 Okay? So it's kind of a little more indication of what it does.
+45:59 Well, the question is: If I have this outline button right here, how and when am I going to outline it?
+46:08 I can't do it in Xcode unfortunately.
+46:11 So I need to do it in code.
+46:12 But I want it to be outlined when the thing first comes up, but -- and I want it to always be outlined.
+46:18 So that's a one-time initialization thing, but it obviously has to happen after my outlets are set because I need to be able to talk to this button.
+46:25 So let's make an outlet for this.
+46:26 I'm just going to control drag here.
+46:29 I'm going to call this the "outline button," okay?
+46:33 And I'm going to take viewDidLoad.
+46:35 I'm actually going to move it up to the top here.
+46:39 Okay. So there's viewDidLoad.
+46:41 And I'm going to do exactly what it says here, do any additional set up after loading the view.
+46:46 This should say typically from a storyboard.
+46:49 It's funny that that has not changed.
+46:51 I mean, storyboards have been around for -- I don't know -- four, five, six, seven, something like that.
+46:56 They're still saying from [inaudible].
+46:57 But anyway, viewDidLoad is the place to do this.
+47:00 And all we need to do is set the attributed title of this button to have the attributes of outline.
+47:06 So how are we going to do that?
+47:07 Okay? And this is important for you to pay attention here.
+47:10 You all look awake, that's good because your homework that's going to be assigned on Wednesday is going to require this.
+47:19 You're going to have to set an attributed title of a button.
+47:22 Okay? Because your cards are buttons unfortunately.
+47:25 They won't be buttons the week after that.
+47:27 But they're buttons right now.
+47:28 And so you're going to need attributed strings to display what we want to do next week.
+47:32 And so you're going to have to set attributed titles to button.
+47:34 So let's talk about how we do that.
+47:37 First thing I'm going to do is I'm going to say NS mutable attributed string title equals.
+47:47 So I want to get the title of this button as a mutable attributed string so that I can set the attributes to be the outline attributes that stroke width thing.
+47:56 So the way to do that is I'm going to say NS mutable attributed string alloc init with string self dot outline button dot current title.
+48:12 So whatever's on there currently, which is the word "outline" right now, going to use that.
+48:17 And then that's it.
+48:21 That's all I'm going to do there, just show you how to do this, this way.
+48:24 I could set the attributes there, actually, but -- oops, did I get that right?
+48:30 Okay. So now I have the title as an immutable attributed string.
+48:35 So now I can set the attributes in this title.
+48:39 Okay? Now this title is an NS mutable attributed string that I just created.
+48:43 It's a local variable.
+48:44 It's created with the button's title, but it's a local variable.
+48:48 So let's go ahead and set the attributes we want.
+48:51 Okay? Again, it's very similar to this down here.
+48:54 In fact, I'm going to just copy and paste this and make one small change.
+49:00 Okay. So here, instead of the minus three, okay, I'm going to make it three.
+49:04 And that's going to make this outline thing be outlined with no blue in the middle.
+49:10 Okay? So the foreground color of this button is blue or whatever the default is, black.
+49:14 But I'm going to make it so it's outlined with nothing in the middle.
+49:18 The other thing is I don't really want this button to be black, okay?
+49:22 Because buttons are not black.
+49:24 Now, what color are buttons?
+49:26 Okay? And this brings up another interesting thing we really haven't had a chance to talk about, which is the tint color.
+49:32 Okay? And some of you have discovered this on your own because you didn't like the blue tint on the green background in Machismo.
+49:38 And I applaud you and your UI instincts to go searching for a way to change that.
+49:43 And the right way to change it is there's actually a global tint color, a tint color for your entire application.
+49:49 And you set that by going to your storyboard.
+49:51 See how my storyboard is selected over here?
+49:54 And if I go to the little area here that has all my attributes inspector, if I click the left to most one, which is the file inspector -- it's inspecting this storyboard file -- you'll see there's global tint.
+50:09 Okay?
+50:10 So global tint affects all clickable things in your app everywhere.
+50:15 Okay? So you could pick a different color than blue.
+50:18 And we do that.
+50:19 The other thing is individual elements like UI buttons, they also have a tint color.
+50:24 Now, usually you don't want to set them separately, although a couple people noticed what seems to be a bug in the simulator where if you set the global tint, it draws improperly segmented control in the simulator.
+50:38 I haven't heard back whether it does it on a device.
+50:40 But so the workaround was to set the individual tint color.
+50:44 So you can set tint color individual items or you can set it at the storyboard level.
+50:49 Here what I'm going to do, I'm not going to set it but I am going to get it.
+50:53 I'm going to get the tint color because whatever this tint color is, I want that to be the color that I'm stroking it with, the outline color.
+51:00 So that is going to be self dot outline button dot tint color -- tint color.
+51:06 Okay? Understand what I'm doing there?
+51:09 So I want it stay blue or whatever this color is, but I want it to be outlined only.
+51:16 And then the range, I need the entire range of text.
+51:20 In other words, I have this mutable string title here; I want the entire thing done.
+51:24 So I'm going to use NSMakeRange, and you're going to find that for C structs in iOS there's usually an NSMake whatever you want that will make the C struct by letting you specify the members of the struct.
+51:38 So in this case a range has a location -- a starting location -- which will be zero and it has a length.
+51:45 Okay? Which is going to be title length.
+51:48 Okay? So that makes a little range.
+51:51 That's going to set the entire range to have these attributes.
+51:54 Okay? Now I have the title I want as a mutable string, but I need to set this back on the button.
+52:01 Okay? Because I've only can done this as a local variable right here.
+52:04 Because there's no mutable attributed string in button like there is in text view that you can just modify; you have to get it, make a mutable version, you know, edit it, and then set it back.
+52:15 And the way we do that is self dot outline button set attributed title, title, for state -- UI controls state normal.
+52:25 Okay? So it's just like set title but set attributed title.
+52:30 Okay? So let's see if that works.
+52:34 [ Pause ]
+52:42 Okay. And it did.
+52:43 So you can see the outline right there is outlined.
+52:46 It's not awesomely outlined, or it's kind of hard to see that it's outlined.
+52:51 I might want to go back to here and set this, for example -- this outline button -- instead of being just the system font, maybe I want this to be bold system font, which -- oops -- which will make it outline a little better.
+53:03 So let's go to here, inspect it, and in the font here instead of using the system font, I'm going to use the bold system font.
+53:13 And now when I run, it will look a little bolder.
+53:20 So it's a little better, a little easier to see the outline.
+53:23 Okay? And it's still a button.
+53:25 If I click it, it still outlines the text.
+53:28 Okay? All right.
+53:30 That's all I wanted to show you there.
+53:32 I'm going to show you another view controller lifecycle thing.
+53:36 But first, let's do a couple of slides.
+53:38 I want to show you one other thing, which I promised I would show, which is this radio station thing.
+53:45 So the way of communicating between objects in a blind structured way, which we refer to as this radio station thing from MVC is called "notifications" in iOS 7.
+53:57 And we're only going to talk today about how to tune into the radio station; we're not going to talk about how to broadcast on the radio station.
+54:05 And in specific today, we're only going to tune into a system radio station, an iOS 7 radio station.
+54:11 Later in the course when we start talking about building more sophisticated models using databases, then we'll really start using the radio stations to hear about changes in the model.
+54:21 Okay? But today we're just going to hear about change in the system because I just want you to get an idea of what that radio station looks like on the receiving end.
+54:26 And it's really, really easy.
+54:28 There is a class called NSNotificationCenter.
+54:31 It has a class method called defaultCenter.
+54:33 That returns a shared instance kind of like NSUserDefault, standard user default did -- a shared instance.
+54:39 That's the object you use to tune into radio stations.
+54:43 And you do it by sending it this message: At observer selector name object.
+54:48 The first argument observer, that is, the object that wants to listen to the radio station.
+54:54 So in your controller -- because controllers are the most common radio station listeners -- this would probably just be self.
+55:00 Okay? Add observer self.
+55:01 This is somewhere in your controller code.
+55:03 Selector is the method inside of the observer that you want to be called when something appears on the radio station.
+55:13 Some broadcast happens.
+55:15 Okay? Name is the name of the radio station.
+55:18 Okay? Which radio station you want to listen to.
+55:21 And sender there -- object sender -- that's if you only want to listen to radio station broadcasts that come from a certain other object.
+55:28 Often you pass nil here, which means if anyone broadcasts on that frequency, I want to hear it.
+55:35 Okay? But it is possible in certain cases to say, "I'm only interested in changes in the radio station generated by this object." So that's the sender there that you would put.
+55:44 Okay? The method that's going to get invoked here -- method to invoke if something happens -- always has one argument, which is an NSNotification.
+55:53 Inside an NSNotification there are three properties: One is name, that's the name of the radio station -- same thing that was passed above; object, okay, that's the object sending you this notification, so that would be the sender anything above; and then user info, which is an ID.
+56:11 And to know what that is, you have to know what the person who broadcasts on the radio station says they will provide there.
+56:20 Does that make sense?
+56:21 So that user info is radio station-dependent.
+56:24 But if you know the name of the radio station, you probably are looking in the documentation to find it, it probably says there, "Oh, and the user info you'll get is X, Y, or Z." But it's an ID.
+56:34 So you have to know what it is.
+56:35 You're probably going to do is kind of class on it, or response to selector, or something like that to use it.
+56:42 A lot of times that's nil because all we're really interested in is whether there was a broadcast, not any particular information that was broadcast.
+56:50 Question?
+56:50 >> About sender is that global over just your app, or global over the whole system?
+56:57 >> All this stuff -- the question is: Is the sender there global to the whole system or just inside your app?
+57:02 Always everything about notifications inside your app, okay?
+57:05 Because the space of objects in the heap is only inside your app.
+57:10 You can't see in other apps.
+57:12 You know, they have their own segregated for security reasons space.
+57:16 So if you're getting a message here from the system, this is going to be nil, okay?
+57:21 The sender's going to be nil.
+57:22 Question? That was your question?
+57:24 All right.
+57:25 So another thing to understand is when you're done listening, tune out.
+57:30 Turn your radio off.
+57:32 Okay? And you do that by sending a message to the notification center saying "remove observer." And you can remove yourself as an observer of all radio stations with the first one or you can just remove yourself from listening to certain radio stations, okay, by specifying the name of the radio station and who the sender is you don't want to listen to anymore.
+57:49 Okay? It's important to do this because, unfortunately, the notification center keeps a pointer to you that is called "unsafe retained." So it's not strong or weak; it's unsafe retained.
+58:04 And what unsafe retained means is that if you go out of the heap without calling this first, the notification center might try and send you a notification and crash your app.
+58:14 That's why it's unsafe.
+58:16 Now, why are these unsafe retained here?
+58:18 Clearly for backwards compatibility.
+58:21 This really should be weak.
+58:23 Okay? It would be awesome for this to be a weak pointer to you because then if you went out of the heap, it would be set to nil inside the notification center; it would never try and send you any messages.
+58:31 But, you know, the whole weak mechanism of setting things to nil automatically, that's an iOS 6, iOS 7 only thing.
+58:40 So if you had an app that was running on iOS 5, that wouldn't work.
+58:42 And if this depended on that, it would be bad.
+58:45 I'm sure eventually they would probably move these things to weak and just say, "If you use this API, it's depreciated; you can't run in iOS 5." I don't know, maybe they'll do that in iOS 8 or 9.
+58:56 I don't know.
+58:56 But be careful there.
+58:57 It's unsafe retained.
+58:58 It's the only unsafe retained really you're probably going to have to worry about in this course.
+59:02 But the bottom line is: Remove yourself when you're done listening.
+59:05 Now, normally you're going to remove yourself when your MVC goes off screen, okay?
+59:11 Because you're usually only interested in radio station happenings when your MVC is active and on screen.
+59:18 But if for some reason that doesn't make sense, there is a method called "dealloc." Every object has this.
+59:27 It gets called just before your object leaves to the heap.
+59:31 Okay? All your properties are nil.
+59:34 You are barely existing as an object and this gets called.
+59:38 Okay? It's that last hook.
+59:40 And so you can fix unsafe retained pointers to you there.
+59:44 Okay? I don't recommend using dealloc.
+59:46 Don't use it for anything else, that's for sure in this class.
+59:50 I suggest removing, it would make sense.
+59:52 Question?
+59:53 >> How do you remove yourself as an observer and you're not an observer on anything?
+59:57 >> Great question.
+59:57 So the question is: What if I call remove observer and I'm not observing anything?
+01:00:01 No problem.
+01:00:02 Nothing bad will happen.
+01:00:03 >> So you could just throw that in dealloc.
+01:00:04 >> You could.
+01:00:04 You could.
+01:00:05 It wouldn't be very nice programming.
+01:00:06 It's kind of not very pretty, but you could just throw that in your dealloc to be safe.
+01:00:12 But better to, you know -- okay.
+01:00:14 So here's an example.
+01:00:15 This is an example I'm going to demo real quick here, which is text size.
+01:00:20 So in iOS 7 -- not in any iOS before that, but in iOS 7 -- if you use preferred fonts, then the user can actually go into settings and change the size of their font.
+01:00:29 So if they're like me and the phone has to be held farther and farther away as the years go by, you can set the text size up and move that phone back in a little bit.
+01:00:38 So that's what this text size thing allows you to do.
+01:00:40 Well, if that text size font change happens, you have to get notified so that you can change the fonts, use the new preferred font that the user set, okay?
+01:00:52 So you get that notification by signing up in the default center for the radio station called UI content size category did change notification.
+01:01:01 Okay? You could argue it could be something like preferred fonts change.
+01:01:04 But it's not.
+01:01:05 UI contents size category did change notification, okay?
+01:01:08 You sign up for that, and whenever those fonts change size, your method -- "preferred font size change" is what I called mine -- will get called.
+01:01:17 Okay? So let's take a look at how we would add that to attributer because attributer uses preferred fonts.
+01:01:25 And if we change the font size, we want the body and the headline both to change to the bigger or smaller font.
+01:01:31 So let's do that.
+01:01:32 I'm going to go back here to Xcode.
+01:01:36 So here we are.
+01:01:37 The other thing we're going to need to make this work is the view controller lifecycle.
+01:01:42 Okay? Because we're only interested in those font changes if we're the MVC that's on screen, which we always are, of course, because we only have this one MVC.
+01:01:51 But soon we will have other MVCs and we won't always be on screen.
+01:01:53 So let's use the view controller lifecycle method viewWillAppear.
+01:01:59 Okay? So when a viewWillAppear -- notice I'm always going to do super there.
+01:02:05 You can call super before or after you do your work.
+01:02:09 It kind of depends on what you want.
+01:02:11 Do you want your super class to get a chance after you've done what you want to do or before?
+01:02:16 Usually it doesn't matter too much.
+01:02:17 I don't know that UI view controller actually does things in these supers, but you always want to give them the opportunity, okay?
+01:02:23 It's just part of the view controller lifecycle.
+01:02:27 So when the view appears, I just want to sign up with the notification center so that I can receive these messages.
+01:02:34 So I'm going to say "Is NS notification center default center add observer self," okay?
+01:02:44 I want these messages sent to myself.
+01:02:46 The selector, remember we have to say "at sign selector" when we want to specify a thing.
+01:02:50 I'm going to call it "preferred fonts changed." Okay? Name is UI content size category -- lucky, I get to tab through that one.
+01:03:01 Okay? And the object is nil.
+01:03:04 In other words, if anybody sends that, I'm going to change my preferred fonts.
+01:03:08 Okay? Notice there's a warning here, that's because I don't implement this.
+01:03:13 I believe that's new in iOS 7.
+01:03:15 I don't remember seeing that before.
+01:03:19 Okay. Thank you.
+01:03:20 Too many Rs.
+01:03:23 Okay. View -- void here preferred.
+01:03:27 Oops. Two Fs now.
+01:03:29 Okay, preferred fonts changed takes an NS notification star, okay?
+01:03:35 Notification, I'm not going to use that because it's just basically Boolean.
+01:03:38 And I'm actually going to call another method.
+01:03:40 I'm going to call use preferred fonts, and you're going to see why here in a second.
+01:03:45 Okay? So that set it up so that anytime my view appears, I'm going to get this use preferred fonts sent to me -- preferred fonts sent.
+01:03:55 And in here I have to make my text view and my headline use the new preferred fonts.
+01:04:02 And that's really, really easy to do.
+01:04:05 Self.body.font equals UI font preferred for text style.
+01:04:12 UI font text style -- this is the body, so I'm going to do body.
+01:04:16 So this has allowed me an excuse to show you how to set these preferred fonts in code instead of setting them in Xcode.
+01:04:22 This is how easy it is.
+01:04:23 Okay? Now I'm setting the font of the UI text view.
+01:04:26 So if I had any bolds or italics, unfortunately this would blast them.
+01:04:30 So obviously, I would need to iterate through all the attributes and look at the font, get the symbolic traits, apply them like I talked about earlier.
+01:04:38 And then let's do the same thing for the headline, but its font wants to be the preferred font for headline, which is this one.
+01:04:50 Okay? So that's that.
+01:04:54 One last thing to consider here is I need to stop listening -- we'll do it in will disappear.
+01:05:04 Could do it in either but -- okay.
+01:05:09 When I'm going to disappear I want to stop listening.
+01:05:12 And so, again, NS notification center, default center, remove observer.
+01:05:19 Now, some would argue just putting self here, but I actually think that's bad coding because, you know, what happens if you add a new feature down the road where you're listening on a different radio station that you don't want to stop listening to when your view disappears?
+01:05:32 Which is rare, but it's possible.
+01:05:34 So I actually think it's better here to use the version of this, which remove observer that takes the name.
+01:05:41 So I'm going to say remove yourself name is UI content blah-blah-blah.
+01:05:48 And the object is still nil.
+01:05:50 So I'm only going to remove myself as a listener from that one radio station.
+01:05:57 And there's one last thing to do here, which is what happens if my view appears, I start listening, it disappears, and then they go change the text style?
+01:06:08 And then I reappear?
+01:06:12 Okay? I will not be notified at that point because the change -- the text style change -- happened while I wasn't listening.
+01:06:19 So turning your listening back on, you don't get all the messages that happened while you weren't listening; you only get new messages.
+01:06:25 So that's why we probably want to say self use preferred fonts in viewWillAppear.
+01:06:31 This is why I'm talking about where viewWillAppear wants to sync up with the world when it starts.
+01:06:36 That's what viewWillAppear is for.
+01:06:38 So viewWillAppear is going to use preferred fonts, whatever are currently out there.
+01:06:43 Okay? That make sense why I'm doing that?
+01:06:46 So let's run this and see if it works.
+01:06:53 Now, I'm running this on a device but on your simulator you can also go to the settings.
+01:06:59 So here's my text, right?
+01:07:00 So let's even go ahead and put some orange text in there.
+01:07:04 Okay. Now I'm going to hit the home button and I'm going to go to settings, which is right here.
+01:07:10 I'm going to go down to general, I believe it is.
+01:07:15 Is that it?
+01:07:16 Yeah, text size.
+01:07:17 You see text size right there?
+01:07:19 You can see there's a slider.
+01:07:20 So let's make our text really big, okay?
+01:07:24 Go back. I can just go back to here.
+01:07:27 It's still running in the simulator.
+01:07:30 Okay? So if I had breakpoints and stuff, that would all still work.
+01:07:33 And now I can see my font is big.
+01:07:35 I kept my orange right there.
+01:07:37 You can do this.
+01:07:38 I can put an outline on there.
+01:07:40 Green maybe.
+01:07:41 Okay, you can see the outline a little better with green.
+01:07:43 And now if I go back again to settings -- and let's set this all the way to small and go back.
+01:07:51 Back to our thing, you can see it updates it.
+01:07:54 Okay? So make sense?
+01:07:58 Everyone understand what's going on there?
+01:08:01 Okay. So there you can see in that part we used -- we showed you how to do the preferred fonts in code, and we also used notification center to do the radio station, and we also used some more of the view controller lifecycle.
+01:08:13 So that was multihit there.
+01:08:16 And so next time -- what's coming up on Wednesday -- we're going to take this app and we're going to add some more view controllers to it.
+01:08:28 So multiple view controllers.
+01:08:29 Now, it's very important to pay attention for that for your assignment because that's the fundamental thing we're asking you to do in the assignment that's going to go out on Wednesday is make multiple MVCs -- it's still going to be Machismo but you're going to have to do another game, have both on screen, have yet another thing appearing on screen.
+01:08:45 So you're going to have at least three and if you do extra credit, four or five different MVCs.
+01:08:50 So we're going to rapidly start going up to multiple MVCs.
+01:08:53 We're going to talk about how to add MVCs with the tab bar and also navigation controller.
+01:08:58 That's the first two ways we're going to learn how to do that.
+01:09:01 Really important to understand for Wednesday is we're going to use inheritance because two of your MVCs are going to be very similar.
+01:09:09 They're both going to be card games, but they're going to be a little different.
+01:09:11 You're going to want to use inheritance to share a code between them.
+01:09:14 So I'm going to kind of get you started on that on Wednesday.
+01:09:16 And so I'll be sending out assignment three on Wednesday.
+01:09:19 Friday we were going to be doing getting your device working with the free university developer program; however, that's not working technically right now.
+01:09:27 So we're going to put that off until next week.
+01:09:29 So next Friday -- not this week's Friday, but next Friday -- we'll be having a section where you can come to the section and we'll help you get it so it's working on your device.
+01:09:40 >> For more, please visit us at Stanford.edu.

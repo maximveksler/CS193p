@@ -1,0 +1,938 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:07 >> Okay. Well, welcome to lecture number 18 of CS193P, fall 2013/14.
+00:15 Before I talk about what I'm going to talk about today, let's talk a little bit about what's coming up because we're right at the end of the quarter here.
+00:22 So on Wednesday -- next lecture -- we are going to have this alternate final presentation day.
+00:28 And a few of you have already said that you wanted to do that.
+00:32 And really, the only thing you need to do to sign up to do that if you want to use this Wednesday as opposed to the following Thursday normal final presentation time to do your presentation, is to submit the Keynote slides, okay, by tomorrow at noon.
+00:48 That's very important.
+00:49 If I don't see your slides by tomorrow at noon, then you're basically not going to be presenting on Wednesday.
+00:52 And then you'll be forced to present next Thursday.
+00:58 So the only thing I'll say about your Keynote slides, make sure that they're widescreen format, okay, 1280 by 720.
+01:06 If you are submitting PowerPoint or something else, you know, you're taking your chances because I'm going to convert them to Keynote.
+01:13 So if they have fonts and stuff, convert them -- you're in good shape; if not, you know, you're slides might look a little wonky.
+01:21 You just submit them normally, right?
+01:23 Just do the normal class submit script.
+01:25 You submit it as your final project.
+01:28 And of course, you can submit again, all the way up until the deadline.
+01:30 And the other thing we're going to do on Wednesday after we have a few people, you know, do their final presentations -- which by the way, I, you know, really encourage all of you to come and be an audience for those people just because you'll get to see some final presentations; you'll get a little bit of bonus.
+01:49 I'll talk a little bit about the final presentations.
+01:52 If I see something, I'm like, "Oh, let's make sure that this doesn't happen next Thursday or whatever." Also, after that's done, if you're planning to do a live demo, Wednesday will be a great time because I'll have this whole setup here.
+02:05 And you can try and hook up your device, and using this wireless thing that I use, and this thing right here -- which let me set that up -- to show your demo and make sure that it's working, make sure your device works, all that stuff so that you can have a nice, smooth demo.
+02:22 Okay? So we'll be doing all that on Wednesday.
+02:24 Otherwise I'm not going to present a particular topic.
+02:28 So it's one of those things where, again, I encourage you to come be an audience for the people who are doing alternate presentation, but it's not a mandatory.
+02:37 I mean, all these lectures at the end here are not mandatory per se.
+02:41 But that's what's going on, on Wednesday.
+02:44 Okay? Any questions about that?
+02:46 All right.
+02:47 And then Friday, no section on Friday.
+02:49 I think it might even be officially start of final exam period on Friday.
+02:53 I'm not one hundred percent sure.
+02:54 But in any case, no section.
+02:55 We've moved your project deadline, as you know, to Sunday night at midnight.
+03:00 And when you submit your final project, submit your slides.
+03:04 Okay? Assuming you're not submitting them by noon tomorrow, make sure you submit them by Sunday night.
+03:09 And just put them right at the top level of whatever you submit.
+03:12 Just whatever the top level directory is, just put them there -- Keynote slides.
+03:15 The final presentations are a week from Thursday, so the normally scheduled final exam period for this class, 12:15 to 3:15.
+03:24 The presentation is required.
+03:25 Some people say, "Is it optional?" No, it's required.
+03:27 You get two and a half minutes this quarter, which is a long time.
+03:31 Usually we only give two minutes.
+03:33 And seems like a long time; when you get up there it will seem short.
+03:37 And again, widescreen aspect ratio.
+03:39 And the order is going to be random.
+03:41 You're not going to find out until the day you get it, so don't even send me something that I says, "Oh, I got a flight to catch, so let me go first." Okay? If you got a flight to catch, then go on Wednesday, okay?
+03:51 Go the day after tomorrow because for fairness, I'm going to put it in a random order that will be revealed at the beginning.
+03:58 Okay? Any questions about that?
+04:02 We're about to find -- any questions about the final project submission process or due date Sunday night?
+04:09 Okay. Excellent.
+04:10 So today's two topics, localization -- really, it's internationalization that I'm going to be talking about -- and then settings, which is a UI.
+04:19 You can add UI to the settings application to control certain settings about your application.
+04:25 And the two demos I'm going to do, I'm going to internationalize PhotoMania, and I'm going to add a setting to Bouncer.
+04:31 Okay? That way we'll get both of these things demoed.
+04:34 All right.
+04:34 So let's talk about internationalization.
+04:36 There's really two steps to internationalization: There's something we called "internationalization" -- sometimes abbreviated I-18-N because there's 18 letters in there; I-18-N, internationalization -- and then there's localization.
+04:48 "Internationalization" is the process of making your app possible to be localized.
+04:53 Okay? Making it so that your app can be shipped in multiple different languages.
+04:58 "Localization" is the process of actually translating that -- your application -- to another language, okay?
+05:04 So it's really a two-step process.
+05:05 Internationalization, that's something you do as the developer.
+05:08 Localization, usually hire someone to go do that.
+05:11 I don't recommend using Google Translate to localize your app.
+05:14 You get some very strange results.
+05:15 You want a professional localizer who understands the idioms of the local language.
+05:23 There's really two things that need to be localized: One is your storyboard and one is kind of all the literal strings in your application.
+05:30 So let's talk about the storyboards first.
+05:32 The way we localize storyboards in iOS 7 is we only change the strings that appear in the storyboard, and we let Auto Layout resize things to fit wider and shorter strings.
+05:45 Okay? That's a great side benefit of having Auto Layout, is that localization now is just about the strings when it comes to the storyboard.
+05:52 But the first thing we need to do before we do any localization is to go to our project settings and set the list of all the languages that we are going to support localization for.
+06:04 Okay? So you know, as you release new versions of your app, you'll support a few more languages.
+06:09 You'll go back to this project settings and add more languages.
+06:12 One thing that's a little tricky about this is you're used to going to your project settings, which is that upper left-hand top part of the navigator.
+06:19 But actually, what we've been setting the settings of there is the target, the app that you're building.
+06:25 Here you want to actually set the settings of the project itself.
+06:28 So you can see where that little bubble points to right there that says PhotoMania.
+06:33 That's a little popup actually; you're going to click that and switch up to editing the project.
+06:37 And when you do, there's not a whole lot of settings for the whole project.
+06:40 You're seeing them all right here.
+06:42 And you're just going to go down to the bottom there.
+06:44 It says localizations.
+06:45 It's just a list of languages.
+06:47 These are pre-supported languages because these languages need to match up with the languages that the operating system, iOS, supports so that when people go to settings and other apps, that's in whatever language as well.
+07:00 So when you hit that little plus button down in the lower left-hand corner, it's going to be a popup with a list of languages.
+07:04 You're not going to just type in the word Arabic or French; it's going to be something you're going to pick from a list of supported languages for iOS.
+07:13 And you can also see that there's a language there called base, right?
+07:18 And there's a switch that says use base internationalization.
+07:21 The concept of base internationalization is that there's going to be a localization.
+07:26 It's not a localization that is in anybody's language; it's just the base localization.
+07:31 And that's going to be kind of like all the defaults: The default storyboard strings, default strings throughout your app are going to come out of the base localization.
+07:40 And then all these other localizations, like English even, but French, and German, and whatever, those are going to modify those strings.
+07:48 And so if you forget to localize a string, the base localization will shine through, okay?
+07:55 And so we'll see what that looks like when it comes to storyboards in a second here.
+07:59 So the storyboards look like this.
+08:03 You select a storyboard.
+08:05 And when you do the thing I showed you on the previous slide, then your storyboards are going to look like this in the file navigator.
+08:12 You see how there's main, iPhone, storyboard?
+08:15 And now it has a little triangle that you can click and it now is showing underneath it main, iPhone, storyboard again -- base.
+08:23 So that's your base storyboard.
+08:25 And then for French, it says main, iPhone, dot strings.
+08:28 So that's just the strings only for the storyboards that have been extracted, okay?
+08:33 When we did that previous thing, it extracted those out there.
+08:37 And when you click on the storyboard and if you go to the file inspector, you can see this little thing showing there where there's base -- there will always be base -- and then however many languages you want to translate to.
+08:48 Now, here notice that English is not even checked; that's because I'm going to assume that my base is English.
+08:55 Okay? Now, you don't always want to assume that.
+08:57 And you could even mostly assume that but still have an English dot strings file that changed a couple of things if you wanted.
+09:03 Or you could have the whole thing be, you know, explicitly in a strings file for English.
+09:09 But here I have not even checked English.
+09:12 So whatever's in my base storyboard, that's what's going to ship when I'm in the language English.
+09:15 But in French I have a localizable without strings file, which I'll show you in a second, which is going to change all the strings in my storyboard.
+09:23 So what does that look like?
+09:27 The French language strings?
+09:29 I'm going to postpone showing what that looks like until we talk about strings in general.
+09:34 And so let's talk about literal strings.
+09:37 So the storyboard strings are going to be in this thing I showed you in the last slide.
+09:42 But there's other strings inside your app that aren't in the storyboard, like things that come up in alert messages, the alert buttons.
+09:48 All those things are not in your storyboard, but they need be localized as well.
+09:52 And the way we get those strings to be localizable is using these macros here that start with NS localized string.
+10:00 So there's NS localized string with default value; there's NS localized string from table; there's NS localized string.
+10:05 And each of these macros takes a little bit different arguments.
+10:07 But the main thing they're doing is you're giving a key that's going to be looked up in a strings file and it's going to return a value.
+10:14 The different variants just determine: What's the default value if I can't find the thing in the string, and which dot strings file am I going to look in?
+10:22 Okay, for our storyboard there's always one string file associated.
+10:25 But when we have literal strings inside of our code, we can split up all the translations into different files if we want.
+10:33 In the demo I'll do that.
+10:35 I'll put them in a little separate file just for one view controller.
+10:38 So for example, if you had the literal string hello, at sign, quote, hello in your app and that is going to appear in the UI, then you would change that to NS localized string at hello comma.
+10:51 And then, the last argument there is a comment to the localizers, okay?
+10:56 So you can assume the localizers speak your language, whatever your base language is, and you're giving them a comment.
+11:02 You're telling them what is this hello?
+11:04 Where does it appear?
+11:05 What's its environment?
+11:06 So here I'm saying it's a greeting at the start of the application.
+11:09 So the person would know in French to make that be bonjour or whatever.
+11:13 Right? So that's how you change all your literal strings to these NS localized string, one of these variants.
+11:20 Now what are these things actually doing, these NS localized string?
+11:23 They're actually calling a method in NS bundle.
+11:26 Okay? NS bundle is a class that kind of collects everything about your app, okay, into an API for accessing the resources of it.
+11:36 And we can use it to access strings files, and we do that with this method in bundle called localized string for key value table, right?
+11:43 Exactly what you would think: Key is what we're looking up in the strings files; value is the default there; and table is which table to look in.
+11:51 The bundle can also be used, by the way, to find URLs to resources like images, things like that.
+11:57 If you drag an image -- a JPEG image -- right into the top level of your navigator, then you can use NS bundle main bundle.
+12:04 There's something called URL for resource, and you give it the name of that JPEG file.
+12:09 It will give you a URL to it.
+12:10 Sometimes you need a full URL to some image.
+12:13 Or if you're not using image named, you need some full URL.
+12:15 So NS bundle is a class for you to kind of understand a little bit as well.
+12:21 But we don't usually -- well, sometimes we'll call this localized string for key, and I'll do it in the demo as well.
+12:26 But we can use the macros, we should.
+12:29 But there's a significant limitation on those macros, the NS localized string: All the arguments have to be literal strings, including the comment; the key; the value; the table name; etc.
+They can't be variables.
+12:42 They have to be literal things.
+12:44 At sign quote something, at sign quote something for every argument of those localized strings.
+12:48 And then let's talk about why that is.
+12:50 The answer for that is there's a command line utility called genstrings -- short for generate strings -- which will look through a dot M file for all those NS localized string macros and extract them all out into a strings file for you.
+13:06 Okay? And that's how you get the base string file that you will then localize to other languages.
+13:12 Okay? And we'll show this in the demo as well.
+13:15 And so, for example, we had that NS localized string at sign hello, greeting at start of application.
+13:19 That would get turned into the following two lines there in a strings file: Comment, greeting is started by application, and then hello equals hello.
+13:28 And the French person would come along and they would change hello equals bonjour.
+13:33 Now, when you do genstrings and you get dot strings files generated -- and you might get multiple of them because remember, one of the NS localized strings is NS localized string from table, so you might specify table name.
+13:44 And so it might be making multiple dot strings files for you.
+13:47 You just take those dot strings files, drag them into your application, into your Xcode project, and then inspect them with a file inspector.
+13:56 And when you do, you're going to see this button, the top button there that says localize.
+14:00 And when you click that, then you'll get a list of the languages, okay?
+14:04 And you can click however many of the languages you want to support localizing this string file for.
+14:10 And then in your file navigator you'll see a dot strings file for every language.
+14:14 You can click on it.
+14:15 And then you -- usually what you'll do is you'll click on it and you'll see hello equal hello.
+14:19 You'll take that entire file or all the strings files, ship them off to a localizer -- maybe with a demo of your app or something like that -- they'll translate all the strings and send them back.
+14:30 And then you just plop them into your Xcode project and ship it.
+14:35 Okay. So the way that these bundles are arranged is inside a bundle -- and your application is the main bundle, so that's the top level of your application -- inside are these lproj directories.
+14:48 And the name of the lproj directory is like a little two-letter symbol for the language.
+14:54 So there's EN dot lproj; that's English.
+14:56 There's FR dot lproj; that's French.
+15:00 And inside the lproj is all the strings files for localizing to that language.
+15:05 Okay? It's as simple as that.
+15:08 So you might have, you know, 25 dot lprojs if you support 25 languages.
+15:13 In all them there will be a copy of the strings files that are edited.
+15:18 You can look more about NS bundle offline, but there are ways to also associate strings files not just with your main bundle of your app, but if you had a framework or something else, you could associate it with frameworks because bundle, in addition to main bundle.
+15:30 it has this bundle for class method.
+15:32 Okay? And so it knows where that class came from, whether it was a framework or your main bundle.
+15:36 And it will give you the bundle, and then you can get a path for a resource or do localized string for key value table.
+15:45 Okay. Couple of things about debugging localization.
+15:47 There's a really nice user default that you can set, NS show non-localized strings.
+15:52 And every time one of those NS localized string -- I say methods, but really they're macros -- any time one of those does not find an entry in a string file, you'll get a little log.
+16:03 Okay? So then you'll know that your localizer missed one.
+16:07 Okay. So that's important to know.
+16:09 So that way when you're doing your QA of your localizations to make sure that they're really working as good.
+16:15 I've seen some people complain that sometimes they'll add some strings to a localization and test it and it's like, "Oh, it's not getting the new changes." I haven't seen that in iOS 7, but if you do, building clean and reinstalling seems to solve that problem.
+16:30 I don't know exactly the circumstances that supposedly happens under, but it can't hurt to build clean.
+16:36 Okay. So that's strings.
+16:38 And we'll see all this happening in the demo.
+16:41 There's more to localization, though, than just strings unfortunately.
+16:45 There's also the concept of a locale.
+16:48 So your user not only might speak a different language, they might live in any number of different locales.
+16:55 An easy one to think about is English.
+16:57 In America we speak English.
+16:59 In Great Britain they speak English.
+17:02 But there are local idioms and the way that we express currency, the way we even just express numbers -- big numbers -- the commas and the periods are swapped, for example.
+17:13 Things just are all slightly different.
+17:14 So even though language in both of those countries would be English, the locales would be different.
+17:19 So there's a whole other system here for locales.
+17:21 And users set their language and their locale using the settings app.
+17:25 And your application it's just supposed to adapt.
+17:27 Okay? And you adapt by using some of these methods that take a locale as an argument or that use a locale under the covers.
+17:34 Okay? You can find out what current locale is with these methods, and you can also have this nice autoupdating current locale, which if the user changes their locale, it will just automatically update underneath the covers; although, you probably want to listen to this radio station, too, because if it changes, you might have to redraw your UI.
+17:52 Right? If they change?
+17:53 But it's pretty unusual for the user to change their locale or their language while they're in the middle of running your app, but it could happen.
+17:59 Okay. You should be prepared for that to happen.
+18:02 So what are some of the things that are different in a locale?
+18:04 Well, there's numbers.
+18:06 Now, there's a lot going on with formatting numbers.
+18:08 It seems like it's really simple, but there's actually a lot to think about here.
+18:12 But I'm going to look at two pretty simple cases.
+18:14 One is displaying numbers and one is reading numbers.
+18:18 So for displaying number on screen you're probably want to do string with format percent G.
+18:25 "Percent G" just means generic floating point number.
+18:28 But you don't want to do that, okay?
+18:30 What you want to do is use this method in NS number formatter called localized string from number, number style.
+18:36 Okay. And there's different number styles like decimal and spell out.
+18:40 We'll even spell it out.
+18:41 Like, if you put a four in there, it will say four, f-o-u-r.
+18:43 Okay, spell it out.
+18:45 So there's different formats for doing that.
+18:46 And that will give you back a string that you can put in the UI that will display the number in a way that's appropriate for the locale you're in.
+18:54 And especially, again, a large number like a thousand in the US might be one comma zero zero zero point zero zero; whereas in Great Britain it would be one period zero zero zero comma zero zero.
+19:05 Okay. And so this would get that right.
+19:07 Then there's parsing numbers, reading them.
+19:10 You really probably want here to just say int value or float value of a string, which will parse it and try it interpret a float or an int as the input.
+19:21 But that's not really the right way to do it.
+19:23 You should use the number formatter here.
+19:24 So you just create a formatter, set the style of number that you're trying to read in -- same thing as we saw above there -- and then you're going to get the parse number as in NS number by calling number from string.
+19:35 Okay? And that's going to look in that string, parse it like a currency or just a decimal number.
+19:41 And so if the person types in one period zero zero zero comma zero zero, you'll get a thousand if they're in the Great Britain locale.
+19:48 Make sense?
+19:49 Whereas in the US you wouldn't get that.
+19:51 One period zero zero zero probably will give you one or might even give you nil because that's not really even a number.
+20:01 Dates -- another complicated one you have to be careful of.
+20:04 All I'm going to say about dates is familiarize yourself with the concept that our calendar, the Gregorian calendar, is not the only calendar in the world.
+20:13 Okay? There are other calendars out there.
+20:15 And there's mechanism in iOS for dealing with all of them, but you have to know how to do it.
+20:20 I can't cover it all in one lecture -- even if I had a whole lecture devoted to it probably.
+20:26 But you want to look at classes like NS calendar, search through the documentation.
+20:30 Kind of familiarize yourself.
+20:31 If you're really going to do a multi-language, multi-locale application, and dates are part of your UI, you really want to understand what you're doing there, okay?
+20:40 For formatting simple dates there's this nice method, localize string from date with the date style.
+20:47 You can get away with a lot by just using this one, okay?
+20:52 But if you're doing anything more complicated with dates like you're writing the calendar app or something, then you obviously want to really understand dates better.
+21:00 Strings, an interesting thing: If you're searching in a string, okay, especially if you're searching case insensitively to try and find a word in a string, you don't want to use the range of string method; you want to use this range of string method -- range of string options range locale -- and pass the current locale.
+21:18 And this is especially true with case insensitivity and when diacritics are involved because different languages treat the diacritics differently.
+21:26 Okay? And case sensitivity is different in different languages.
+21:30 So you would definitely want to use this method for that.
+21:33 UI image is kind of an interesting one.
+21:35 What if you were writing an app, some kind of driving app or something like that and you have a stop sign?
+21:41 The stop sign is pretty much the same in almost all locales.
+21:44 So you're good to go.
+21:45 But other signs, like yield signs and things like that, can be quite different and your user wouldn't even recognize a yield sign in their locale.
+21:53 You might want to have a different image and have the image be localizable.
+21:57 Okay? Really easy to do.
+21:59 You just put the image for each locale, you know, in its lproj -- sorry -- for the languages in its lproj and then you pull it out.
+22:10 But even there, if you have a language that might have different locales that have a different sign with the same language on it, amazingly stop is "stop" in most languages, even though "stop" is obviously not a word in French.
+22:23 If you go to France, you'll see stop signs that say "stop," which is kind of strange.
+22:27 But there might be locales where things are different, so you might have to do a little extra work on top of UI image image named.
+22:33 Okay? You might have to say, "Oh, if I'm in this locale, then it looks like this." Now, again, that's only if you're doing an application that has imagery like road signs or whatever that's very locale-specific.
+22:44 Okay? That's something a localizer will hopefully help you.
+22:47 All right?
+22:48 You'll put a yield sign up, and they'll say, "Oh, wait a second in" -- you know, I don't know -- "Sweden that looks different." Or, you know, "In Afghanistan it's this." And so your localizers will hopefully help you.
+23:00 But UI image, image named will look in the lprojs for you.
+23:04 Okay? You might still have to locale on top of that.
+23:08 So the demo we're going to do here is internationalizing PhotoMania.
+23:12 So I'm going to start with the PhotoMania that we had at our last lecture, last week.
+23:20 So here's PhotoMania.
+23:22 And PhotoMania is UI here.
+23:26 It's amazing, it's actually pretty easy to localize because PhotoMania, primarily what it displays is its content.
+23:34 Right? If you look at almost all of this UI, it's just only displaying what's coming back from Flickr.
+23:41 It hardly has any other text in it.
+23:43 That's actually very good UI design.
+23:46 Generally, you want as high a percentage of the UI to be what you're displaying -- so if you're photo viewing app, you would want photo everywhere and just a little bit of controls around the edges.
+23:57 But there is a couple of places.
+23:59 You can see this guy right here has quite a few strings in it right there.
+24:03 And there's some miscellaneous strings that we load up as part of these prototype cells that might need to be localizable.
+24:11 But let's start, like I said, with adding the ability to have these other languages.
+24:17 And we do that by clicking here to edit our project.
+24:25 But again, we don't want to be editing the target; we want to edit this.
+24:28 So this is something right here.
+24:29 Don't forget this step right here.
+24:31 We want the project.
+24:32 And when we do that, now you'll see there's localization.
+24:35 Here's the localizations down here.
+24:37 And we are going to use base localization, which means our storyboard is going to be our base and we're going to modify the strings after that.
+24:45 So I'm going to add French.
+24:47 So let's add French.
+24:48 It's asking me, "What existing stuff do you want to make strings files for?" And I'm just going to say all of it, all my storyboards and don't worry too much about info P list dot strings.
+24:59 There's a little bit in there to localize, like your app name can actually be localized.
+25:02 But most of your stuff is in your storyboard.
+25:05 So we'll have both storyboards.
+25:07 And when we do that, it just adds French here.
+25:10 And if we look up here, look at this.
+25:12 Now this has a little triangle that, if we click it, we get to see that there's the base storyboard and now there's string files for French.
+25:22 Okay? So here's what a strings file looks like.
+25:25 It's got a comment to the localizer, and then a key, and then a value.
+25:30 Okay? Now, these keys right here, how do we know what matches up with what?
+25:35 Well, most of the time we can look at the value like done.
+25:38 Well, we know that done is this done button -- easy.
+25:41 But look at title.
+25:43 See, there's two, three titles.
+25:45 There's a title right here and there's two title right here.
+25:48 It's like which title is which?
+25:51 Which is this?
+25:52 And which is this title right here, for example?
+25:57 And you can find that out by clicking on any of the titles.
+26:00 Like, let's click on this one because we do definitely want to localize this one.
+26:03 Go over to the inspector, go to the identity inspector -- it's part of its identity -- and you can see that all objects have an object ID in a storyboard.
+26:12 You see that?
+26:13 So this one's 65EYS hit.
+26:16 So that is this one.
+26:18 Okay? So this one is the title that is the title of that.
+26:22 Now, these other two titles, we don't even need to localize them because they are in these prototypes here, okay?
+26:33 These two prototypes, so they never appear on the UI, right, these titles and subtitles.
+26:36 We always drive them with whatever our data source is for our table view.
+26:42 But this one we do need to localize, and then also this little subtitle one here, too, which is QCJ.
+26:47 This one also needs to be localized.
+26:49 So what does it look like to localize these?
+26:51 Let's say I'm a localizer and I'm localizing it.
+26:53 Unfortunately, I don't quite know enough French to localize this.
+26:57 So I'm going to show you a kind of cool way to localize -- which is good for testing -- which is just to put a period between every letter like that.
+27:06 Okay. So do a localization like this as a developer because it's easy for you to do.
+27:11 Okay? You don't have to know the language.
+27:12 And what's cool about this is it makes everything wide.
+27:15 So it's going to really challenge your UI to make things fit when you change these strings, right?
+27:20 It might even work for German if you do this because German tends to be very long words.
+27:26 And it's also, again, really -- you can do it really quickly.
+27:29 Let's go ahead and localize this entire file by doing this.
+27:34 Oops. And another good thing about this is everywhere in the UI that this appears, it's going to be really obvious immediately.
+27:43 Oops. I forgot that one, right?
+27:45 Because this period's very, very easy to see in the UI.
+27:51 So we don't need to do these two titles or this subtitle.
+27:53 We don't need to do this because that's just a placeholder.
+27:57 We want this subtitle down here, though, because that's the other subtitle.
+28:02 We want this one, too.
+28:04 And so the little URL guy here.
+28:09 And cancel.
+28:11 Okay? So we've localized this entire thing, everything that needs to be localized to French.
+28:18 And you might even -- when you send this off to the localizer you might even take these things out of here.
+28:22 So the localizer on this one, too.
+28:25 The localizer doesn't even get confused, you know, like, what's going on.
+28:28 However, there's some arguments to leave them in because you're going to put that little NS show non-localized strings -- the user default I talked about -- on, and then you're going to complaint about all these ones.
+28:38 So its kinda, 6 in one hand, half dozen in the other, if you want to do that.
+28:42 All right.
+28:43 So now we've localized this.
+28:44 What does it look like?
+28:45 So let's run this and see.
+28:49 All right.
+28:49 So when we run this UI, it all looks like it's in English, right?
+28:54 And in fact, if we go over to our little add photo guy right here, this all looks to be English and everything looks fine.
+29:02 Okay? Nothing has changed because we're not running in French.
+29:04 We're still running in English.
+29:05 So the base storyboard is still showing through.
+29:08 Okay, that's good.
+29:08 That's a good thing to check, to make sure you haven't broken anything by adding a localization.
+29:14 But now let's go and change the language to be French.
+29:18 So you do that, you can do it in the simulator and you can do it on your device.
+29:22 And you just go here to general, international, language -- we'll change it to French.
+29:28 Okay. It's changing the language.
+29:30 Your application, if it was running right now, would get that notification that we talked about that says, "Oh, this has changed." So you could redraw your UI.
+29:39 But let's go back and run here and see what we get.
+29:46 So here's photographer.
+29:48 Hopefully this is going to fill in with its normal data.
+29:51 Yes, it does.
+29:52 Let's go over here and look here.
+29:55 And you can see that it has done our little dot language here.
+30:01 We switched it to French and it's done our little dot language, but we can't really read everything because nothing fits, right?
+30:06 Subtitle doesn't fit, title.
+30:08 So this is good that it doesn't fit, and this is part of the advantage of doing the dots.
+30:12 Also notice this.
+30:13 This is all still in English.
+30:16 So that's no good.
+30:18 So let's fix these things.
+30:19 The things not fitting is quite easy to fix.
+30:21 We're just going to go to the storyboard right here, and I'm going to reset to use Auto Layout.
+30:29 Okay. Now when I dragged all these things in, I believe I used the blue lines.
+30:34 So when I reset to suggested constraints, I think I'm going to get suggested constraints that work.
+30:40 So let's go ahead and take a look.
+30:43 Enter enough and you can see now all these things fit.
+30:47 See that? Cancel fits, done, title.
+30:51 Okay? So we did a good job with our Auto Layout.
+30:54 So Auto Layout is a fundamental part of localization.
+30:57 Fundamental.
+30:58 Okay? If you don't have your Auto Layout right, you cannot do localization because when you change the strings, everything will be cut off, and dot dot dot, and all this bad stuff.
+31:07 But what about this English right here?
+31:09 We got to fix this, we got to get rid of this.
+31:11 And these are actually not in my storyboard.
+31:13 These strings, like "Okay," and "Add photo," and "Sorry, this device cannot add a photo," those are all literal strings in my code.
+31:21 So let's go localize those.
+31:23 And those are all in the thing we added last week.
+31:26 So hopefully you remember some of this code, which is add photo view controller.
+31:31 Okay? So here's add photo view controller.
+31:33 So one thing I like to do in anything that I implement is search for at sign quote.
+31:40 Okay? Because at sign quote is going to be literal strings.
+31:42 Now, not all literal strings need to be localized.
+31:45 Okay? But like, this one does, and this one, and this one, and this one.
+31:50 This one not; this is a segue identifier.
+31:53 Never appears in the UI.
+31:54 Does not need to be localized.
+31:56 This one also not; this is the name of an entity in the database -- or at least in this case we don't put this in the UI, although we do somewhere else in the UI.
+32:04 A little preview of what we're going to do later.
+32:06 And then, of course, all of these need to be localized, right?
+32:10 This one also.
+32:11 All these things do is alerts.
+32:13 This one not; this is thumbnail.
+32:15 This is just a little file extension for our thumbnail URL -- never appears in the UI.
+32:20 Here's another one that never appears the UI.
+32:21 This is how we're making a unique document URL.
+32:25 So here we don't need to use a number formatter and all that business.
+32:28 And then here's some more of the filter stuff.
+32:31 Notice in the filter stuff this does not need to be localized, but this does.
+32:35 This appears in the action sheet; this is just used in the code behind the scenes.
+32:39 So we only have to do these chrome, blur, noir, and fade.
+32:43 Okay? So that's the stuff that needs to be localized.
+32:46 So how are we going to localize that?
+32:47 Let's pick one of these.
+32:49 How about let's pick this one right here: "Sorry, this device cannot add a photo." Because we know that's going to come up right away.
+32:56 So how would we localize this?
+32:59 Some of this is art of programming; some of it is kind of what's a way that's really going to work effectively?
+33:06 But I think one of the best ways to do this is to get rid of this literal string and replace it with something you pound sign define.
+33:14 So I'm going to call this one "Alert can't add photo." Okay? And I'm actually going to put a little comment here and paste that thing back so I can remember what I originally intended to say in English.
+33:31 And then I'm going to add a pound sign define for this alert, can't add photo that's an NS localized string -- that macro NS localized string.
+33:40 In fact, NS localized string from table.
+33:41 So I'm going to put those up here in my alert section here.
+33:45 So I'm just going to pound sign define can't add photo to be NS localized string from table.
+33:55 So I have to give it the string.
+33:56 And here, one thing you could say here is you could put the English version here.
+34:02 And a nice thing about putting the English version here is that if you don't localize it, you'll get English at least.
+34:09 But I actually don't believe in that strategy because if I'm French and I get English, it looks bad.
+34:16 It makes my app look bad.
+34:18 It's almost better to get some kind of internal thing that's like, "Oh, this app is broken." It will be found in testing right away.
+34:25 There's many places that you would ship your app to get offended if you throw English in there.
+34:32 They're kind of like, "Oh yeah, English.
+34:34 Great." You know what I mean?
+34:35 So it's almost better not to do it.
+34:37 Also, there's another problem here, which is that what if this word is a simple word like "alert" or "yes"?
+34:43 Okay? Well, there can only be this key into this table once.
+34:48 And so if that yes might want to be two different words in a different language, there's no way to distinguish them.
+34:54 Okay? You would just yes would be the key, and you can only convert yes to "oui" or whatever, but you can't do anything else.
+35:01 So what I do is I actually put this -- this internal define -- into here.
+35:07 So that's the key.
+35:08 What that means is I have to provide an English dot strings because otherwise this is going to appear in the UI because that's the default.
+35:17 Okay? So I'm going to have to do that.
+35:21 I also am going to give the comment for the localizer here, I'm just going to say, "This is message given to user if the user tries to add a photo but there is an unrecoverable problem." Okay. Because that's when this is shown.
+35:43 This can't add photo happens right here with when can't add photo returns no.
+35:47 So this is something like, "I can't get where your location is on Earth, but it's because you're restricted.
+35:53 So there's nothing you can do about it" or "There's no camera on this device, so there's nothing you can do about it." So -- oops, wrong button there.
+36:01 So it's an unrecoverable error.
+36:04 So I'm trying to explain to the localizer here what this message is about.
+36:09 And I'm also going to put it in a table.
+36:11 I'm using localized string from table, and I'm going to call the table the "add photo view controller table." Okay? So that means that when I run that genstrings thing, it's going to generate a strings file called add photo view controller dot strings.
+36:25 And that's where it's going to put this.
+36:27 So I'm kind of collecting all the strings for this particular view controller into one strings file.
+36:32 I could separate it even more fine grained, or I could put all the strings in my whole app into one big one.
+36:37 That's possible, too.
+36:39 Yeah?
+36:40 >> Would it be beneficial to pass the original string along to the localizer somehow?
+36:46 >> Yeah. So the question is: Would it be beneficial to let the localizer see the English string?
+36:51 Absolutely.
+36:52 And when you send this French dot string -- French version of the strings -- off to the French localizer, you'll want to send the English one, too, so they can see, "Oh, I see what this is in English." And in fact, when we do our localization we're going to start with the English one and we'll go to French.
+37:05 So there's that one.
+37:08 Now, so I've localized that one string right there.
+37:11 But I got a lot of other strings in here.
+37:13 So to make this go a little faster I have a snippet here that does the rest of the pound sign defines, which I've called strings yes.
+37:21 So here it is.
+37:22 So these are all just pound sign defines for all the other things -- actually, I guess I already did that one so we'll do that.
+37:29 So you can see that they all are the same format, right?
+37:33 I'm using the same thing there, using photo view controller.
+37:36 Actually, I had the arguments in a different order there so that was wrong.
+37:39 So table comes first; comment is last.
+37:42 So I put all these in here.
+37:44 And then I just need to go through with my code and use these things everywhere.
+37:47 So like this one, add photo, is alert; title; title; add photo.
+37:56 And this one down here is alert; dismiss button; same thing here, and here, and here, and here.
+38:09 Okay? So I just need to do that for all my strings.
+38:12 Again, for speed here I'm just going to do it for this method all in one spell.
+38:17 So you can see all the strings in there.
+38:20 Now they're all changed, okay, to be like this.
+38:23 Same thing down here with filtering.
+38:25 So we've got a lot of things here in filter -- title of action sheet, cancel button -- all these filters.
+38:32 So I'm going to replace that as well.
+38:35 Filter localized.
+38:37 There we go.
+38:39 Okay? So same thing there.
+38:41 I'm doing the same strategy.
+38:43 Okay? So everyone understand what we're doing with this NS localized string?
+38:47 Any questions about that?
+38:48 So now we've localized our app here, but now we need to create this strings file and then localize it.
+38:55 So how do we create the string file?
+38:57 That we do with this genstrings thing.
+38:59 So let's go get terminal.
+39:01 So I'm going to run terminal here.
+39:03 This is one of the only time I think in this class that I've asked you to do that.
+39:07 But here I am in my home directory here.
+39:10 I can do LS.
+39:11 Here I am.
+39:12 So I'm going to CD to developer.
+39:14 Okay, here's my developer.
+39:15 I'm going to CD to PhotoMania.
+39:16 Now I'm in the top level of PhotoMania.
+39:19 I'm going to CD inside that.
+39:22 Here's all my code.
+39:24 Okay? See all my dot M files?
+39:26 And here you can even see my lprojs for my storyboard there.
+39:30 So the way I'm going to generate the strings file here is I'm going to say genstrings star dot M. And that's going to look at all my dot M files, look at all those NS localizer string macros, and it's going to generate strings files for all of them.
+39:43 So we did it.
+39:44 Let's take a look.
+39:45 Start out strings, and sure enough there's add photo view controller because we used that for all the tables here.
+39:51 If we didn't -- say, if we used a different name here or we didn't do from table, then it would have generated other strings files.
+39:58 Okay? But this is the only one we did.
+40:01 All right.
+40:01 So now let's just drag that thing.
+40:04 Let's go find it.
+40:05 Here it is.
+40:07 This is the strings file.
+40:08 Add photo view controller strings.
+40:10 I'm just going to drag this into my project here.
+40:13 Put it right here.
+40:14 Usually we put our strings file all under view.
+40:17 If we kind of arrange our storyboards into a place, we'll put the strings file there as well because it is part of our view, really, the localization of our view.
+40:25 And so now we have this add photo view controller strings.
+40:28 And sure enough, see, it's got all these things -- this equals that.
+40:32 Okay? Make sense?
+40:34 Now we need to make this strings file localizable.
+40:37 We go over here to the file inspector.
+40:40 This one right here is file inspector.
+40:43 And I got the strings file selected.
+40:45 I'm going to hit localize.
+40:47 Okay? It's going to say "What language is this?" And that's going to be our base, and then we're going to have English and French created off of that.
+40:56 So I'm going to leave that be base.
+40:57 So I'll hit localize.
+40:58 Now when I select the strings file, instead of having a localize button, it shows me a list of all the localizations that I had set up in my project settings.
+41:07 So I'm going to add an English localization and a French localization.
+41:10 And when I do that, I get a little triangle over here.
+41:13 And you can see here's my base.
+41:15 And now I have English and French, which it has copied the base to start.
+41:20 Okay? Now I would localize this to English.
+41:22 So let's localize this to English.
+41:24 I have a little snippet for that, too, somewhere here.
+41:27 PhotoMania, internationalization.
+41:30 This one's English.
+41:31 Here it is.
+41:32 Select all, copy, paste.
+41:36 Okay. So I've just made English -- the English versions of all of these things.
+41:41 Everyone understand what I did there?
+41:43 Right? And then French, same thing.
+41:46 I could take all these and put dots in here, but I did that offline to save us some time.
+41:52 That's this.
+41:53 Copy, paste.
+41:57 Okay. So I've localized this to French dot French.
+42:01 Okay? So now we have localization for that.
+42:06 And so now when we run -- okay.
+42:12 So when we run, now we still have some stuff left to localize here.
+42:17 Right? You can see that these things are still in English.
+42:20 But if we go over to here, look at this.
+42:24 [Inaudible] we already saw that from last time.
+42:27 I forgot to mention that maybe.
+42:28 But the maps part of it is all localized.
+42:31 And when we go over here, we have all these dots.
+42:33 And now we have these strings also localized.
+42:36 The add photo here.
+42:38 Okay. Okay?
+42:40 And if we go through and checked them all, all the other ones would all have the dots, too.
+42:43 So we're making good progress here in terms of our localization.
+42:46 Couple of things, though, not localized here.
+42:50 One, my photos, right?
+42:53 In French that would be I don't know, [inaudible] or something.
+42:57 I don't know.
+42:59 Actually, it would be M dot Y, P dot H dot -- okay.
+43:01 So we would need to localize that.
+43:03 Where is that?
+43:04 That is here in photographers.
+43:08 Actually, no, that's in -- sorry -- that's in core data.
+43:12 Photographer create.
+43:13 Right? So that's just a literal string.
+43:15 So we would probably localize this with NS localized string.
+43:19 Not going to do it because I've already showed you how to do that.
+43:21 What else do we have that's not localized?
+43:24 This little line right here, zero photos.
+43:27 Okay? That's actually probably correct in real French.
+43:30 I think photo is French; in French it's photo as well.
+43:33 But we want to make sure that was localizable.
+43:35 That's another reason we should do the dot thing because it would be obvious that there's no dot here; whereas if you're just checking it with French, you'd be like, "Oh yeah, that's localized," but in fact, it's not.
+43:44 So where is that?
+43:45 That's down here in -- that's the one that's in photographers.
+43:50 You can see it's just a string with format thing here for table view.
+43:55 So we would want to do another NS localized string here, right?
+43:59 And then there's one other thing that's in English: This word "photographer" right here.
+44:05 Now, you might be surprised; where does this come from?
+44:08 This is actually being provided by core data table view controller.
+44:13 Okay? That class that we gave you many weeks ago.
+44:17 And what happens here is core data table view controller, when you set a fetch results controller, it checks to see if your table view has a title.
+44:25 And if it doesn't have a title, then it sets the title to be the entity name -- photographer or photo.
+44:33 Okay? Now, this is an interesting one to localize because I can't use NS localized string here.
+44:40 Everyone understand why?
+44:41 Because NS localized string, all the arguments have to be literals -- at sign, quote, something.
+44:46 So how am I going to localize this?
+44:48 Well, we can go one level below the NS localized string to the bundle thing.
+44:52 So let's take this string.
+44:53 I'm going to take it out of there.
+44:54 I'm going to go NS bundle, main bundle, localize string for key.
+45:00 Okay? This can be a variable.
+45:03 So I'm going to make it be that entity name.
+45:05 The value, this is the default value if it can't find that string.
+45:09 So I'll make that be the entity name.
+45:11 And then table, this is the strings table to look in.
+45:14 I'm going to call it entity.
+45:15 So this is a new strings table that I'm going to have to invent.
+45:19 So how do I invent this strings table?
+45:21 I can't use that gens strings thing because all gens strings does is look at NS localized string, those macros.
+45:27 Okay? How am I going to make a strings file for this?
+45:30 Well, I'm going to use new file.
+45:33 So when you do new file, if you go down here to resource -- you see resource right here -- you'll see that there is strings file.
+45:40 So I'm going to create a new file, call it strings file.
+45:43 I'm going to call it entities; that's what I said I called it.
+45:45 I'm going to put it where I keep my view stuff, okay?
+45:48 And I hit create.
+45:50 It makes it, it right here.
+45:51 Entities dot string.
+45:53 I'm going to make it localizable, the same way as I did the other strings file.
+45:57 That will be our base, which is nothing.
+46:00 Okay? And then I can say, "Well, I don't need an English localization because the names of the entities in the database are in English." So I don't need one.
+46:09 But French I do.
+46:11 Okay? So I'm going to make a French one.
+46:13 Now if you go over here and look at French, here it is.
+46:15 And now I can just say photographer equals photographer.
+46:21 And we'll put our dots in here.
+46:23 Dot, dot, dot, dot.
+46:25 Whoops. Dot.
+46:27 Okay. So we've translated that to French.
+46:34 And now when we run, we'll see that we get photographer along the top here.
+46:42 Okay? So that's an example of where you need to localize by actually calling the bundle thing, as opposed to NS localized string.
+46:47 Question?
+46:49 >> When you did the macro for the NS localized you [inaudible].
+46:55 If I have two dot M with the same string, could I put that in the dot H [inaudible]?
+47:01 >> Yeah. Great question.
+47:02 So the question is: When I did these NS localized strings here I put them in my dot M -- photo view controller dot M -- see how I put them all right in here?
+47:10 Could I put these in a dot H somewhere and then import them and share them between two?
+47:16 The answer is absolutely you can do that.
+47:18 When you do genstrings, it's legal to put a dot H file there.
+47:21 In fact, genstrings will look in any file you want, right?
+47:24 So yes, you can do that.
+47:27 All right.
+47:28 So that's it for localization.
+47:30 I'm just kind of skimming the surface as far as of localization, but I think this is a really important one to know if you're going to ship a product on the app store because you can really open up your market by having it localized.
+47:41 It's not that expensive to have these strings files localized.
+47:45 Really, more of your cost is sometimes just QA-ing it.
+47:49 You got to put something that's in French in front of French users and make sure that it uses the right idioms and that it's understandable.
+47:56 And, you know, if you get a good localization company doing the localization for you, they'll do the QA as well and make sure that, you know, it's actually user-tested as well.
+48:05 Okay? All right.
+48:08 Back to the slides.
+48:10 All right.
+48:11 Okay. The last thing we're going to talk about here is settings, okay?
+48:19 So settings allows you to add user interface for your application into the general settings app.
+48:25 So you can see the screen capture at the bottom there, that's the general settings app.
+48:29 And if you scroll down towards the bottom of very first page of settings, you can see all these other apps, like Maps and Safari and even third-party apps -- Twitter, Facebook, Flickr, whatever.
+48:38 Actually, I'm not sure those are third-party apps; they're probably iOS 7's integration to those things.
+48:44 But your apps could appear at the bottom of this list.
+48:47 And when you click on one of those apps, it goes to the next view here.
+48:53 And I've shown two different ones, one for Maps and one for Safari.
+48:56 And you can see that there are some UI in there.
+48:58 We got some switches, we can choose from a predefined list of things like where it says search engine Google.
+49:05 You can click on that and have a list of things.
+49:07 You can also have sliders in here.
+49:10 You can group things, etc.
+So this UI you can build 49:13 for your app and have the settings app do this.
+49:16 This UI is basically a UI on top of NS user defaults.
+49:23 Okay? So these things -- all these things in the UI -- are setting NS user defaults.
+49:28 That's all they're doing.
+49:29 And that's how it's communicating with your app, okay?
+49:32 So it's as simple as that.
+49:34 There's really not a lot of UI you can put in here.
+49:36 I'm not going to talk about all the things you can do.
+49:38 You can look in the documentation for that.
+49:40 But like I said, sliders, switches, text fields, typeable text fields, and also selecting from lists are the main things.
+49:48 The way you add this to your app is in your app, okay, you go into Xcode and you say new file.
+49:56 And then under resources you pick settings bundle.
+49:59 This is the same place we went to add a strings file a moment ago.
+50:01 Now we're going to do settings bundle.
+50:03 And when you do settings bundle you'll get this little settings bundle.
+50:06 Add it to your file navigation there.
+50:08 You can see it.
+50:09 And it's going to give you a default kind of an example bundle, which is really nice because it's a good starting point to get started, and what can I do with this thing?
+50:20 All that UI that you're going to build, you don't build it in a storyboard, you don't build it, you know, with graphical interface; you build it using a property list.
+50:29 Okay? And this property list has well-defined keys and values.
+50:33 And these keys and values determine whether you're doing a text field, or a slider, or grouping things, or whatever.
+50:38 So you can kind of see up here some of the property list things you can set to build this UI.
+50:45 For example, what you see on screen, I'm going to show you what that looks like in the settings app, okay?
+50:50 So you see you got a group is item zero.
+50:53 So this thing is going to be grouped.
+50:54 The name of the group is "group," so it's going to say group at the top.
+50:57 And then we got a text field, a toggle switch, and a slider.
+51:01 You see items one, two, and three?
+51:03 The text field there, you know, using the alphabetic keyboard, it doesn't do auto correction, etc. The toggle switch, its title is enabled.
+51:18 So it's going to say enabled, and then there's going to be a toggle switch there.
+51:21 The slider looks like it goes from a zero to one.
+51:25 And for all three of them, do you see how it says name underbar preference, enabled underbar preference, slider underbar preference in each of those three things?
+51:33 That's the NS user default that it's setting, okay?
+51:37 I don't really like those names very much, but that's what it's setting.
+51:41 So what is this going to look like?
+51:42 What would this particular thing look like?
+51:44 Well, it would look like this, okay?
+51:47 Grouped, name, enabled with a switch, and then the slider.
+51:50 Okay? So localization.
+51:54 Let's talk about localization settings.
+51:56 You've got to have localization for setting, otherwise when a person's French they're not going to understand how to do your settings.
+52:01 And it's done using strings files.
+52:04 And if you look inside the settings bundle, you'll see it comes with an EN dot lproj; little bit of English bias there, I think.
+52:10 And in that EN dot lproj -- actually, might not even be English bias.
+52:15 It's possible that if you're developing this and you're French, it might create an FR dot lproj for you.
+52:20 I'm not sure, I've never tried that.
+52:22 And then inside this string's file is every string that would appear in this UI that you're building with equals whatever it's supposed to be.
+52:32 Okay? So whatever's in that base P list we saw two slides ago, anything that would appear in the UI you can just say it equals something else.
+52:40 And then you can have as many dot lprojs as you want here -- French dot lproj, whatever.
+52:45 The bad thing is there's no way to go to the file inspector and hit localize.
+52:50 Okay? For some reason they have not gotten around to having the settings bundle be localizable in Xcode.
+52:56 It's got the mechanism there, but there's no inspector UI to do it.
+53:00 So how do you localize this thing?
+53:02 How do I create an FR dot lproj?
+53:05 And the answer is you're going to go to finder and find this settings bundle.
+53:11 You can actually do that from Xcode.
+53:12 I'll show you how to do that in the demo.
+53:14 Then you're going to right-click on the settings bundle and say show package contents.
+53:18 And that's going to show you what's inside that settings bundle, which is going to look like this.
+53:22 And you're going to see the EN dot lproj there.
+53:25 And now you're going to manually create an FR dot lproj.
+53:29 Okay? Really nice support for it here.
+53:32 And usually I do this by taking the EN dot lproj and just copying and pasting it and then renaming it from EN dot lproj copy to FR dot lproj.
+53:40 And then the root dot strings that's inside there, that's what I would send off to my localizer.
+53:46 Okay? And that would do the equals thing for French.
+53:50 So let's see what this looks like in Bouncer.
+53:53 Okay? Because Bouncer has some nice settings that we could set.
+53:57 And what I'm going to do is make it so the elasticity -- you know, the bounciness of the bouncing ball -- is settable in settings.
+54:04 So right now we have the elasticity set at one, which is kind of the maximum elasticity that it can have and still settle down.
+54:12 If we had more than one, it would start getting faster and faster as it bounced off the walls.
+54:16 It would be more than an equally elastic rebound.
+54:20 So we're going to make it so we can set that elasticity anywhere from zero to one.
+54:24 Okay? Zero would mean just kind of hits and dampens immediately.
+54:28 All right.
+54:29 So let's go get Bouncer.
+54:32 Bouncer. Here's Bouncer.
+54:34 Okay. Bouncer has not changed since last it was posted.
+54:40 The elasticity is here, this elastic, dynamic behavior.
+54:44 And you can see that we set it to one, okay, by default right now.
+54:49 So we want to be able to set this elasticity from the settings app.
+54:54 So let's build the UI for it first, and then we'll have to change our code to use the NS user default that our UI's going to set.
+55:01 So to do the UI we just do new file, go to the resource section of iOS, settings bundle.
+55:09 Same place we did strings file right here, settings bundle.
+55:11 Create the settings bundle.
+55:13 You can call the bundle whatever you want.
+55:15 Doesn't really matter.
+55:15 I'm going to call it settings.
+55:18 Here it is.
+55:19 Here's the settings bundle.
+55:20 And this root dot P list is what the bundle is, and you can see it has four items here.
+55:27 Again, group, text field, toggle switch, slider.
+55:31 Okay? So you get this -- every time you create a settings bundle you get this one.
+55:36 Let's go ahead and see what this looks like.
+55:39 Let's do this over here.
+55:42 [ Pause ]
+55:50 So here's our Bouncer, and you can see it's got full elasticity -- bounces pretty good, right?
+55:57 And if we go over to the settings app right here, if we scroll down to the bottom, you'll see that in addition to these other apps, there's Bouncer.
+56:05 Okay? If Bouncer had a nice icon, the icon would look better.
+56:08 But if we click on Bouncer, here's the UI.
+56:10 So we got this slider right here that we can move around and we've got the switch to turn off.
+56:15 But none of this is connected to Bouncer in any way; this is just the default stuff we got from creating the settings app.
+56:22 So what I'm going to do is I'm going to keep the slider, and I'm going to have the slider go from zero to one -- elasticity zero to one.
+56:28 I'm going to get rid of this enabled switch right here.
+56:31 I'm going to get rid of this name text field right here.
+56:34 And I'm going to keep the group, but instead of calling it "group," I'm going to call it "elasticity." So I'm going to have this really simple UI here that says elasticity and then has a slider.
+56:42 All right?
+56:43 So let's go here.
+56:45 Let's get rid of this text field.
+56:47 Let's get rid of this toggle switch.
+56:50 And so I'm keeping the group and the slider.
+56:53 I'm going to rename the group from group to be "elasticity." And then in my slider let's look at some of these things here.
+57:01 Okay, the maximum value is one.
+57:03 That's good.
+57:04 Okay? That's maximum elasticity I want.
+57:06 Minimum zero.
+57:06 So that's good.
+57:07 I don't need to change that, but you can obviously change these things.
+57:10 The default value of .5 -- no, I really want my default value to be one because that's what my default value was before, and I want it to start there.
+57:20 And then this is very important, slider preference.
+57:22 This is going to be the NS user default that communicates this back.
+57:26 And I'm going to call this settings underbar elasticity.
+57:31 Okay? When I do the names of NS user defaults, I like to name scope them, like, with the name of the class and then an underbar and then all the items in there.
+57:42 So you kind of give it a little bit of protection against the same name thing.
+57:46 Here, since this is set in settings, I'm going to scope it to be settings.
+57:50 Okay? We could argue there are better ways to do that.
+57:53 But it's a simple way to do it.
+57:55 So this is going to be the name of the NS user default we want in our code.
+57:58 So now let's go back to our code and use that NS user default instead of 1.0 here.
+58:03 So I'm going to get rid of this 1.0.
+58:05 And in fact, I'm going to add a method to do this called reset elasticity.
+58:09 And let's write that method.
+58:13 Oops. Void.
+58:15 Reset elasticity.
+58:18 And here I'm going to get the user default right off the bat -- NS user default.
+58:25 You know how to do this.
+58:26 Defaults. Standard user defaults, value for key.
+58:30 And the key is settings, elasticity.
+58:34 Okay? Again, probably want to pound sign define there, whatever, yes.
+58:37 But for demo we'll go here.
+58:39 I'm going to say if it's set -- because it might be that that's never been set; no one's ever gone to the settings app and set this so it might just not even be set.
+58:48 So if it's set, then I'll do one thing; if it's not set, if no one's ever gone into settings, then I'm going to set my elasticity to be 1.0, which is what it was before.
+58:59 But if someone has gone to the settings app, then I'm going to set my elasticity to be this elasticity's float value.
+59:08 Simple as that.
+59:12 Okay? Now, this works great the first time we ask for the elasticity.
+59:17 But what if someone goes over to settings while my app is running and changes the elasticity?
+59:23 Okay? We need to find out about that, and we do that with a radio station.
+59:27 Okay? So we're going to listen to another radio station.
+59:30 We're already listening to two radio stations in this app -- the resign and become active.
+59:34 So I'm just going to add another radio station listener here.
+59:38 Notification center, default center.
+59:40 And then a little Star Wars there.
+59:44 And then we're going to add observer for name.
+59:47 Okay? And this thing we're going to -- radio station we're going to observe -- is called NS user defaults did change notification, exactly what you would think it would be called.
+59:58 Okay? And we don't care who is going to tell us that it changed.
+01:00:03 And we can do it on this queue.
+01:00:05 It's fine.
+01:00:06 And what are we going to do when it changes?
+01:00:08 Well, of course, we are just going to reset the elasticity.
+01:00:14 Okay? And that's why I put that in a separate method.
+01:00:17 Okay? So it's going to call this, it's going to read that user default, update the elasticity.
+01:00:25 As we know with the dynamic animator, as soon as you change that elasticity, it's going to immediately start affecting the elasticity.
+01:00:37 Okay? So let's go ahead and try this.
+01:00:40 See if this works.
+01:00:42 [ Pause ]
+01:00:47 >> For the slider, whats the granularity?
+01:00:52 >> Yeah. So the question is: What's the granularity of the slider as we move along?
+01:00:56 And it depends.
+01:00:57 If it's a float, then however wide the slider is, you know, however many points that can be divided into, that's how much granularity you're going to get on the float.
+01:01:06 If it's an integer -- you know, if you're making integer -- then you're going to be rounding off to the nearest integer, right, as you get it from NS user defaults.
+01:01:14 But basically granularity depends on the width available.
+01:01:17 So it's actually going to vary per device.
+01:01:19 Right? On a wide device you can get a higher granularity.
+01:01:22 All right.
+01:01:22 So here we are; elasticity is default.
+01:01:26 Okay? So -- oops.
+01:01:29 This guy's hard to control.
+01:01:32 Okay. So we had normal elasticity going on here.
+01:01:34 So now I'm going to go out to the settings app.
+01:01:38 Okay? I'm going to go down to Bouncer.
+01:01:39 Here's Bouncer's elasticity.
+01:01:41 It's at one.
+01:01:43 I'm going to crank it all the way down to zero.
+01:01:47 Okay? Which is really low, it doesn't matter.
+01:01:49 And let's go back to Bouncer.
+01:01:53 And now when this thing bounces, doesn't bounce.
+01:01:57 Okay? Low elasticity.
+01:01:59 Okay? Make sense?
+01:02:02 And then we can go back again.
+01:02:07 Change the elasticity back to being high.
+01:02:10 Back here to Bouncer.
+01:02:13 And now back to bouncing.
+01:02:17 Okay? Make sense what we did there?
+01:02:22 Now, one last thing I want to show you about this is localization.
+01:02:25 So here we have settings elasticity.
+01:02:30 Well, that's correct because we're in English.
+01:02:32 But what happens if we go and change the language here?
+01:02:35 So let's go change to French -- international, language, French.
+01:02:48 All right.
+01:02:49 So now when we go back to settings and we go down to look at Bouncer.
+01:02:54 Okay? So we go back here and it still says elasticity even though I'm in French right now.
+01:02:58 So this is all in French.
+01:03:00 Okay? So we got this all in French -- nice, excellent, all in French, except for Bouncer is English.
+01:03:05 Okay? So this person is immediately deleting Bouncer, this French person deleting Bouncer because of the English bias.
+01:03:11 So how do we fix that?
+01:03:13 Well, we go down here.
+01:03:14 We want to change this root dot strings right here to say elasticity equals elasticity.
+01:03:23 So this is what we would want in English.
+01:03:25 And in French we'd want this to be the French word, or the dots, or whatever.
+01:03:29 So how are we going to do this?
+01:03:30 And this is where we have to go out to the file system and do this manually.
+01:03:34 So the way you can go out to the file system is you select the settings bundle, right-click on it, and you can see the very first thing here is show in finder.
+01:03:43 So I'll show in finder.
+01:03:44 Here it is, but it doesn't have a little triangle.
+01:03:47 That's because it's a package.
+01:03:49 Okay? But I can right-click and say show package contents.
+01:03:53 Now it will show me what's inside of it.
+01:03:55 Here's my EN dot lproj.
+01:03:57 I'm just going to copy it and paste it.
+01:03:59 So now I have EN dot lproj two.
+01:04:01 So I'm going to rename this to be FR dot lproj.
+01:04:07 What's really kind of interesting about the way the finder works with apps is this will all be appearing in Xcode at the same time that you're typing it.
+01:04:14 So you don't have to do anything special there.
+01:04:17 As you create these directories and rename them, Xcode keeps track of it.
+01:04:21 So here's the root dot strings for French and here's the one for English.
+01:04:25 So in the French one let's change this to our dot.
+01:04:32 Okay? Oops, sorry.
+01:04:32 I wanna make sure this is...okay.
+01:04:36 So we change this to the dots.
+01:04:40 And now let's -- yeah.
+01:04:44 So now let's run this.
+01:04:48 Reinstall this Bouncer, including its settings bundle.
+01:04:52 All right.
+01:04:53 So here we have Bouncer.
+01:04:54 Let's go over to settings, look at Bouncer settings, and now we have elasticity with the dots.
+01:05:02 Okay? All right.
+01:05:05 Questions about any of that?
+01:05:06 Yeah?
+01:05:07 >> If you have settings in your app that are frequently used, should you refrain from also putting them in this [inaudible] settings?
+01:05:15 >> What a great question.
+01:05:15 Okay. So the question is: If I have settings in my app and the user frequently wants to change them, like let's say elasticity is something that, you know, every game you want to play with a different elasticity or something like that because, you know, it's not something that you just kind of set to taste and then you just leave it, then you would not want to use the settings app.
+01:05:36 Okay? Settings that the user wants to set on a regular basis, that are a normal part the operation, those want to be in your app.
+01:05:44 So we would want to have some way here in Bouncer to be able to set the elasticity -- maybe a gesture, maybe, you know, we're not using pinching.
+01:05:52 Maybe pinching could do it or something.
+01:05:54 I mean, if it's something you want to change a lot, you want it here.
+01:05:57 Okay? Or you have a title bar across the top and have a bar button for it or something.
+01:06:01 Really, the settings app is set it and forget it kind of settings.
+01:06:05 Right? Settings that are just maybe something a user tunes that they like and then it's set.
+01:06:11 Okay? It's not going to be things that you're going to set constantly.
+01:06:16 Question?
+01:06:17 >> Suppose that you did have a way to set them in your app, should you specifically not put them in your extra settings place?
+01:06:25 >> Yeah, so the question is: If I did have a way to set elasticity in my app, should I definitely not set them in my settings?
+01:06:31 I would say not necessarily.
+01:06:33 Like, for example, you might want to -- let's say elasticity is something you change with every game.
+01:06:38 Like, you say new game and it says, "What elasticity do you want?" It's possible you might want to have setting apps set the default elasticity, right, so that when it asks you about the elasticity, it starts with that default.
+01:06:49 So it's possible you might want to have that.
+01:06:51 But generally you don't want the user confused about, "Where am I setting this?
+01:06:54 Am I setting it in settings, or am I setting it here?" So even in that case in settings you'd probably want to call it default elasticity, and then here you would call it elasticity or something like that.
+01:07:04 So good questions.
+01:07:06 Any other questions about settings?
+01:07:10 Okay. So both localization and settings, you know, there's obviously a lot you can do here.
+01:07:17 And so I'm just kind of trying to skim the surface enough so that you understand where to get started, okay, in terms of "How do I make different UI in settings, and what do I do to make my app international-izable?" Okay. So that's pretty much it.
+01:07:33 Here is just a reminder of what's coming up.
+01:07:35 We talked about this at the beginning.
+01:07:36 If you have any questions about your final projects or about anything else, I will be here.
+01:07:41 And I will see you on Wednesday.
+01:07:44 >> For more, please visit us at Stanford.edu.

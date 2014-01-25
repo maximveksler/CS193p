@@ -1,0 +1,1081 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:07 >> Okay, well welcome to lecture 16 of Stanford CS193P fall of 2013-14.
+00:15 So today we are going to talk about the last of the segues, which is modal segues and their kind of related segue which is unwinding segues.
+00:27 Okay these can be a little, modal segue's really easy.
+00:31 The unwinding, you know, can be a little confusing and so hopefully both the combination of the slides and the demo will get you there.
+00:39 But it's an important one to understand, these unwinding segues.
+00:43 Also, briefly we're going to talk about text fields which we haven't covered yet and also alert and action [inaudible] and then I'm going to do this demo.
+00:51 It says camera time permitting, but we will definitely not have time for that.
+00:54 That's what we'll start off on Wednesday with.
+00:57 All right?
+00:58 All right, modal view controllers, this is another way to segue, another way to put a view controller on screen.
+01:05 You already know about popovers and you know about push segues in a navigation controller.
+01:10 So this is another way called modal view controllers.
+01:12 And a modal view controller is a way of putting a view controller on screen where it takes over the entire screen, okay?
+01:19 For the lifetime of that view controller being on screen, it's in charge of the entire screen, okay?
+01:25 On the iPhone it takes over the entire screen by covering the entire screen.
+01:30 On the iPad it usually takes over by being in a popover.
+01:33 And as we know, popovers are essentially modal.
+01:35 They're in a mode.
+01:36 When your popover comes up, everything else is kind of dark gray.
+01:39 And if you click on anything else, the popover goes away, right?
+01:42 So it's essentially taking over as well.
+01:44 So modal view controllers are a way to put things up on screen that takes over.
+01:51 So let's look at the iPhone version of this.
+01:53 Here's a little demo of it.
+01:54 So this is the contacts app and you can see I've got my contacts there, my winning contacts, and so what if I want to add another contact here?
+02:04 Let's say I want to add Montay Ball [assumed spelling]
+02:07 or something like that.
+02:07 How would I do that?
+02:09 Well I would press that little plus up there in the corner, and what would happen when I press plus?
+02:15 So let's watch.
+02:16 So I hit plus, and a whole new view controller slides in and completely takes over the screen.
+02:21 Now this was not a push.
+02:23 Okay, that cancel button there, that's not a back button, okay?
+02:26 It actually took over the whole screen.
+02:28 Now cancel happens to be in the same place that back would be, which is kind of decent UI consistency there, but it's a different, totally different modal mechanism, okay?
+02:39 So not only, so we have this modal view controller that's taking over the screen.
+02:46 And for example, there's another button on this one, add photo, which uses another modal view controller and covers this guy's screen.
+02:53 So let's watch what happens when we hit add photo.
+02:55 See? That covers up the whole screen again.
+02:57 So now we have two levels of modal segues happening here.
+03:02 And again it's not a push, there's no back button.
+03:04 In this one the cancel button happens to be on the right.
+03:07 And I don't have any photos or videos to choose here on this device that I'm running on, but you can see no back button there.
+03:17 Now, when I cancel, okay and this modal view controller goes away, watch what happens.
+03:23 It disappears.
+03:24 I go back to the previous modal obviously.
+03:26 And then if I cancel this modal, okay, then I'll go back to the previous one from that.
+03:32 So modal takes over the screen until it's, you hit either done or cancel or something and then it goes away and goes back to where you were, exactly where you were.
+03:40 Okay? So, it's pretty straightforward but just want to make sure you understand what we're doing here with modal view controllers, okay?
+03:47 Now some things to think about, modal segues can be a little disorienting to the user because they're in their nice app, they're really comfy, and then all the sudden their whole screen is completely taken over by something else.
+03:59 And like whoa, what's this?
+04:00 Now, you know, if you're using modal view controllers in the proper places, it's okay.
+04:05 The user's fine with that.
+04:06 Like the contacts, they're adding a new contact, they understand okay well I have to completely specify this contact before I say done, so I kind of can't do anything else anyway until I'm done.
+04:16 But modal view controllers can be overused.
+04:18 I see students overusing it a lot.
+04:20 They're just kind of like oh, well I need to put the view controller on the screen so I'll just put it up modally, okay?
+04:24 And, whereas it might be better to push it onto screen if it's, if going back makes sense at all times.
+04:32 Okay? If you push something and it doesn't make sense to go back at all times, then push is probably not right, okay?
+04:38 But then you might ask yourself, can I design my UI so it is always okay to go back, right?
+04:43 You know, in a navigation controller.
+04:45 So modal view controllers tend to get overused.
+04:47 Users can sometimes by disoriented by them so use them with care.
+04:51 How do we set a modal segue up?
+04:54 Super simple.
+04:55 Got our story board, have the view controller you want to modal segue to, we just control drag.
+05:00 Okay? Control drag, and when it says what kind of segue do you want you say modal instead of push for example.
+05:05 And bam, that's all that's necessary to set it up.
+05:07 And it's a normal segue so you're going to prepare for segue just like any other segues.
+05:11 It's very, when it comes to pushing it, or you know not pushing it, putting it on screen, it's very much like pushing.
+05:18 So it's very, you'll be very used to that.
+05:21 It can be manually segued to just like we talked about last week.
+05:25 You can even put them up by creating view controllers and put them on screen but we don't really talk about that in this class because that's really old style way of doing things.
+05:35 We do things in storyboard and we control drag to set up segues.
+05:39 So it's normal to prepare.
+05:42 What does a prepare look like?
+05:43 It looks like any other prepare for segue, right?
+05:45 You get the destination controller, maybe check the identifier.
+05:49 You see what class it is.
+05:51 You know you set up your des- your, you prepare by passing whatever public API that view controller wants.
+05:59 Okay now here's where modal segues get interesting though.
+06:02 That's hearing back okay?
+06:05 So a modal segue has gone off and done something like created a new contact in your contact app, and now the contacts app, you know the view controller that put it up wants to hear back.
+06:16 Okay well what was that contact you just created?
+06:19 Okay so this hearing back is kind of the interesting yet another kind of segue.
+06:25 Okay? This hearing back we call these unwind segues, okay?
+06:29 An unwind segue means you're going back to someone who put you up.
+06:34 Someone who put you on screen.
+06:36 We call a view controller that puts another view controller on screen, a presenting view controller because it's presenting this other view controller, okay?
+06:42 So an unwind segue, you're going back to someone who presented to you.
+06:46 Unwind segues can only go back to someone who presented you.
+06:50 You can't unwind to someone else who didn't present you.
+06:53 But in the case where we had modal and then that modal brought up another modal, you can unwind two levels at once.
+06:59 Okay so you can unwind to anybody who presented you either directly or indirectly.
+07:05 Most interesting thing about unwind segues, they're the only kind of segue that doesn't create a new view controller, okay?
+07:13 Every other segue-- pushing, mo modal, replace-- all these segues always create another view controller.
+07:19 They instantiate one from scratch, every time.
+07:22 Okay every time you push in a navigation controller, you get a new view controller.
+07:25 Every time you modally segue, you get a new one.
+07:28 Unwinds obviously don't do that because they're unwinding back to someone who presented you.
+07:32 They obviously already exist.
+07:34 Does that make sense?
+07:35 See what I'm saying?
+07:36 So it's kind of a-- unwind is kind of a weird segue in that way.
+07:39 It always goes back to somebody who already exists.
+07:43 Normally this unwinding is used with modal.
+07:45 It actually can be used with pushing though.
+07:48 You could push and push and push and then unwind all the way back up to the top.
+07:52 Okay so unwinding can be used inside navigation controller, but most often probably used in modal controller.
+07:59 Okay so let's talk about unwinding and how we set that up and how we make it work because it's a little, again, like I say it's a little disorienting because it's graphically not shown in the storyboard in the same way as other segues, okay?
+08:11 There's not the line being drawn.
+08:13 But the way you set it up, and the most important thing about an unwind segue is to specify the action method that's going to get called in the presenting view controller-- the one that's presenting these guys-- some method has to be called in them when you unwind, okay?
+08:29 That kind of method, it's an IB action, right?
+08:32 It's the kind of thing that Xcode is, pays special attention to.
+08:36 So it looks kind of like a target action method, but the argument is very important to get right.
+08:41 It's a UI storyboard segue, okay?
+08:44 That's because when this unwind happens, this method's going to get called and it's going to pass you the unwind segue, okay?
+08:52 The segue itself that is happening is going to be passed to you.
+08:56 And when you look in that segue, you can for example find out who's the source of this unwind.
+09:01 That's going to be the thing you presented or the thing that you presented that somebody else presented or presented down the way, that's going to be the source view controller.
+09:08 So this is the only case where we've looked at the segue's source view controller.
+09:11 Usually we're looking at the segue's destination.
+09:14 But in this case the unwind segue destination is receiving this message so it knows who it is, and so it's looking at the source.
+09:20 Okay so obviously the first line in a segue method like this is usually who's unwi- who am I unwinding from, okay?
+09:29 Now that you know who you're unwinding from, you could ask that thing, like the contact, the add contact view controller, what was the contact you added, okay?
+09:37 You just unwound to me.
+09:39 Obviously you've chose your contact.
+09:41 What was the contact you added?
+09:42 And so now you've got the contact, you could add it to the list of contacts or whatever you want to do.
+09:47 Okay? So creating that method is the most important thing to do, and just the very creation of that method will automatically make Xcode realize that you can unwind to that view controller.
+09:59 If a view controller has this kind of method, IB action, any name takes a UI Storyboard segue, that view controller can now be unwound to, okay?
+10:08 So any view controller that that view controller presents can unwind back to it.
+10:12 Okay so how do you set up that unwind?
+10:14 Okay this is a little odd.
+10:16 In the, let's say, add contact view controller, the one that's being presented modally, it might have a button in there like done or save new contact or create new contact.
+10:28 That button, okay, really wants to start this unwind segue.
+10:32 But you can't control drag from that button all the way back to the other view controller that has this method.
+10:39 You'd think you could, but you can't.
+10:41 Instead, you control drag from that button down to the little green button-- you see that image I have there-- the little green button at the bottom of the view controller that is starting the unwind segue, okay?
+10:52 The thing that was presented modally.
+10:53 So you go down to that green thing-- and when you do to that green thing and you let go, it's going to give you a list of all these methods like done right there.
+11:02 Okay all the methods that are IB actions that take UI storyboard segues as arguments.
+11:07 Now some of those methods might be in completely unrelated view controllers off somewhere else in your storyboard because it's going to show you all of them.
+11:14 Xcode knows about all of them.
+11:15 It shows you all of them.
+11:16 If you pick one that wasn't, is not in a view controller that presented you, the unwind just will not happen.
+11:22 It's like you did nothing.
+11:23 It's not going to crash but it's just not going to do anything.
+11:25 So the done button would just do nothing, okay?
+11:28 But if it can find, at run time if it can find that method up the change of, chain of who presented you, it will call that method, okay?
+11:36 Now that's only part of unwinding.
+11:39 Part of unwinding is letting the view controller who presented you know yeah I'm done, okay?
+11:44 And here's from public API and myself [inaudible]
+get information out of me.
+11:48 But there's another part of it which is preparing that unwind segue.
+11:51 So the unwind segue has to be prepared as well.
+11:54 And in fact preparing an unwind segue is even more important sometimes than preparing other segues because it's the only chance that the presented modal view controller has to do anything before it goes away.
+12:07 Okay? And that's to prepare that unwind segue to go back.
+12:11 So in the demo we're going to do a photo, some more photo mania and we're going to add a photo.
+12:16 We're going to allow us to take a photo with the camera instead of getting it from Flickr, and when that modal view controller that lets you add that photo is done, it has to put that photo in the database before it unwinds.
+12:27 So it prepares for the segue back when it's done by putting that photo in the database.
+12:32 Okay so preparing for unwind segues is very important.
+12:36 Now, the thing about preparing for segues is you, when you do the prepare for segue, you need the segue's identifier, because you've got to know which unwind segue am I talking about and that is also difficult with unwind segues.
+12:49 The only place to set that is in the document outline.
+12:52 Okay so when you create an unwind segue by control dragging down to the little green thing, in the document outline there'll be a little line in there unwind segue, you know, from a whatever button.
+13:03 And you can click on that and then inspect it just like any other segue and say the identifier is whatever.
+13:09 And then in prepare for segue you'll have the identifier.
+13:11 Why is that different or a little hidden?
+13:13 Well because unwind segues don't have a, you know, a drawing on the storyboard that says where they go because they don't really know where they go.
+13:20 It depends on who presented them as to where they unwind to.
+13:24 So there's no line showing them going back.
+13:27 So that's why you have to use the document outline, okay?
+13:29 So I'm going to demo all this so hopefully it'll all make sense once you see it.
+13:35 How about dismissing modal view controllers from code?
+13:39 So you just want to get it off the screen.
+13:41 You're not going to unwind, you just want to get it off the screen.
+13:44 By the way, unwinding automatically takes it off the screen.
+13:47 If you have a modal view controller and you unwind, it will automatically be removed from the screen, you do not have to dismiss it.
+13:53 But you can also dismiss them manually by sending the message dismiss view controller animated.
+13:58 This method is sent to the presenting view controller, not the presented.
+14:04 The presenting, okay?
+14:06 You say to a view controller, dismiss view controller animated.
+14:10 It means dismiss any view controller that you have presented, okay?
+14:15 And luckily though if you want to kind of say that in the actual view controller, there's a nice method in UI view controller called presenting view controller which will tell you who presented you, if anyone presented you.
+14:29 So that's a, you can dismiss yourself basically by saying self [inaudible]
+presenting view controller 14:33 dismiss animated.
+14:35 And since by definition that guy presented you, when you dismiss it's going to dismiss you, okay?
+14:42 So just a little frowned upon because some people would argue that when a view controller, modal view controller gets cancelled, you want to unwind.
+14:51 Even if you're not communicating anything back, just want to let the guy know, yeah I got cancelled.
+14:57 If you just cancel yourself by dismissing yourself, then the guy who presented you doesn't get notified that you submitted yourself.
+15:04 But some people say yeah but if I'm cancelling I don't want that guy to know that I'm, I didn't do anything, I didn't add the contact in the contact case, so I don't even want him to know.
+15:13 So I'm just going to dismiss myself.
+15:14 So it's kind of an art of programming as to which you believe is the right thing there.
+15:19 It's usually not an issue because in your storyboard you're wiring it up anyway, so you could always wire it up as an unwind that cancel button instead of having the cancel button do target action and dismiss itself, okay?
+15:30 You can always just disconnect any target action that might be set up.
+15:36 Okay how does the modal view controller appear on screen?
+15:40 That's set by this modal transition style property in the presented view controller and it has various choices here like cover vertically is slide up from the bottom like I showed in the demo there.
+15:51 There's also flip horizontal which will flip the new one in horizontally.
+15:55 There's also cross dissolve, right, which kind of fades the new one in.
+15:58 And partial curl which will curl up the current one and show the new one underneath.
+16:03 That one's kind of a weird one, so you'll want to check the documentation if you want to use that curl.
+16:08 It puts some limitations on you.
+16:10 Once you curl it, you can't go modal again for example.
+16:12 You can't present another one.
+16:14 Also the one that curls up, doesn't get view did disappear because it doesn't disappear.
+16:20 It kind of just curls up.
+16:21 You can't really see it behind the curl but it's still on screen so that's a little weird programming wise.
+16:27 Okay normally a modal thing comes up and the one behind it gets completely covered so it gets view did disappear because it's view did disappear.
+16:33 It was completely obscured by the modal one, but with the curl, not so much.
+16:37 So be careful with curl.
+16:38 Now what about all this business on the iPad?
+16:41 Okay, so on iPad again mostly we're going to try and do popovers for this kind of stuff instead of modal view controllers.
+16:47 But you can do modal view controllers and you can even have a modal view controller that controls, covers the whole screen.
+16:52 And you determine how it works, how it covers, using this modal presentation style property.
+16:58 It's a different property, and one of the options is full screen-- not recommended on the iPad.
+17:04 There's page sheet and form sheet which are just different size versions of the thing on the iPad.
+17:10 The rest of the iPad screen will be dark gray, you know kind of grayed out like a popover's background is, and then it'll show up, one's portrait sized, one's a little smaller.
+17:19 And then the current context is an interesting one.
+17:22 If you have a popover, if you have a view controller and popover and that view controller does a modal, then if its current context, which is the default, it'll appear inside the popover.
+17:31 So it'll be modal inside the popover.
+17:34 You see what I mean?
+17:34 So it's going to keep the same context as the view controller that presented it, okay?
+17:40 So anyway you can look all this up for details.
+17:42 It's all settable in Xcode as well, these two properties.
+17:45 All right so that's it for modal view controllers.
+17:47 I'm going to demo it so you'll see it all in action.
+17:51 All right, different topic, UI text field.
+17:53 So we've seen UI text view and UI label.
+17:57 Okay these are kind of two ends of the spectrum of text.
+17:59 UI label, non editable.
+18:02 You know you can have attributed text in there but it's static text, can't select it or anything like that.
+18:07 Usually one line of text.
+18:09 Then you've got UI text view which is almost like a text editor, okay fully editable, all fonts and colors, everything we want.
+18:16 So UI text field is kind of in between those two.
+18:20 Okay? It's a UI control, like a UI button or something like that that you can set up target action from.
+18:26 And that target action can happen when you're done editing the text or other things that are happening in the text and you can just, when you control drag to do it you'll see the options you have in the little target action window that comes up.
+18:40 But it's also usually just one line of text.
+18:43 It's not like UI text view that has [inaudible].
+18:45 Also, the user is usually just providing the text, they're not doing any colors or any of that attributed text business.
+18:52 Generally UI text field is just the text and nothing but the text, okay?
+18:56 Having said that, it's got a lot of features to make it really cool for doing things like entering passwords or having a search field, all those kind of things.
+19:04 So it's a pretty powerful little class.
+19:06 But it's kind of like an editable UI label if you want to think of it that way.
+19:11 One thing that's interesting about a UI text field of course is that when you click in it, the keyboard appears.
+19:16 Now we didn't really talk about how this keyboard appears when we talked about UI text view, but how does that work that the keyboard appears?
+19:22 And the answer is, there is a method called become first responder that is sent, that if you send it to a text field or it gets sent to a text field, will cause the keyboard to appear.
+19:33 So this is a method you send to the text field.
+19:35 You can also send it to a text view.
+19:37 And when you do that, the keyboard will appear.
+19:39 And similarly, if you want the keyboard to go away, you send a message to the text field, resign first responder.
+19:44 But first responder means where do keyboard presses on the keyboard go?
+19:50 Okay? So if you say become first responder, the text field becomes the first responder and the keyboard will appear and key presses will go to that text field and similar to resign, it'll go away.
+19:59 Okay?
+20:00 There's a delegate for UI text field unlike UI label and there's a lot of stuff you can see there.
+20:06 I'll show you a brief example in the demo.
+20:08 For example, when the keyboard presses the return key, okay when the return key is pressed and that text field is being edited the text field's delegate will extend this message, text field should return.
+20:18 Return yes or no whether it should send its target action basically.
+20:22 And in there you can do things like resign first responder.
+20:26 So when the keyboard comes up, someone hits return, you can make the keyboard go away which is usually what users expect.
+20:32 So we'll see that in the demo as well.
+20:34 But there are other delegate methods, I just want to give you an example of one of them there.
+20:37 There's probably about 10 of them.
+20:39 Check out the documentation on that.
+20:41 Over here's another one, text field did end editing.
+20:44 That's sent to the delegate when it resigns first responder, okay?
+20:48 So when it stops being first responder, this message gets sent.
+20:51 It also has a radio station that it broadcasts on every single keystroke.
+20:56 Okay so if you want to find out every single character that's typed in your text field you can sign up to listen to this radio station and you'll find out what's going on.
+21:06 And like I said, UI text field is controlled so you can set up target action as well.
+21:10 So there's a lot of ways to find out what's going on a text field depending on the granularity that you want.
+21:15 The keyboard, the exper- we don't, there's really no property like give me the keyboard so that I can set properties on it.
+21:23 Okay when you want to control the appearance of the keyboard, you have to send messages to the class, UI text field of UI text view that brings the keyboard up, okay?
+21:34 And those objects, those classes will all implement this protocol called UI text input traits.
+21:42 So these are the set of properties that you can set on a text field or on a text view that aren't really controlling anything about the text view or the text field, they're controlling the properties of the keyboard that they would bring up, all right?
+21:54 So what are some of the properties you can have like auto capitalization.
+21:57 Sometimes it's nice you have a text field, the first character you type, you want it to be capitalized.
+22:02 Or every word you type, separate word you want it to be capitalized so you can set the kind of capitalization type that you have.
+22:10 Maybe it's a password.
+22:11 This text field's a password and so you want it to be the dots when you type them.
+22:16 Okay so secure text entry will make [inaudible] the dots.
+22:20 The return key, when the keyboard comes up it has a little return, okay, and that can have a word on it like search or go, okay, or return.
+22:29 And you can control that with a return key type.
+22:31 So these are all things that you set, properties you set in your UI text field but you're really controlling the keyboard.
+22:38 One thing about the keyboard, it comes up on top of other views, okay?
+22:42 It covers them.
+22:43 It comes up from the bottom, covers them.
+22:45 All right, that can be a problem if your text field's at the bottom because you just covered the thing you're typing in, okay?
+22:52 So A, try to design your UIs so that doesn't happen.
+22:56 But B, you can for example, if your view is scrollable, maybe scroll that text field up or even just move the whole view up so that while the keyboard's up, you can still see your text field that you're typing into, okay?
+23:09 And so the way you find out the keyboard's come up and how much it's covering is by tuning into this radio station UI keyboard will or did show or hide notification.
+23:20 It's a notification sent by the window you're in.
+23:23 Okay, self dot view dot window for view controller.
+23:27 And the user info that you get with this radio station will tell you the rectangles of where the keyboard appeared and it's your responsibility to move it out of the way, okay?
+23:36 The only class in the kit, in the UI kit that will move the thing automatically for you is UI table view controller.
+23:44 So if you have a row in a table view that's in a UI table view controller and it's editable text and you bring the keyboard up, it'll automatically scroll the table view so move it.
+23:54 Okay so that's the only one that automatically does it.
+23:55 Otherwise it's your responsibility to make, move anything that gets obscured by the keyboard.
+24:03 Other text field properties, you can go look those up.
+24:05 It has a nice left and right accessory view kind of like the annotation call out.
+24:09 You can even add a little view to the keyboard with this input accessory view.
+24:14 There's a lot of stuff to look at in text field, I can't, I don't have time to cover it all today but you can look it all up in UI text field's documentation.
+24:23 All right the last thing I'm going to talk about today before the demo is action sheet and alert.
+24:27 So action sheet and alert are things that pop up on the screen to alert the user of something obviously or to give them kind of a branching decision.
+24:35 Okay action sheet for branching decisions alerts to alert them of something.
+24:39 They have very, the reason I talk about them together, they have very similar APIs, in other words programming interfaces.
+24:45 They're used in different circumstances though.
+24:47 An alert is more saying something happened, pay attention, or I need a little piece of information, please give it to me right now or I can't proceed, okay?
+24:56 In a little, it's a little bit like a modal view controller except for that it can only, you know, ask a simple question and get a simple answer, okay?
+25:03 So that's what an alert is for.
+25:05 Don't overuse alerts either.
+25:06 Just like I say don't overuse modal view controllers, don't overuse alerts, okay?
+25:10 Don't every time you need a piece of information from the user just put up an alert and ask them for it.
+25:14 You know it's nicer for them to be able to just click on something and start typing.
+25:18 Take a look for example at the contacts app.
+25:21 Even that contact app where it brought up the add contact in a modal view controller, when it comes to adding things like text or the, you know, URLs or emails, you just click right there and you just type them in.
+25:33 It doesn't go modal again on you just for that kind of information, so check that out to see how that can be nicely used.
+25:40 Action sheets are, they slide up from the bottom on the iPhone, they usually appear on a popover on the iPad.
+25:47 They are for really branching decisions, so the user wants to do something next but you, they need to tell you something so you can decide which way to go, okay?
+25:58 So that's what action sheets are for.
+26:00 And again they're modal.
+26:02 They stop everything until the person answers the question of what's an action sheet.
+26:06 So make sure that's really the UI you want as opposed to just having, you know, buttons in your UI that push different view controllers.
+26:14 That's another way to do branching decisions as well.
+26:17 And we'll see action sheets.
+26:18 I'll be demoing those on Wednesday, okay?
+26:22 All right, what's the API for these two things look like?
+26:24 Very similar.
+26:25 I'll start with action sheets first.
+26:27 You just alloc init it.
+26:28 Here's the designated initialize for action sheet.
+26:30 You can see that it takes a title-- the action sheet has a little title at the top.
+26:34 It has a delegate, okay?
+26:35 The delegate mostly will tell you what was chosen in the action sheet.
+26:39 Or in alert view it'll tell you which button was chosen.
+26:42 There are some special buttons, a cancel button, okay which cancels the action sheet without making a decision.
+26:49 Destructive button, that's, you can have one button in your action sheet like that and that will be like in red or otherwise telling the user, if you choose this, something destructive's going to happen.
+26:59 This is like delete, or something like that, okay?
+27:02 So that's what destructive button is.
+27:04 And then you can have as many other titles as you want.
+27:06 Those are all the other branches you can take besides the destructive one or cancel, not doing anything.
+27:11 You can also add buttons programmatically.
+27:14 If you don't want to provide them in the alloc init you can just call add button with title to add in the action sheet.
+27:20 And then it's time to display the action sheet and you'd kind of do this, depends on where, what context you're in.
+27:26 On the iPhone, you've almost always going to do show in view.
+27:29 A lot of times self dot view, or if you have a view that's inside your self dot view, you could show it from that.
+27:36 But it doesn't really matter on the iPhone because it's always going to slide up from the bottom.
+27:39 No matter how you present an action sheet on an iPhone, it's always going to slide up from the bottom.
+27:43 But on the iPad, since it's going to appear in a popover, it makes a lot of sense to, for example, use show from bar button item and it'll put the popover and the little arrow on the popover will point at that bar button item.
+27:55 Or even show from rect.
+27:57 So you specify an arbitrary rectangle in your view and it'll bring a popover up and point to that.
+28:02 So for example, let's imagine you are, have some text and someone double clicks a word and then they want to define the word or copy the word or something like that.
+28:14 I probably wouldn't use it for copy and paste but do something with that word.
+28:17 And then you might say, show from rect and give the rectangle of the word.
+28:21 You see what I mean?
+28:22 So this is like, this is what, you know, iBooks does.
+28:25 You select a word and you say define, it'll make a little popover-- that's not an action sheet but it'll make a little popover.
+28:30 So you can do the same thing with action sheets.
+28:32 Okay so on the iPad you're going to use show from rect, show from bar button item.
+28:36 On the iPhone it almost doesn't matter which one you use, it's going to come up from the bottom.
+28:42 Finding out which button is chosen, this is the delegate method you get, did dismiss with button index.
+28:47 It's all done by button index.
+28:49 You can look up which is the cancel button and which is the destructive button, which are the other buttons.
+28:53 You can also get the button title and index and compare it to the one that was chosen.
+28:58 Be a little careful there if you're doing localization because your action sheet might have localized words in it and then you want to see which one is chosen.
+29:04 Make sure you're comparing localized, the localized words, all right?
+29:08 Or otherwise just use indexes if you want to kind of be more localization independent.
+29:13 You can programmatically dismiss an action sheet.
+29:18 And why would you ever want to do this?
+29:20 Okay you put up an action sheet, a decision branch [inaudible], why would you ever want to dismiss it yourself?
+29:24 Well, the main reason is, you get put in the background, okay?
+29:28 So anytime you have an action sheet up and someone clicks the home button to go to another app, you should dismiss that action sheet, okay?
+29:36 Why would you do that?
+29:37 Well because when the user comes back to you, they'll probably be, that could be the next day.
+29:42 They might be kind of confused why this action sheet is up.
+29:45 They don't remember why they forced that branching decision.
+29:48 So you're better to go back to the previous step for them and let them choose that branching decision again and make the action sheet come back up.
+29:55 So how do you find out you entered the background?
+29:57 There's this nice radio station, UI application did enter background notification.
+30:01 You just listen to that, boom, you'll find out you were put in the background.
+30:04 Just dismiss the action sheet, and you know how to do this with blocks so it's really really easy.
+30:08 One liner when you put up the action sheet to put a one liner in there that when it gets to this radio station, it just dismisses it.
+30:18 Okay? There's special popover considerations.
+30:20 We have the same problem here with popover action sheets that we had when we did PhotoMania where we kept pressing a URL and we got more and more and more of them.
+30:28 Okay same thing here.
+30:30 You have to be careful if your action sheet's already up, don't put it up again.
+30:35 Okay? So alert view.
+30:38 Alert view can have multiple buttons like the one on the left.
+30:42 It can also have a little text field in it like the one on the right which is kind of fun.
+30:46 And its API looks exactly like action sheet.
+30:48 You can add buttons programmatically.
+30:52 Showing it is always just the one method show because alerts always come up in the middle of the screen.
+30:58 I think I said only table view controllers will move out of the way.
+31:01 Alerts will also move out of the way.
+31:03 If you bring up a keyboard because there's a text field in your alert, the alert will move up, okay?
+31:08 So anyway, show.
+31:09 On either iPad or iPhone, you just do show.
+31:12 Here's how you get a text field in your alert.
+31:15 You just say alert dot alertviewstyle equals one of these styles that has text: secure text, plain text, login and password.
+31:22 And then you get the text field so you can get the text out of them by alert view text field add index.
+31:28 Okay, index zero if there's only one text field.
+31:31 Index zero and one if there's login and password for example.
+31:34 So that's how you can get text field.
+31:36 All right, time for the demo so I'm going to show all of these things in the demo.
+31:42 And like I said, what we're going to do is we're going to enhance PhotoMania so that it can, so the user can take photos with their camera.
+31:49 Okay? Now we're not actually going to get to the camera part today, but we're going to do all the rest of it.
+31:53 Most importantly we're going to do that modal segue and unwind segue to put this view controller up that's going to ask for the photo.
+32:01 Okay it's going to be a view controller.
+32:03 It's only job is to let the user take a picture with the camera, give it a title and subtitle, find out their location.
+32:09 Okay I'm going to go back and show you a core location demo here because I never showed you that before.
+32:14 And then now I can create a photo because I've got all the pieces-- title, subtitle, image, I'll make a thumbnail, and then the location.
+32:22 Now I can make a photo in the database.
+32:24 Okay everyone understand what we're going to do?
+32:27 Okay, let's dive right in here.
+32:30 I'm going, let's show coming up because I'm not going to go back to the slides.
+32:33 I'll continue this demo by doing the actual camera part and then I'm also going to talk about core motion which is accelerometer, gyro, all that stuff, on Wednesday, okay with another demo.
+32:45 Friday's section is sprite kit which is a new iOS 7 kit for doing 2.5D games.
+32:53 Okay games that look 3D but they're really made out of 2D images.
+32:57 And then next week we have off and then when we come back we'll have more miscellaneous topics.
+33:04 Okay so PhotoMania, where is it?
+33:08 Okay so just before class I added one thing to PhotoMania and I'm going to show you the code I added.
+33:14 What I did was I added a photographer to my database for the user.
+33:19 Okay this is the photographer, the user, who's using my device, okay?
+33:24 That's because I'm going to add photos and he's going to, her or she, is going to be the photographer.
+33:29 So how did I do that?
+33:31 I added these two methods to my photographer category here, user in managed object context.
+33:37 That gives me a photographer for the user, unique photographer.
+33:41 And then is user which just tells me whether a particular photographer is the user.
+33:46 And the implementation of these, I kind of went cheapo, there'll probably be much better ways to do this, but I just created a photographer with the name my photos, and I put a spacebar at the beginning so it would sort at the beginning.
+33:59 But really the way to do this would be to add another attribute to your photographer which is, is the user.
+34:04 And then when you sort, you would sort by that first, and then secondarily by the name.
+34:09 And that would make it so that this name wouldn't have to be unique because it would be the, you know, that attribute set.
+34:15 And then here I'm just checking to see if the user is self.
+34:19 So that's all [inaudible]
+user is.
+34:20 Okay? The only other line of code I added to this was I always create this magic user in app delegate when the database context becomes available.
+34:31 Okay? That's it.
+34:32 Everyone understand what I did so far?
+34:34 I've shown you everything.
+34:35 So let's look what this looks like.
+34:37 So here I'm running PhotoMania and you can see right here at the beginning I have a photographer, my photos, and I can click on it.
+34:43 I'll show all my photos.
+34:44 I don't have any yet because we haven't hooked up this whole camera business.
+34:48 But what I'm going to do in this UI is when I'm looking at my photos, I'm going to add a little button up here, looks like a camera, and it's going to modally present a view controller that lets me take a picture and put it in the database.
+35:02 Okay? Good.
+35:02 All right so that's what we're going to do, we're just going to add this here.
+35:06 Now, that camera, we don't want that camera button here when we're looking at night flyer.
+35:10 Okay we don't want that night flyer to be able to add one, so we're only going to do it when it's my photos.
+35:17 Okay? All right, so how are we going to do that?
+35:20 Let's go look at our view.
+35:21 We're going to do this on the iPhone.
+35:25 Probably not going to get around to doing it on the iPad on Wednesday, we'll just do it iPhone only.
+35:31 Here is my list of photographers.
+35:33 Here is that map view with the photos by a given photographers.
+35:37 Here's where I want to have that little map button.
+35:40 So I'm just going to go down here and grab a-- oops.
+35:46 Grab a bar button item.
+35:48 Here's one right here.
+35:49 Put it here.
+35:50 I could say the word camera or take photo or something here, but it actually turns out there's a nice built-in one for camera.
+35:59 Whoo, built in bar button item.
+36:00 Looks good, okay?
+36:02 So again I only want to have this camera appear when I'm showing the photographer who is the user, okay?
+36:10 So I'm going to put a little bit of code in my photos by photographer map view controller which is the code for that thing, to only show that button in that circumstance.
+36:20 So first of all I'm going to create a little-- let's go back here [inaudible]-- I'm going to create a little outlet to it.
+36:31 Trying to make it more spacier as I show these.
+36:35 Okay so here is this guy right here and I'm going to go to the dot m. So here's my photos by photographer with map view controller.
+36:45 That's this.
+36:46 That's where this is.
+36:46 So I'm going to control drag from this little button right here to make a outlet for it.
+36:52 I'm going to call it the add photo bar button item.
+36:56 Okay? So I've got my add photo bar button item.
+36:59 And now I'm just going to put a little bit of code that only puts that here if my current photographer-- here's where I set my photographer for this thing-- is the user.
+37:09 So I'm going to have a little method here.
+37:10 I'm going to call it self update, add photo, bar button item.
+37:16 And I'm just going to have a little-- this update this thing.
+37:23 We need photographer create for that because that's where that thing we just added.
+37:29 All right so here's what I just typed in right here really fast and you can look at this offline.
+37:34 There's nothing really new to teach you here so I'm not going to go through it.
+37:37 But suffice it to say it's really updating the right bar button items of this navigation item right here to have this or not.
+37:44 So let's go take a look.
+37:48 Okay so we go here, it's got this.
+37:51 Go back here, doesn't have it.
+37:53 See? Okay so that's good.
+37:56 So now we need to make it so when we press this we do this modal segue to a new UI.
+38:00 So let's go do that, back to our iPhone storyboard to make space.
+38:05 All right so let's make this new UI that we want to do that, so I'm going to create a new view controller here, drag this out.
+38:14 Here's my new view controller.
+38:15 Okay, and we'll line it up there nicely.
+38:19 And what is this view controller going to have in it?
+38:21 Well, let's see, I'm going to drag a whole bunch of nice stuff out here.
+38:25 It wants a cancel button, so let's do a cancel.
+38:29 Okay? That's if I decide eh, I don't really want to add one after all.
+38:33 It wants a done button.
+38:35 So if we're going to do a done, it probably wants a take photo button, okay, that we'll click that will cause us to bring up the camera taking user interface.
+38:45 I will put these somewhere here, put that up there.
+38:48 Let's put this one lined up over there.
+38:51 Put this somewhere.
+38:52 We need a view, I want to have an image view, a UI image view that shows me what I just took with the camera.
+38:58 So let's drag that out, put that here let's say.
+39:02 Maybe, I don't know, something like let's make it square.
+39:08 Oops. There, that's my square one.
+39:11 Put take photo down here.
+39:13 Okay, and then I'm going to have some text fields for the title and subtitle.
+39:16 So let's drag those out.
+39:17 So here's text field, first time we've used that.
+39:20 But here we go.
+39:21 There's one there.
+39:22 Let's make it a little wider, [inaudible] like that.
+39:26 Let's copy and paste for title and subtitle.
+39:29 Let's get a label for each of these things.
+39:32 There's the subtitle label and let's copy and paste [inaudible]
+new title label.
+39:37 And then let's line these things up.
+39:41 Something like that.
+39:43 We'll line up the baselines probably of our-- let's get that out of the way-- line up the baselines here.
+39:49 Center's probably just as good.
+39:52 So anyway, so there's our title, there's our subtitle.
+39:55 And now let's create a custom UI view controller subclass so we can wire all this business up to something.
+40:02 So we can go here, new, file.
+40:05 And we're creating a new one.
+40:06 This is going to be a normal UI view controller.
+40:09 It's going to call, let's call it add photo view controller because that's what it does, right?
+40:13 It adds a photo to the database so that's a good name for it.
+40:17 We'll put it where all the rest of our controllers are.
+40:21 There it is.
+40:22 Okay, this is our new, we don't need any of this boilerplate that it puts in here.
+40:27 Get rid of that.
+40:29 Let's go ahead and set our identity of this thing to be this new add photo view controller.
+40:36 Let's wire up some outlets to point to some of these things.
+40:39 [ Pause ]
+40:44 All right so, we need an outlet to both of these text fields, so let's do that.
+40:49 This is our title text field and we'll wire this one up.
+40:53 This is our subtitle text field.
+40:58 And let's light the cancel button.
+41:00 Let's wire that up.
+41:01 Cancel. Done.
+41:05 Let's wire up the take photo.
+41:08 Take photo.
+41:11 Done. Okay.
+41:13 Now you know I don't like those like that so we'll do that.
+41:18 Let's also wire up this image view right here.
+41:23 Okay I'm also going to do something that I did in image view controller which I always like to do when I have an image view like that, which is I'm going to have a non atomic strong UI image star image.
+41:34 Okay so I'm going to have a property called image but I'm going to store it in the image view.
+41:39 Same exact thing we did for view controller.
+41:42 So here I'm just going to have-- oops.
+41:45 Set image.
+41:46 Okay and it's just going to set in the image view controller and return the image view controller.
+41:50 And the reason I'm doing this is because I'm going to need to do some things when the image is set in the future.
+41:56 So I'm just kind of getting it ahead of myself and getting it ready for that.
+42:00 Everyone understand what I'm doing there though?
+42:02 Okay. Okay, so let's go ahead and put this on screen briefly by creating a modal segue from here to here.
+42:14 And I just want to show you a little bit about these text fields.
+42:17 So I'm just going to have this guy right here go like this, and instead of push I'm going to do modal, okay?
+42:23 So that's going to put this thing on screen modally.
+42:26 This is a modal segue right here.
+42:29 This for example, we could call it the add photo segue, okay?
+42:34 I'll probably skip even checking that identifier.
+42:37 But anyway, let's go ahead and run so we can get this thing on screen and I can show you something about the text field.
+42:43 So here we go, here's our camera.
+42:45 And when I click this, it comes up on screen modally.
+42:47 Now one thing about modal, you better have a way to get rid of it, okay?
+42:51 And we haven't wired any of this up.
+42:52 This is, my app is done now.
+42:55 I can't get back, okay?
+42:56 So I have to either unwind or I have to cancel myself, okay?
+43:00 But we're not doing that right now, what I'm doing now is I want to look at these text fields.
+43:04 So if I click here title, okay, and I could type, start typing in a title here, and I'm like okay that's where I want the title to be.
+43:11 Oh, I can't get, I can't get rid of this, okay?
+43:14 There's no way to get rid of this keyboard.
+43:16 Okay there's nowhere I can click, there's nothing I can do, this thing is up.
+43:20 And my photo is underneath it, so I can't see my photo.
+43:23 Okay this is awful.
+43:25 So I really want to be able to dismiss this keyboard when I hit return here.
+43:31 So we can do that using the UI text field's delegate.
+43:34 So let's go ahead and do that.
+43:36 Okay we're going to go here and I'm going to do something a little interesting we haven't done before which I'm going to wire up a delegate in the storyboard.
+43:44 Normally we would do this in code.
+43:46 Like when the setter for that text field was called we'd say self, you know, we'd say text field dot delegate equals self.
+43:52 But here I'm going to do it by control dragging from the text field down to my view controller.
+43:58 And when I do you'll see that I can set its delegate, okay?
+44:03 So I'm setting the text field's delegate to be my view controller.
+44:08 I'll set the other one too.
+44:10 So both of these guys, if you right click on them you'll see that their delegate is my add photo view controller.
+44:17 Now I still have to, in my add photo view controller right here, I still have to say oh yes, I'm a UI text field delegate, okay?
+44:28 All right now again, all these methods are optional so it really wouldn't be that big a deal if I didn't but still, just to be proper, I should do that.
+44:36 And I, now I can implement some of these ones.
+44:39 Like a good one here would be shou- what's it called?
+44:42 Text field should return.
+44:43 So here's some of the text field ones.
+44:45 These ones [inaudible].
+44:46 So let's do text field should return, okay?
+44:49 And so if the text field asks me, should I return?
+44:52 I'm going to say yes, you should return.
+44:55 Meaning if you have target action that fires when you return, go ahead and do it.
+45:00 But I'm also going to say, Mr. Text Field, please resign first responder.
+45:04 In other words, stop using the keyboard, okay?
+45:08 So just by putting this in here, now when we run and bring this baby back up and we click here and we start typing and we hit return, it leaves the text in there, even does its little fixing the misspellings.
+45:24 And the keyboard goes away.
+45:26 Okay? And I can bring this one back and make this one go away.
+45:29 So it's a much nicer UI to be able to make that keyboard go away especially if you have something underneath the keyboard and you don't scroll it up.
+45:36 Okay? So I just wanted to show you that just to show you how we can A, set the text delegate in the storyboard, and B, how we could use a delegate method to do something valuable.
+45:45 Okay? So that's all I'm going to show you for text field.
+45:47 I think you can figure out the rest on your own.
+45:51 All right so now let's get back to the segueing okay?
+45:55 So we have this guy right here and it segues to here.
+45:58 So we already set up this modal segue, but we don't actually prepare it nor can we unwind from it.
+46:03 So we really haven't finished with the whole relationship between these two view controllers.
+46:08 So let's first look at the public API of this modal view controller to kind of understand how it's going to communicate.
+46:16 So I'm going to look at the public API of add photo view controller and it really has two things.
+46:21 It has an input which is the photographer who is taking the photo.
+46:35 Okay? Now hopefully we always pass in the user, right, that special photographer.
+46:40 But this add photo view controller can be more generic about it and just say, hey give me a photographer, I'll take a photo and add it to the database for that photographer.
+46:48 But we're going to have our map, photos by photographer map view controller.
+46:52 If it's the user and that camera button gets pressed, we're going to pass in the user's one.
+46:58 So that's the in, okay?
+46:59 So that's import photographer.
+47:05 And we're also going to import photo while I'm here because this thing, this view controller also has an output which is-- [inaudible], the photo that was added to the database.
+47:20 Oops, photo.
+47:22 Okay so this is an add photo view controller.
+47:25 It adds a photo for that given photographer and when it's done doing that, this will be set to the photo it added.
+47:32 So anyone who segues to it, when they unwind back, they can look and see what was the photo that was added?
+47:38 That make sense what we're doing there?
+47:41 So we have to implement this API both on the way in and on the way out.
+47:46 So let's talk about on the way in first because that's normal segueing that you're used to.
+47:50 We're just going to do this in our photos by photographer for map view controller and all we're going to do is prepare that segue, okay?
+47:56 Before we do that let's go ahead and import our add photo view controller because we're going to use it.
+48:03 We're going to prepare it.
+48:05 And so let's do that.
+48:07 And here's prepare for segue.
+48:08 This is a normal segue just like any other segue and I'm just going to prepare it.
+48:13 Let's say if the sender-- no if the segue's destination view controller is kind of class, add photo view controller, then add photo view controller-- add photo view controller-- equals add ph- yeah you guys should not be using my bad style here but that's demo naming right there.
+48:39 Segue that destination view controller.
+48:41 Okay so now I have the view controller I'm segueing to here in this modal segue so I'm going to set its photographer that's taking the photo equal to self dot photographer.
+48:51 Now this is always going to be the user because the only time that little camera button is there is when it's the user, okay?
+48:58 But to be double safe here, maybe I would want to check and see is user, right, [inaudible] photographer is user.
+49:05 But I'm not going to be double safe because it's demo, okay?
+49:08 So there, that's that segue.
+49:09 I'm still going to do this segue if the sender is in annotation.
+49:13 In other words, someone clicks on the pin, [inaudible] do that one too.
+49:16 I could probably put an else in here if I wanted to.
+49:19 Even else if.
+49:21 Something like that.
+49:23 Okay because obviously it's going to be one or the other.
+49:25 I also probably could've checked my segues identifier here to make sure it's add photo.
+49:29 I can do that if I want to.
+49:31 But anyway, hopefully this side of this segue you totally understand, right?
+49:35 Okay, normal segueing, we're just doing it modally rather than not.
+49:39 Okay, so now we've got to it.
+49:41 Now the hard part, unwinding, okay?
+49:45 So now we want to hear about it when the thing is done, okay?
+49:50 And I told you that that's done by implementing a special IB action, okay, method, and we can call it anything we want.
+50:00 And what is going to happen when it's unwinding?
+50:03 Well a photo's going to be added.
+50:04 So maybe I'll call this method added photo, okay?
+50:08 Because that's what it does.
+50:10 And the real key is that the argument is a UI storyboard segue.
+50:14 Oops, segue.
+50:17 Okay? So this method is the method that's going to get called when we unwind, all right?
+50:22 Now the very adding of this has caused Xcode to know about it, so that if we go back to our storyboard and wind u- you know control drag to hook up and unwind, it's going to know about it.
+50:34 So let's go do that.
+50:36 We're back in our thing here.
+50:38 Now, cancel.
+50:39 Let's talk about cancel briefly.
+50:41 I'm going to make the executive decision that cancel, it's just going to dismiss, it's not going to unwind.
+50:46 All right?
+50:47 And I already have a cancel method right here.
+50:50 I already wired it up for target action.
+50:52 So how do I do that?
+50:53 Self dot presenting view controller presenting dismiss, yes.
+51:01 And this completion handler is called once the view controller is fully dismissed.
+51:06 In other words, after its view did disappear is called.
+51:10 We don't need to do anything at that time.
+51:12 Some people think this, this is more magic than it is.
+51:16 It's really just a simple way to, after this thing is gone, do something to clean up or something.
+51:21 But we're no, we don't need to do that.
+51:24 So anyways, so that's it.
+51:25 So that cancel.
+51:26 So in fact if we run right now and we bring our photos and we go up here, cancel will work you see?
+51:33 It just dismisses it.
+51:35 And it doesn't unwind, it doesn't call that added photo.
+51:38 It just cancels it, gone, okay?
+51:40 Now done, this is the one we want to unwind.
+51:43 We want it to create this photo and then unwind back to this map view controller right here and call added photo.
+51:52 Okay what's, what are we going to do when added photo is called?
+51:54 Well, let's see.
+51:56 Let's do a couple of things.
+51:59 One, let's make sure that the source of this is an add photo view controller, which it should be because it's the only thing we know how to unwind for.
+52:11 And also because who else would call added photo?
+52:13 But we'll check it anyway.
+52:15 And then we're going to do, I'm going to copy and paste this so I don't have to type all that again.
+52:19 Okay now I'm just going to change, but this is the source view controller instead of the destination view controller, okay?
+52:25 So I've got my APVC.
+52:26 Now I'm going to say, okay well what was the photo that was added?
+52:30 Well it's the APVCs added photo.
+52:33 That's part of its public API, the out of its public API.
+52:38 So I'm grabbing that out, and now I'm going to say if we added a photo, then what might I want to do?
+52:43 I'm the map view-- I'm showing photos by a photographer so I probably want to do, for example, map view, add annotation this added photo.
+52:53 In other words, add this photo to my map.
+52:55 I might also want to say self dot map view show that annotation, okay?
+53:01 Zoom in to that part of the world where the photo was taken.
+53:05 I might want to say, I probably want to say photos by photography equals nil and have that recalculate because I've added a new photo for this photographer.
+53:12 So the next time someone asks me about that it'll work.
+53:15 Otherwise, for instructional purposes here, I'm going to log and say add photo view controller, did not-- or I'll even say-- unexpectedly did not add a photo.
+53:32 Okay because if I'm getting unwound to, it should have added a photo.
+53:37 Okay so if this is nil, then something's wrong.
+53:40 Okay? So but we're going to see that happen because we're going to try this without adding the, without the photo being added to the database and see what happens here.
+53:48 So everyone understands what happen- what's going on here right?
+53:50 We're unwinding back to this guy.
+53:52 This guy is receiving the unwind and doing something with the photo that was added with the add photo.
+53:58 All right so now let's go ahead and wire that up.
+54:03 So as I said, we're going to pick whatever UI in here is going to cause the unwind, which is the done button.
+54:09 I'm going to control drag to this green button.
+54:11 And when I let go, watch what happens.
+54:14 You see how added photo is in the list?
+54:17 And every single IB action that had a UI storyboard segue as an argument would be listed here.
+54:24 Okay? But added photo, obviously only one, it's the one we want, so I'm going to click that.
+54:28 So now I've created an unwind that will unwind back to this guy.
+54:34 And I told you that the only place you can really see this is in the document outline.
+54:38 You can see it right here.
+54:38 See? Unwind segue from done to exit, okay?
+54:43 And I can, this is a normal segue so I could set its identifier for example to something like do add photo or something like that because that's what this unwind segue does.
+54:53 It does the add photo.
+54:54 It's the done basically.
+54:56 Okay but I wouldn't even need to do that.
+54:58 So let's go-- well I will need to do it eventually-- but for this so far I didn't.
+55:02 So let's go ahead and see what happens here when we run this.
+55:06 Okay so I'm going to go here, I'm going to go here, and I'm going to hit done this time and we'll watch it unwind.
+55:12 Okay it unwound, right?
+55:14 It dis- dismissed it, okay?
+55:17 And look down in my console down here.
+55:20 Add photo view unexpectedly did not add a photo which is exactly what we'd expect, right?
+55:25 It unwound over to here, did this, but it never added the photo because I never take all the information here that's in my UI like the title, the subtitle, the photo-- I never put them into a photo and added it to the database.
+55:41 So it's right.
+55:43 This thing is properly reporting here that it did not add a photo.
+55:47 So let's do that.
+55:49 How do we do that?
+55:50 This is where prepare for segue is so important for unwinds, okay?
+55:54 Because prepare for segue-- since this unwind segue happens in this view controller, okay-- unwinds over to there, this guy gets to prepare.
+56:03 And what this guy wants to do when he prepares is create that photo.
+56:09 Make sense?
+56:10 So all we got to do to make that photo is implement prepare for segue here in this add view controller.
+56:15 So let's do that.
+56:17 Add view controller.
+56:18 Let's put this right here.
+56:20 This is normal prepare for segue here.
+56:23 We need to figure out which segue it is and so we could-- we really can't look at the destination view controller here, okay?
+56:32 Because add photo view controller is kind of like part of the view of that other view controller.
+56:37 So it really can't be looking, it can't know anything about the photos by controller map view controller.
+56:42 But what we can do is look at the segue's identifier.
+56:46 So if the segue's identifier is what I set there which was do add photo, right?
+56:51 That's what I set it to in the storyboard-- and probably we want to have this be called something like unwind segue identifier or something like that.
+57:02 We'll put this up here.
+57:04 Copy, pound sign, define.
+57:07 Like that.
+57:08 Okay? So I have a nice constant there.
+57:11 We're going to need this constant in a second as you'll see.
+57:14 So if this is the unwind, then we want to create that photo.
+57:17 So what do we need to create the photo?
+57:19 Well, first thing I need is a managed object context.
+57:22 Okay I can't create a photo unless I have a handle on the database.
+57:26 But I do because self dot photographer taking the photo has a managed object context, so I'm going to put this photo in the same database that the photographer's in which is exactly what I want.
+57:37 All right?
+57:37 So that's good.
+57:39 So if that context is not nil, then we can create our photo.
+57:43 So photo star photo equals, and let's import photo.
+57:51 Okay, so how do we create a photo?
+57:53 NS entity description, insert new object for identity, photo, and the context is that context.
+58:02 All right I've created a photo!
+58:04 Now I just need to set everything in the photo.
+58:06 So photo dot title equals self dot title text field dot text.
+58:14 Oops. Get rid of these square brackets.
+58:18 All right, and photo dot subtitle equals self dot subtitle title field dot text.
+58:24 So here's how we are grabbing the text out of those text fields just using, just like a label, right?
+58:30 Just grabbing the text property which is an NS string.
+58:33 And what else do we got to get out of this photo?
+58:36 Well quite a few other things actually.
+58:38 We got photo dot who took.
+58:40 Everyone know what that is?
+58:45 All right, photographer taking the photo, that's who took this thing.
+58:49 How about photo dot latitude?
+58:52 Okay, well we don't have the latitude.
+58:55 We've got to get that latitude, so to do that I'm going to add some properties here.
+59:00 Okay so I added these properties.
+59:02 One is to keep track of our location, [inaudible] location.
+59:06 One is to keep track of the URL of our image.
+59:08 One is our thumbnail.
+59:10 And also I'm going to say add photo, added photo equals something.
+59:14 So I'm going to make this one read right and I'm going to make this one read only over here.
+59:19 So that this is truly an outgoing parameter, okay?
+59:22 So I'll make it read right here internally.
+59:25 So I need to import core location, okay because I'm using core location right here.
+59:33 Okay and we're going to have to set this location which we'll do in a moment.
+59:36 But in the meantime, let's go here.
+59:37 This is going to be self dot location dot coordinate dot latitude.
+59:43 And photo out longitude equals self dot location dot coordinate dot longitude.
+59:49 And then let's say photo dot image dot URL equals self dot image dot URL, absolute string and we're going to have to implement this, okay?
+59:59 Because right now our image is just in that image view.
+01:00:02 We're going to have to put it on disk and get a URL to it.
+01:00:05 So we'll have to implement it.
+01:00:06 And then we got photo dot thumbnail dot URL equals or do the same thing here, absolute string.
+01:00:13 Okay and then finally we're going to say self dot added photo equals the photo.
+01:00:18 Oops. All right?
+01:00:22 So in the unwind, in preparing for the unwind, we put that photo in the database.
+01:00:26 Now, there could be a problem here.
+01:00:29 What happens if the user hasn't taken a photo yet?
+01:00:31 Okay, they haven't hit take photo.
+01:00:34 Th- I can't do this.
+01:00:35 Okay a photo of, blank photo makes no sense whatsoever.
+01:00:39 So this is a normal segue preparation.
+01:00:43 So I can also do bool should perform segue with the identifier.
+01:00:49 Okay? So this is whether we should do the unwind at all when we click it.
+01:00:54 So again I'm going to do the same, if segue identifier is that unwind [inaudible].
+01:00:59 And then I'm just going to check some things to make sure things are okay like if not self dot image, then I'm going to complain.
+01:01:09 So let's say no photo taken.
+01:01:12 Oops. Okay or I might say or else if self dot title text field dot text length not-- so if, I'll force a title here and I'll say self alert title required.
+01:01:37 Too many exclamation points there.
+01:01:38 Otherwise, we'll return yes.
+01:01:40 In both of these cases we want to return no that we should not segue.
+01:01:45 Okay? Now before we go on and try all this segueing stuff, let's talk about this okay?
+01:01:52 See this little method alert which I haven't defined yet?
+01:01:56 Let's go ahead and implement that.
+01:01:57 This is a good aside for us to talk about alert view here.
+01:02:01 So let's do void alert NS string, message, okay?
+01:02:07 What we want to do here is put up an alert that says whatever that message is.
+01:02:12 So how do we do that?
+01:02:14 UI alert view, alloc init this long thing.
+01:02:20 What's the title?
+01:02:21 Well, we're adding a photo so we'll say the title of this alert.
+01:02:25 That's the little title at the top.
+01:02:26 Not the message but the title at the top.
+01:02:28 Say add photo.
+01:02:29 The message is the message that we want to give right here.
+01:02:32 Delegate, I'm going to make this one have no delegate.
+01:02:35 Show it with a delegate in a minute.
+01:02:37 Cancel button.
+01:02:38 There's no cancel, okay?
+01:02:40 And the only button is okay.
+01:02:43 Okay? So I've created this alert view, now I'm going to show it.
+01:02:50 Okay? Everyone understand that?
+01:02:52 So that's just showing.
+01:02:54 So let's go ahead and take a look at this.
+01:02:57 What have we got here?
+01:02:59 Oh sorry, this is just the identifier.
+01:03:04 Okay. Yeah.
+01:03:07 Yeah what else have we got here?
+01:03:09 Okay this else return super should okay?
+01:03:16 That's if we don't, if it's not our identifier, it's some other one, then we'll do super.
+01:03:23 So let's do that.
+01:03:23 All right so we'll go to photos.
+01:03:26 We go here.
+01:03:27 Now let's try to unwind.
+01:03:29 No photo taken.
+01:03:30 So did our should perform put up an alert?
+01:03:33 No photo taken.
+01:03:35 See that? So that's good, okay?
+01:03:37 So we're trying to unwind so we're getting closer to unwinding.
+01:03:40 We still have to get an image and we have to make sure we set our title.
+01:03:45 So we're getting closer.
+01:03:46 I'm going to take another little aside to show you doing an alert with a delegate.
+01:03:51 What if I had something in my application which was a fatal error, fatal alert, okay?
+01:03:59 So this is some alert that's so bad I got to cancel right away.
+01:04:02 Just do cancel, okay?
+01:04:04 How would I implement that?
+01:04:05 Well, I would do the same alert that I'm doing here, okay?
+01:04:10 But instead of having the delegate be nil, I'm going to have the delegate be self so that I can find out when the user clicks okay.
+01:04:16 And when they click okay, I'm going to cancel.
+01:04:19 I'm going to dismiss myself.
+01:04:21 So to do this, I need to be a UI alert view delegate.
+01:04:26 Oops. Okay.
+01:04:28 And then I'm going to implement the alert view.
+01:04:31 I'm going to do the one dis- you can see there's a few here-- did dismiss with button index.
+01:04:36 That's the one I'm going to do.
+01:04:37 And I only have this one button so I didn't even need to look at the button index.
+01:04:41 I know that in this case I want to cancel.
+01:04:45 Okay? Now I didn't set myself as the delegate for this one, so I'm not going to cancel for a normal alert.
+01:04:50 Only for a fatal alert am I going to cancel.
+01:04:53 Now what would be fatal?
+01:04:55 What kind of things would be fatal in this?
+01:04:57 Well, what if my device has no camera?
+01:05:00 Okay that's fatal.
+01:05:02 It's just a waste of time to have this thing up if my device has no camera.
+01:05:05 Or, since this PhotoMania is fundamentally locations of photos, what if I can't get the location?
+01:05:12 Okay the user maybe doesn't allow me to get the location.
+01:05:15 So let's go ahead and put a method up here called can add photo.
+01:05:20 We've got to import some stuff here.
+01:05:23 So this can add photo method is going to check some of these fatal errors like do I have a camera available?
+01:05:31 I'm asking the UI image picker controller, is there a camera available?
+01:05:34 I'm also making sure I can get an image which really you usually don't have to check this.
+01:05:38 Mostly you're checking this to see if it'll do video.
+01:05:41 All cameras can do image, but just to show you what it looks like to check it.
+01:05:45 And then I'm also going to check my location manager to make sure my authorization status is not restricted.
+01:05:51 So that means my authorization status is either you're authorized, or denied.
+01:05:56 Now why am I only checking restricted here?
+01:05:58 Because this is going to be a fatal error.
+01:06:00 Okay? It's only going to be fatal if the user can't control whether my app can find its location.
+01:06:07 All right, they can't go to settings and set it, so it's fatal.
+01:06:12 Later I'll check to see if they've just denied it and I'm going to suggest to them they go back to settings and undeny it and then it'll work.
+01:06:19 So it's not a fatal error in that case.
+01:06:21 So that's the difference why we're doing restricted here, okay?
+01:06:24 So if any, if all this is true, then we're good to go.
+01:06:27 We can take a photo.
+01:06:28 Otherwise, we can't take a photo.
+01:06:30 So now let's, in our view will appear or view did appear-- super, view did appear-- I'm going to say if self class can add photo-- actually I'm going to say if not-- if I can't add a photo, then I'm going to self fatal alert sorry this device cannot add a photo.
+01:07:01 Notice I'm not saying anything in this fatal error like you are not authorized to do, get your location because there's nothing they can do about it, okay?
+01:07:13 If they have no camera or they can't do it, they can't go out of camera or, you know, do something about their being restricted from doing the location.
+01:07:21 They can't do anything so I'm not going to suggest they do anything.
+01:07:24 I'm just going to say sorry, you can't do it.
+01:07:26 Okay? I could imagine maybe saying here, sorry this device cannot have a photo because you have no camera, okay?
+01:07:33 I definitely wouldn't want to say because you cannot get your location.
+01:07:37 Or if I do say that, I want to say contact your system administrator or something like that to get yourself there.
+01:07:42 It's, you know, but here I'm just going to say sorry you can't take a photo, and it's going to be fatal so I'm going to immediately drop out of there.
+01:07:48 So let's take a look at that.
+01:07:51 All right there's photos, and I'm going to bring this up.
+01:07:54 And sure enough sorry, this device cannot add a photo.
+01:07:57 Why? Because it's the simulator, okay?
+01:07:59 The simulator cannot add a photo.
+01:08:01 So it's properly telling me I can't add a photo and if I click okay, cancel.
+01:08:08 Okay so fatal error.
+01:08:10 Okay so now we're going to continue, we're going to switch over and do it on a device where we actually can do this stuff.
+01:08:16 But to do that, the next thing we want to do is location manager.
+01:08:21 So I never showed you how to do the location stuff and so this is a good example of how to show that.
+01:08:26 So I want to set this self dot location to something.
+01:08:30 Because right now it's going to be nil, right?
+01:08:32 Because I just created that property and I never set it, and then here I'm looking at it.
+01:08:36 So our latitude and longitude would be zero so we're going to be somewhere out in the ocean somewhere west of Africa or something.
+01:08:41 Probably have pirates after us over there.
+01:08:44 So we don't want to do that.
+01:08:45 We want to set this [inaudible] location.
+01:08:47 So how are we going to do that?
+01:08:47 Well, to do that I need a location manager, okay?
+01:08:52 So let's find a good place to put all this.
+01:08:53 Let's put it down here, okay?
+01:08:56 So I need a location manager and I, for speed here I have this to show you how to do that.
+01:09:01 So I'm just going to add this property right?
+01:09:06 CL location manager, location manager, remember this is the thing we ask to start giving us updates on the location.
+01:09:13 And then I'm going to lazily instantiate it.
+01:09:16 Here it is here, lazy instantiation.
+01:09:19 If we haven't created one, then I'm going to alloc init it.
+01:09:21 I'm going to set myself as the delegate.
+01:09:24 Obviously warning because I haven't said that I'm that kind of delegate yet.
+01:09:27 And then I'm going to set my accuracy to best.
+01:09:30 Why am I doing best?
+01:09:31 Because I want to know exactly where this photo was taken?
+01:09:33 And I'm modal anyway so I'm only going to be on screen for a few moments.
+01:09:37 I'm not going to use up the whole battery just finding out where I am.
+01:09:40 And then here we set the location manager.
+01:09:42 And then here's the delegate method I'm going to use, okay?
+01:09:45 I'm the delegate, so I'm going to get the delegate method.
+01:09:48 It's called location manager did update locations.
+01:09:51 It gives me an array of all the locations it's found since the last time it called this message, this method.
+01:09:56 And I'm just going to grab the last one.
+01:09:58 The last one is always the most current one, the most up to date, the most accurate.
+01:10:03 That's the one you always want there, okay?
+01:10:06 If you're just trying to get your current location.
+01:10:07 And I'm just going to put that in self dot location so that when I pop it in here it'll be the right location.
+01:10:15 Okay? Now, we're not done here because this location manager, we have to start it up.
+01:10:21 Okay remember, just because you create a location manager-- let me go ahead and do this delegate thing first, make myself be a CL location manager delegate.
+01:10:33 I need to start it up.
+01:10:34 And where am I going to start it up?
+01:10:35 I'm going to start it up in view did appear, okay?
+01:10:37 So I'm going to say else-- okay this is I can't add a photo.
+01:10:42 So else, I'm going to say self dot location manager-- that's going to lazily instantiate it starts updating location.
+01:10:49 And that's going to start sending me those deligate methods of my location, all right?
+01:10:55 It's probably going to send me one right away that's pretty inaccurate, like WiFi based or something, then it'll probably send me another one with GPS if I'm outside or I can, you know, see the satellites.
+01:11:04 So it might send me more than one.
+01:11:06 That's okay.
+01:11:06 I want it to keep sending me more and more accurate ones as time goes on.
+01:11:10 If you do this, you almost always, in view will disappear, want to turn this back off.
+01:11:17 Now it's not that huge a deal here because this thing is presented modally.
+01:11:25 Oops, stop updating location.
+01:11:28 This is presented modally and so when this thing unwinds, it's going to get released from the heap.
+01:11:34 And when it gets released from the heap, this location manager's going to get released and it's going to stop updating, okay?
+01:11:39 So it's really not that big a deal, but if for some reason we ever figured out how to make this thing not be modal, put it up in a non modal way, we just want to be in the good habit of every time we turn this thing on, turn it off somewhere.
+01:11:51 Even if it's, you know, turns it off right before it gets thrown out of the heap.
+01:11:55 Still, turn it off, okay?
+01:11:57 Using location updates is expensive.
+01:11:59 Fun to run while this thing is up, but we want to make sure we turn it off.
+01:12:06 Okay let's go ahead and, let's see what else can we do here?
+01:12:13 Yeah, let's go ahead and throw these two methods into image URL and thumbnail URL.
+01:12:21 So all I need to do here with the image URL and thumbnail URL is I'm just going to take the image that's in my image view, put it on disk, and return the URL.
+01:12:30 Okay? Where am I going to put it on disk?
+01:12:31 I'm just going to put it in a randomly named file, okay?
+01:12:35 I'm just going to pick a name, I'm going to pick, the name is going to be the number of seconds since some reference date in 2001 or something like that, okay?
+01:12:42 That's pretty unique.
+01:12:43 It's not likely, I mean unless somehow you did two different devices identically and this was over iCloud, you could conceivably get a conflict there but we're just going to do that.
+01:12:54 Probably better ways but we're going to create both the image URL and the thumbnail URL.
+01:13:01 Let's put those down here.
+01:13:02 So the image URL, NS URL, image URL looks like this.
+01:13:08 Oops. Okay so this is the getter for that method, so I'm going lazily create that file.
+01:13:14 As soon as someone wants the URL for it, I'm going to go create the file, okay?
+01:13:18 So if not image URL-- in other words, I'm going to lazily instantiate it.
+01:13:22 And we have an image, okay because we can't create the file if we don't have an image, but if we do have the image then we'll do it.
+01:13:31 Let's do this, let's say NS URL, URL equals self unique document URL.
+01:13:42 Okay so this is just going to be a unique URL in my documents directory.
+01:13:46 I have that one here for you, you can look at it at your leisure.
+01:13:50 It just does, you know how to do all these things already so there's no use going over them again.
+01:13:54 So I got this unique URL.
+01:13:57 If that was successful, then I'm going to get the image data out of my image view and I'm going to do that through this kind of cool function, UI image jpeg representation.
+01:14:09 Okay? It will take a UI image and give you back an NS data with a Jpeg of that thing.
+01:14:16 Pretty cool, huh?
+01:14:16 Not all images can do this but, you know, the kind of images that we load from the camera can, for example.
+01:14:22 So this would be self dot image, and then this is how much you want to compress it, and I'm going to compress it as little as possible, okay?
+01:14:29 Because I want the image to be as close to what you took of the camera as possible.
+01:14:33 I don't want any compression artifacts or any of that stuff because this is the actual image you took.
+01:14:37 So now that I have this, I'm going to say if I'm able to write this thing out, write to URLs.
+01:14:43 So write to URL is an NS data method and I'm going to specify that URL, and yes I'm going to do it atomic which means it's going to write it to a temporary file, delete any existing one, move it over in one atomic transaction so if the phone crashes in the middle, you won't get, you'll still have an old file if it were still there.
+01:15:01 If it successfully does that, then now this is the image URL.
+01:15:04 Remember this is the getter for image URL so I'm setting that.
+01:15:08 And now we can return our image URL.
+01:15:11 Now one thing is, every time you ask for the image URL, I'm writing it out to disk.
+01:15:16 Well not every time but the first time you ask for it.
+01:15:19 I better be careful here if someone changes the image, I'm going to have to regenerate this URL.
+01:15:25 I also want to delete that pile off of disk.
+01:15:28 So here I'm going to say, if anyone sets the image to something new, I'm going to say NS file manager, default manager, remove item at URL our image URL.
+01:15:38 Notice I'm not calling self dot image URL here because that would create the file.
+01:15:44 Okay? So this is a little bit weird.
+01:15:46 I told you never use underbar in anything but a setter or a getter.
+01:15:51 I'm violating that but it's, you know, kind of for performance reasons here and we don't care if there's an error.
+01:15:57 If it couldn't delete it, it couldn't delete it.
+01:16:00 And also I'm going to set my image URL to nil so that the next time someone asks, because I have a new image, the next time someone asks, it'll regenerate.
+01:16:09 Okay? So I'm going to do the exact same thing for the thumbnail, okay?
+01:16:14 I created this file here.
+01:16:16 I'm going to drag in a little category that I created using some of the code from last Friday's section and also some of the little code that I wrote.
+01:16:28 So here it is right here.
+01:16:29 Oops, [inaudible] like this.
+01:16:31 Put it in here.
+01:16:32 Oops, let's go here so you can see what I'm doing.
+01:16:34 Going to put this right here.
+01:16:37 This code is quite simple.
+01:16:39 It just has two methods.
+01:16:40 One takes the image and gets a new image by resizing it.
+01:16:44 That's what we want for a thumbnail.
+01:16:46 And this one applies a filter based on what we saw at Friday's section.
+01:16:50 So if you miss Friday's section you won't understand this code, but if you were there you will.
+01:16:53 And this is pretty straightforward code using draw and rect and this nice graphics begin image context with option so you can look at that offline as well.
+01:17:02 And so now let's go back here, and now that I have that, let u- where was I?
+01:17:08 Let's find this thing.
+01:17:10 It's way down here.
+01:17:11 Here it is.
+01:17:11 So we've got the thumbnail, so the thumbnail uses the same URL as the image but adds dot thumbnail to it and then scales it and then does exactly the same thing.
+01:17:20 So now [inaudible] thumbnail, so we want to do the same thing here for the thumbnail.
+01:17:23 We better remove our thumbnail file and we want to self dot thumbnail.
+01:17:28 That's not strictly necessary but we'll do it.
+01:17:31 Okay, so now that we have thumbnail URL and image URL, this photo creation up here will be able to fully create the photo.
+01:17:40 Now we don't have the camera, but I want to end this thing by showing you this working so far.
+01:17:46 So I'm going to drag an image, a little flower-- this is the flower we saw earlier in the quarter-- and I'm going to make this little flower be our photo, okay?
+01:17:56 So I'm just going to do that right here in view did load of this guy.
+01:18:02 View did load.
+01:18:04 Oops. Super view did load and I'm going to say self dot image equals UI image image named flower dot jpeg.
+01:18:18 This is an opportunity to show you another cool thing that we, I just did.
+01:18:22 What you see, I dragged the file right into my top level of PhotoMania and then I can access it directly using something like image named.
+01:18:31 So you don't actually have to put things in that asset, so you can put them right in the top level if you want and access them that way.
+01:18:36 All right, so hopefully-- oops, this is not going to work because we need to be on a real device.
+01:18:43 There we go.
+01:18:43 I've this iPad in iPhone simulation mode here.
+01:18:47 [ Pause ]
+01:18:55 All right so we'll go to my photos.
+01:18:58 Here's showing all my photos.
+01:18:59 I don't have any yet.
+01:19:00 We'll press the little camera.
+01:19:02 Here's our photo that we took with our camera.
+01:19:04 We'll do that on Wednesday so for now we got photo.
+01:19:08 We could actually hit done here.
+01:19:10 Watch what happened if we hit done.
+01:19:11 It says title required.
+01:19:12 Remember we had that should perform so that's good that it requires that.
+01:19:16 So we'll call this flower and then we'll have a little subtitle, pretty, okay?
+01:19:25 So we're ready to go.
+01:19:26 Now we hit done, it unwinds, it creates it.
+01:19:29 It found our location.
+01:19:31 If we click on it, we see it's got a thumbnail.
+01:19:33 We can click to see the photo.
+01:19:36 Here's our photo, etcetera.
+01:19:38 Okay? Got all that?
+01:19:41 Okay, so on Wednesday we will continue by actually getting the photo in here.
+01:19:45 I'll also show you an action sheet.
+01:19:47 We'll use that filtering thing to put an action sheet up that filters our photo.
+01:19:52 Okay? If you have questions I'm here.
+01:19:56 >> For more, please visit us at Stanford.edu.

@@ -1,0 +1,717 @@
+00:00 = [ Music ]
+00:05 >> Stanford University.
+00:07 >> Okay, well welcome to Lecture number 3 of CS193p for fall of 2013/14.
+00:14 Today I'm going to jump right into a demo and then after that I have some slides, time permitting, assuming the demo doesn't take [pause] the whole time here, and after, the demo I'm going to do is I'm going to take the little card thing we did last week and turn it into a real card matching game where we're actually matching cards, okay, rather than just flipping them over.
+00:37 And, like I say, if I have the time I'll talk a little bit more about objective-C and we're really going to go into objective-C on Wednesday in quite a bit of detail.
+00:46 I also included on the stuff I posted some review slides at the end just kind of reviewing what we will have learned in the first three lectures, just so you can kind of look through it real quick and say oh yeah, do I know that?
+00:56 Yeah I do, and if not, than you can obviously post and ask us questions about it.
+01:02 Okay? So, let's do this demo.
+01:07 So for the demo [background sounds], I'm going to start this demo actually by giving you the solution to the homework, I told you I was going to do this, this is the only time that I'm going to do this this quarter.
+01:23 Normally I don't go over the solution, but the solution's so simple and because obviously we need the solution of this to move on to what I'm going to do today.
+01:33 We'll do the solution first.
+01:34 So here I'm just launching XCode, you can see now in my recents I have this machismo from last time.
+01:40 So, we'll bring that up.
+01:43 There it is.
+01:44 Make sure that we're using as much screen real estate as we can here.
+01:49 Get these wires out of my way.
+01:52 Okay. So, from where we left off, hopefully you remember because you did your homework.
+01:59 We just have this single, this card, single card, and it flips back and forth between the ace and the clubs, and your homework was to use the model that we worked on in lecture to make it flip through an entire deck.
+02:11 So, the solution to that is quite straightforward.
+02:14 We obviously need a deck so I'm just going to add a property here, strong property, should be strong because we need that deck to, to stay around, and it's going to be a deck and I'm going to call it deck.
+02:27 Okay? Now we have an error here because of deck, so we have to go up here and import deck.
+02:35 Alright? To make that error go away.
+02:36 So now we got this property that's cool, obviously we want to lose lazy instantiation to instantiate that property, so I'm going to do that, that's a deck [inaudible] deck, and I'm just going to see if my instance variable is null or nil, rather, the 0, basically.
+02:54 Then I'm going to say, sorry, underbar, underbar deck, equals, and I'm actually going to create deck using another method here, you'll see why in a second and then I'm going to return underbar deck.
+03:07 Okay? And create deck is just going to create a deck.
+03:12 Create deck and I'm going to create a playing card deck, because that's what you were asked to do so I'm just going to do [inaudible] to do that.
+03:22 I got an error because not only do I need to import deck, but playing card deck, and it's actually kind of unfortunate here that in this nice, generic card game that I'm building, that I'm importing a playing card deck.
+03:36 Why is that unfortunate?
+03:38 Well, I'm going to try and build a card game here that has nothing to do with playing cards.
+03:43 Okay? It's going to be a generic, should work with any kind of deck, okay, a deck of any kind of cards and, in fact, in your homework, you're going to be asked to enhanced the game next week to play a different deck.
+03:55 Okay? So it's unfortunate that I have to do this and in lecture, either on Wednesday or probably on Monday, we will talk about how we can get rid of this.
+04:05 Okay, get this import playing card deck and this create deck method to be more generic, okay, not be so specific to playing cards.
+04:15 But anyway, so now I have this deck and it's lazily instantiated so now that I have a deck, I can use it to get rid of this little ace of clubs thing right here, okay?
+04:27 And, I'm going to do that by saying here card star card equals self dot deck, draw random card.
+04:37 So I'm going to draw a random card out of the deck and then instead of putting ace of clubs here, I'm going to put the cards contents.
+04:45 Okay? And that's really your entire homework assignment, there's one other minor thing that I'm going to do here, actually two minor things.
+04:54 Because we don't want just a solution that works, this will work if we run this.
+04:59 We're going to see it work, but it's kind of not very elegant and not really, it's not really a really very good solution to the problem, even though it functions, you see, it's, it's going through the random cards here.
+05:12 But it was kind of annoying, a couple of things.
+05:15 One, it started out with the ace of clubs, that was kind of gross, okay, because if I keep clicking here, eventually I'm going to get the ace of clubs, there it was back again, so that's kind of bad.
+05:26 The other thing is when this deck is empty, this is not going to particularly elegantly, you know, finish off, and we want to have some elegant solution and I said in the hints come up with an elegant solution.
+05:38 Also, this flips thing here, once I flip through the whole deck, it's going to keep flipping.
+05:42 You know, it's going to be 102, 103, 104, 105, that's not very elegant either.
+05:47 So let's fix all three of those things with simple, elegant solutions, okay?
+05:52 So my simple, elegant solution to the ace of clubs which I hinted at for you is simply to start it face down.
+06:00 So I'm going to get the card back here, get rid of the ace of clubs, and now this card starts out facedown.
+06:05 So I didn't have to write any code and I just use my brain over my brawn to make sure that this works, right?
+06:13 So, that's kind of the elegant way of thinking about solving that problem.
+06:17 So we'll just start it face down, there's no, there was no required task that said you had to start with the ace of clubs face up, so that's a good solution.
+06:24 When it comes to running out of cards, I think an elegant solution is it just will stop flipping at that point.
+06:31 I mean, you could make arguments, load up another deck, other stuff, but I think a simple solution is just once you run out of cards, you keep clicking, and it stops flipping.
+06:40 Okay? So how are we going to do that?
+06:42 Well, I know some of you are going to say something like, if number of flips equals 102, then stop flipping, and that's really, really bad.
+06:50 That's a very bad design, because that 102 is like a magic number you just put into your program and there's completely no reason for that bad design either.
+06:59 All you need to do is just say if card, then flip it, okay, so I'm going to flip it here, I'll make some more space so you can see.
+07:11 Otherwise, I'm not going to flip it.
+07:14 Okay? So I'm just, this is a super elegant solution to, you know, not continuing to flip this thing over when the deck runs out, and we know that draw a random card returns nil, if you remember from our implementation it returns nil when the deck is empty, so, perfect!
+07:31 Once it's nil, it's just not going to flip back over to the contents sides, it's going to always stay on the backside.
+07:36 Question? [Inaudible background question]
+07:37 And flip count is the third thing that was kind of not very elegant, so how can we fix that?
+07:43 Well, you know, there's a number of ways to go at that, but I think a simple way is to only flip, sorry, when we actually do the flipping over.
+07:55 Now, this is kind of not a great solution because here we're not actually flipping over, you know, if, if we're on the card back, then we're flipping over here, so this one's kind of not so good, because we kind of gonna, once we flip over to the back, we'll be okay because when we start to do [pause], we'll be executing this code over and over right here because we'll always be on the back.
+08:21 So I think this'll work, right?
+08:23 Is that a good solution?
+08:24 The reason I don't like it is I don't like having this line of code in two different places, kind of eh.
+08:29 I could have done a lot of other things here, we could have factored out the image and the string into separate local variables and had our if, apply those, and stuff like that.
+08:40 I think all of that would have been a little bit of overkill.
+08:44 So, let's see if this works.
+08:47 So here's our thing here, so it started facedown.
+08:50 Let's click through the deck here, I'll click through it quickly.
+08:54 So I'm clicking so quickly through, you'll notice, that I'm not giving time for the thing to finish animating, okay?
+09:01 And we're going to start talking about animation in the week after next.
+09:04 And [pause] one thing about animation is it's going to happen a little bit out of band with what's actually happening.
+09:13 So I am actually flipping here and all that flipping is happening, but the animation is kind of slow and it's staying behind, and that's kind of just, unfortunately, the way it is, the animation will eventually catch up, but here we go to our last card, then we get facedown, and now we click, and it's not clicking over and it's stopped at 104.
+09:32 Okay? Any questions about this solution?
+09:37 Pretty straightforward.
+09:38 Again, elegance, simplicity, that's what you're shooting for in your homework, okay?
+09:42 Big, overwrought solutions where you're adding a bunch of API and checking a lot of things are generally not preferred over more simple solutions, so like this, even if you have something where you kind of have these two lines of code that are doing the same thing, maybe shouldn't be replicated like this, it's a close call as to the really perfect elegance, but I was going for simplicity here too because I only have so much time [laughing].
+10:06 Okay?
+10:07 >> Alright.
+10:07 So now, we're going to go into doing the next phase of our card matching game, which is to make the game actually play.
+10:16 Now the playing of the game is part of our model.
+10:20 It's really important to understand, it's not part of our controller, its part of our model.
+10:25 Because I told you that the model is the what your game is.
+10:28 Well, what is this?
+10:30 It's a card matching game, so the what better be in the model.
+10:33 So we're going to create a class in our model that is going to encapsulate the logic of the game playing and it's not going to know anything about user interface, okay?
+10:42 It's not going to have any things in it that have anything to do with user interface and that's a really important distinction to make.
+10:48 So, let's create that new class, remember that we always create new class the same way you did with your assignment today by saying new file.
+10:57 Okay? And we want an objective-C class and I'm going to call it card matching [pause] game.
+11:04 Okay? And it's going to inherit from NSObject as all of our kind of base classes do, and I'm going to put this thing in the same directory as the rest of my model and I'm also going to put it in the same group than the navigator as my model, as well.
+11:20 Okay? So it goes with all these guys and it goes in this group.
+11:24 It's a nice thing to remember to do.
+11:27 Alright? So we create it.
+11:29 Here it is.
+11:30 Okay? Here's its header file right here and I'm going to use this counterparts, automatic counterparts, to show the implementation, okay?
+11:39 So there is its header file and its implementation, and I always, when I design a new class, I always try to give my first crack at its public API first.
+11:51 Okay? I'll go do its implementation later, but I want to kind of think of how are people going to use my class first?
+11:57 Just to drive my overall design, okay?
+12:00 And that's for a simple class like this, if you get into a more complicated class, you might be having significant design meetings which are teamed to understand what's this object, how does it fit into the world, but if you're just doing a simple straightforward class, especially if you're doing its first iteration, it sometimes nice to just think what is it's API, we call it, okay, API is the Public Programming Interface for a class.
+12:24 So, I need to think of what this card matching game needs to do.
+12:28 Well, one thing I know it needs is an initializer.
+12:31 Okay? And int.
+12:32 But when I think about my card gap matching game, there's a couple of things it just has to know to initialize.
+12:38 It can't just initialize itself like a playing card deck can.
+12:41 A playing card deck knows everything it needs to know about a playing card deck when it's started, but this doesn't really know that, so, I need a couple of things.
+12:48 One thing I need is how many cards are we playing with?
+12:53 Okay? How many cards are, is the person allowed to match total?
+12:57 Right? What's the total amount of cards?
+12:58 So we need that.
+12:59 So I'm going to say, int with card count, and we'll make an NSUInteger.
+13:06 Really, that count has got to be at least two, you would think, so I'd probably, in my initializer, should check to make sure it's greater than one and if it's not I'll probably return nil from self.
+13:18 In other words, I won't initialize, my [inaudible] will return nil.
+13:21 Okay? And we'll, actually, we'll pick one way where it does return nil, but we should probably check that too.
+13:27 The second thing that I need is a deck, a deck of cards, because I got to deal these cards out, right?
+13:33 I'm going to deal them out and then you're going to be able to pick some of them and do it.
+13:38 So, I'm going to say using deck.
+13:42 Deck star deck.
+13:45 Okay, so there's the initializer, and, of course, to do that I need to import deck, alright?
+13:52 So that's pretty good.
+13:54 Start there.
+13:55 What else do I need for my game?
+13:57 Well it's a game, so I think it should have a score.
+14:00 [Pause] Eh, we'll say NSInteger score.
+14:04 And, again, NSInteger, NSUInteger versus unsigned int is kind of a style thing, I used NSUInteger above, I'm going to use NSInteger to be consistent here and my score can be negative possibly.
+14:18 So that's why it's not an NSUInteger, it can be negative.
+14:21 And notice I made this property read only.
+14:23 It's the first time we've seen that.
+14:25 And why is that?
+14:26 Well that's because I'm the game logic, I get to determine what the score is, nobody can set the score, I tell you what the score is.
+14:33 Therefore, there should be no setter for this property.
+14:36 At least not publicly.
+14:38 You're going to see in a moment, privately, we're going to make this rewrite so that we can set it privately, right?
+14:43 Because we obviously need to be updating our score all the time as people flip these cards over and get matches, they get points, we need to update it.
+14:50 But publicly, we want it to be a read only.
+14:53 Okay? The only other thing I need to do is someone's going to be clicking on these cards; they're going to be flipping over and being chosen and possibly matching, so I need some sort of method to let somebody choose a card.
+15:07 So, I'm going to call this choose card at index, NSUInteger, again, index.
+15:19 So, there's a lot of ways in API you could have for letting someone choose a card.
+15:24 The person who creates this card matching game, not the person, but the other object, like a controller that creates this model class, knows the count, because it specified the counter cards.
+15:35 So, it's pretty reasonable to have them specify an index, which means 0, in this count minus 1, anytime someone chooses a card.
+15:43 Okay?
+15:44 So this is just a simple way of specifying which card did the user choose?
+15:49 And similarly, I actually need to be able to return a card at a given index, and why do I need this?
+15:58 Well, I need to be able to find out the state of the game at any given time, I mean, how is my controller going to display a UI for this game if it can't, you know, if it can't find out what the cards, what the state of the cards is, so this is just a little way for it to get the cards, and it could iterate through all the cards and get them all, and update them all, or it can get one in a particular index and could kind of, whatever fits best to what we're doing.
+16:24 Alright, so, that's my public API.
+16:27 Now before I go and do my implementation over here, you can see that I got this warning right here and what's this warning saying, it's saying there's actually three of them, you can click on this little three by the way, it's saying you have not implemented these [pause], these three methods that you made public, so that, that's a good warning.
+16:43 I need to go do that.
+16:45 But before I do that, I'm going to go back to my controller, I want to show you how we're going to, what kind of UI we're going to have over here so that as we're doing our implementation, you can kind of imagine how they're going to work together, but I actually wouldn't necessarily have to do the UI before I do the card matching game and one could argue I should do the card matching game first and not be influenced by the UI so much when I'm designing my model.
+17:11 Okay? But, you know, this model is going to be served by some UI so we're going to do them at the same time so you can imagine it a little better.
+17:19 So what do we need for this UI?
+17:22 Well one thing is we need a lot more cards, okay, this one card, it can't be matched against anything else, so let's make more cards, this is very easy to do.
+17:30 I'm just going to move this card up into the corner here and I'm just going to copy and paste it, so I can select it and copy and paste, okay?
+17:38 Place it, use the nice blue guidelines there.
+17:40 I can even copy two and paste them.
+17:43 Okay? Or copy four, and paste them.
+17:48 Okay? So now I'm going to have 12 cards, that's a good number of cards.
+17:52 I actually don't need this flips thing anymore, I'm not going to be just flipping cards, I'm going to be matching cards, I'm probably going to need something for the score which we'll do a little bit later.
+18:00 But that's pretty much my entire UI, I'm just going to have these cards and I'm going to click on them, it's going to show a card and then I'm going, I could either click on it again to turn it back facedown, un-choose it, or I could click on another card and if it matches I should get some points and if it doesn't match, the other one, the last one I had is going to flip facedown.
+18:21 Okay? Now those of you who are used to a game like Concentration, it's a little different, usually you pick a card, then you pick another card, and if they match you get points, if they don't match they usually both turn back over, okay?
+18:33 Which would be a cool UI, but I haven't taught you how to do animation and that's what you would need there because that second card, when it comes up, would need to be on screen for a little bit before they both went down because you got to at least get to see this one.
+18:44 So since you don't have animation, when you click on that second one, it's going to facedown the previous one if they don't match.
+18:50 Okay? And then you just keep clicking around trying to find matches and you get points, and we'll show you, kind of the point system that I'm going to use.
+18:58 So this is my entire UI.
+19:00 Very, it's a very content-central UI, right?
+19:03 The UI is really focused on these cards, there's not a lot of adornments and other stuff around it.
+19:09 And we're really not going to have much other stuff except for the score and you're going to add like a redeal button and maybe a little bit of stuff about some status about what's going on in your homework, but this is the fundamental basis of the UI.
+19:23 Okay? So now let's go back to our card matching game, and let's talk about how we're going to implement this thing.
+19:32 I'm going to go back to automatic here.
+19:35 Get this thing back.
+19:36 Just to make this look nicer, I'm going to go like that.
+19:39 And I'm going to leave this header file up while we go and do the implementation so you can kind of see where we're shooting, this is what we're shooting for.
+19:50 [Pause] So, the first thing I want to do is make this be readwrite in my implementation only.
+19:57 And I do that with this little, private interface, remember I showed you about this, that you can have one of these with the little open parentheses, close parentheses like that, and now you can declare your own things.
+20:09 Well, I'm going to redeclare this thing to be nonatomic readwrite, NSInteger score.
+20:17 Okay?
+20:18 Now this readwrite, we don't use that very much because it's the default, right?
+20:23 Is chosen, remember the properties chosen and match that are in card.
+20:27 Those didn't say readwrite, but they had a setter and a getter.
+20:30 Okay? They were readwrite.
+20:32 We really only use this when we're trying to redeclare a readonly one from public to private, this is about the only time we really use this.
+20:41 There are probably programming styles where people put readwrite all the time, even though it's the default, some people do that with strong since strong is the default.
+20:49 I like to specify strong everywhere just so it's really clear what's going on in my mind.
+20:56 But readwrite, not necessary for most things except for here where we're redefining it.
+21:00 So everyone understand what I'm doing here?
+21:02 This is score, this is exactly the same score, it's just that this says there's going to be a setter, but I'm only going to be able to call that setter, at least not without a compiler warning in my implementation.
+21:13 Okay, because I declared the readwrite part here.
+21:16 No public person is going to be able to set the score, call set score, without compiler giving a warning.
+21:23 Okay? So the next thing I want to do is I want to think about my internal data structure for my card game, really simple, it's just an array of cards.
+21:32 Okay? I'm going to have an array of cards, it's going to be this many cards, I'm going to pull them out of this deck, and, people are going to be able to choose those cards, someone can go look at the cards, and we'll adjust the score as people choose the cards, okay?
+21:47 So I need that internal data structure, it's internal, so I'm going to put it here, nonatomic, strong.
+21:53 It's going to be an NSMutableArray, okay?
+21:57 And this is similar to what we had in deck.
+22:01 Alright? And I always like to put of card just to say what's in here because as we said, there's no way in objective-C to kind of have the compiler enforce what's in here.
+22:13 The things that are in this MutableArray are just objects.
+22:16 And the compiler does not know what class they are.
+22:19 Okay? So it's up to you to make sure you don't send messages to things you pull out of it that are wrong.
+22:24 So here, we are trying to at least give the person reading our code know our intent, our intent is for this to be an array of cards.
+22:32 Okay? And, of course, we want our lazy instantiation.
+22:38 [ Typing Sounds ]
+22:45 Okay? So that's good.
+22:47 So now we have this array of cards, we can use it anytime we want.
+22:52 Again, we could do this initialization in the initializer, right, we can do this alloc init in here, but I happen to like using the lazy instantiation, I think it, it's kind of, makes the code in our initializer look a little cleaner.
+23:06 So let's do our initializer next though.
+23:08 So I'm just going to copy and paste here.
+23:12 You know, it probably not necessary to copy and paste because if you just start typing this, it's going stay [inaudible], we'll do that with the other method just to show you that one.
+23:20 And then we all know that we do this weird thing here, self equals super init [phonetic].
+23:25 Now, this is our classes designated initializer, in other words, you have to call this initializer or our class will not be properly initialized, we can have other initializers that could call this one, okay, if there were ways to default things or whatever.
+23:40 There is no way to do that, default it, so this has to be our designated initializer, so, I'm actually going to put a comment in my public header file saying this is my designated initializer.
+23:50 That way if anyone ever subclassed my card matching game, they would know that in their designating initializer, they'd have to call super, our designated initializer.
+24:00 Okay, that's the way designated initializers work.
+24:02 You have to call your super designated initializer from your designated initializer.
+24:07 Question?
+24:07 >> Does the compiler know that this is the.
+24:10 >> Designated initializer?
+24:12 No, the compiler does not know.
+24:14 This is a purely commented thing, it's similar to this kind of comment thing.
+24:17 It's unfortunate that the compiler does not, there's no key word or anything that says this is my designated initializer.
+24:23 You had a question first here?
+24:25 Okay, question?
+24:27 [ Inaudible Background Question ]
+24:40 Well, followup with me, I don't understand the question.
+24:43 If you have other initializers, I guess the, your question is how do I disable another initializer?
+24:50 [ Inaudible Background Question ]
+24:57 Right. Oh, I see what you mean.
+24:59 Yeah, you, okay, so the question is could I have another initializer, designating initializer not be public or something be private and have things call from it?
+25:07 Yeah, you absolutely could do that, although if you make your designating initializer not public, than subclasses don't know about it because there's no protected in objective-C, so anything subclassers need has to be made public for them to see it, it's still there, they can still subclass it, but, you know, to document it you want it, you have to put it in your public API.
+25:26 So. Yeah, the whole thing with initializers in objective-C is less than nicely supported by the language.
+25:32 Question?
+25:33 [ Inaudible Background Question ]
+25:39 Yeah, so the question is would it make sense here to, for me to implement an init here, right?
+25:47 To do something.
+25:48 And actually it might well make sense to override an init, and you know what you would do?
+25:53 Return nil.
+25:54 Okay? Because if you do card matching game alloc init [phonetic], it's not properly initialized and there's no default for the number of cards or the deck, so return nil, okay?
+26:04 So, yeah, so the answer is yeah you could.
+26:07 Alright, so just back to our designating initializer, we need to call our supers designating initializer, which for NSObject is an init.
+26:14 No arguments.
+26:15 Okay? Then we just say if self, then we can initialize ourselves and then we're going to return self.
+26:23 And if anything goes wrong in here, we will set self equal to nil.
+26:28 Okay, and break out of this thing.
+26:30 And, in fact, something is going to go in wrong in here, as you will see.
+26:33 Okay? So, what do we need to do to initialize our thing here?
+26:37 Well, we need to pull this many cards out of this deck and put it in our internal data structure here.
+26:45 Alright? So how do we do that?
+26:48 How about four int i equals 0 [pause], i is less than count, 5 plus, plus, so that's just me going through this many of these things.
+26:59 I'm going to say card star card equals deck, draw random cards, so I'm drawing a random card of the deck, and then I'm just going to say self dot cards, sub i, equals card, okay?
+27:15 So I've got this MutableArray, it's always going to be non-nil.
+27:19 So this is perfectly fine.
+27:21 Okay? There's one problem here though.
+27:23 What if we run out of cards?
+27:26 Okay? What if you pass a playing card deck here and you say 100 cards for your game, okay?
+27:32 This is going to eventually return nil.
+27:35 Okay, and run out of cards.
+27:36 So we should check here and say if card, then we'll do what we normally do, otherwise, self equals nil, break out of that four loop because we're dead.
+27:50 Okay? Question?
+27:52 [ Inaudible Background Question ]
+28:00 So the question is how can I access cards here to set it, in this line of code, when I haven't put anything in the cards?
+28:08 Well, card starts out as nil, and then when I call the getter, self dot cards right here is the getter, it's going to initialize it to an empty array, but it's mutable.
+28:19 So I can add objects here, Actually, oh I'm sorry.
+28:23 You're right about that, yeah, well, this is fine too, but maybe a better way to do this is to say self dot cards at object card, because that's a little clearer.
+28:33 In fact, you might be right, that wouldn't have worked.
+28:35 So, this is a better way to do it, we just add cards to the deck.
+28:40 Okay? Make sense?
+28:41 Sorry about that, I had a little different one.
+28:45 [Pause] And actually I'm not sure if that would work, let me think about that, so you're saying insert object, yeah, that, actually that probably would work too.
+28:51 Because you'd be doing insert object at index, it wouldn't be, you know, it would be just at the end of the array, that would probably work too.
+28:56 So you could do it either way.
+28:58 Because self dot cards sub i, that sub i thing, it's really just calling a method, insert object at substring index, that's what the method is calling.
+29:06 You can look at the documentation to see the name the method is calling there, but if you insert object at index and it's at the end of the array, I believe that'll work.
+29:13 But if you do it at 500, that's not going to work, okay?
+29:16 Because it can only grow the array as you go, I believe.
+29:19 Question? [Inaudible background question]
+29:20 So the question is can I put different kinds of objects in the same array and the answer is absolutely.
+29:27 You can and we do, occasionally, and we'll talk about on Wednesday how you deal with that.
+29:32 Right? How, how we manage the fact that we have different kinds of objects in there, but yes, absolutely, perfectly legal.
+29:38 Okay? Alright.
+29:40 So there's that.
+29:41 And, again, as I said, we could probably say at the beginning here, if self, we could also have an if count is less than two, right?
+29:51 Then return nil, we could do that, check that, as well.
+29:55 Okay? Okay, let's do some of our other methods here.
+29:59 How about choose card at index.
+30:01 Okay? Actually let's do card at index.
+30:03 Because card and index is super easy.
+30:05 Right? This is card star, and notice if I start to type here, it knows that its card index so it's going [inaudible] press tab to get there, and this one it just returns self dot cards of index.
+30:18 But, you know, this is a public method.
+30:21 What happens if someone passes a bad index there?
+30:23 Right?
+30:24 An index that's greater than the count.
+30:26 Are we just going to go ahead and crash here?
+30:29 One could argue that might be good, because we'll help find the bug.
+30:33 Certainly some kind of assertion in here would be good, we'll talk about that later, but I'm actually just going to protect myself against it by saying if self, if this index is less than self dot cards count, then I'll return.
+30:50 Okay? Otherwise, oops, if, actually we'll do it this way, use the old question mark.
+30:57 Some people were asking about this, okay?
+31:00 Return question mark nil, everyone know this question mark colon c thing, this is totally a c thing, nonobjective c thing, alright?
+31:10 Just like an if then.
+31:11 Yeah, question?
+31:12 >> So [inaudible], how does array access with these methods for the MutableArray to work without that index, if you, or without the guard, if you pass the large index, would it necessarily crash or would?
+31:24 >> Yeah. So the question is, what if I pass too large an index here, would this crash?
+31:29 And it would, and what would happen is it would crash with the exception array index out of bounds.
+31:34 [Inaudible background question]
+No, no, it would crash, it, 31:37 raise an exception, array index out of bounds.
+31:39 Okay? NSArray class would raise that exception, and we'll talk about raising exceptions.
+31:44 For now, until you go to this debugging thing, maybe on Friday, for now, you're just going to see exceptions like that happen on your console, it's not even going to stop where the exception happened, which is unfortunate, but that debugging session, we'll talk about how to make it stop there, but that's what's going to happen, it's going to raise an exception.
+32:01 So that's carded index, really, really easy.
+32:04 And now let's talk about this other one, choose carded index.
+32:07 This is really the heart of our logic.
+32:10 Because here's where you're choosing the cards, here's where the matching actually has to happen, in the scoring, okay?
+32:15 So this is basically our entire logic is going to be in this method.
+32:19 So what do we need here?
+32:20 Well, they're choosing a card, so let's get the card they chose, and I'm going to call self carded index, to get that card.
+32:30 Okay, so now I have the card that they, they're choosing here.
+32:36 Now, if a card that they chose has already been matched against another card, then I'm going to do nothing here.
+32:41 I'm going to ignore when you try to choose a card that's already been matched, successfully matched with another card, so I'm just going to say here, if card [pause] is matched, [pause]
+32:55 and actually I'll just say if not card matched, we'll do something, otherwise we'll just do nothing.
+33:02 Okay? So I'm only going to match these cards if, or only going to try and match two chosen cards if the card you just chose is not already matched.
+33:12 Okay? Does that make sense?
+33:13 Does everyone see why we do that?
+33:15 It's already matched, you can't match it against another one.
+33:18 So now the question is if the card is already chosen, then what am I going to do?
+33:24 Then I'm actually going to flip the card back over, un-choose it, so I'm going to say card dot is, dot chosen, rather, equals no.
+33:33 Okay? So if you'd pick the card that's already chosen and you choose it again, it's going to un-choose it.
+33:38 So it's kind of a toggle.
+33:40 Choosing a card is kind of a toggle thing, on and off.
+33:42 Notice that we have the getter is chosen, remember we renamed it in our header file, with that getter equals is chosen, but the setter, okay, we don't use the is chosen.
+33:52 The setter is still chosen.
+33:53 Chosen is the name of the property.
+33:56 Okay? Everyone remember that?
+33:57 From card, hopefully, you had to type it in so remember it.
+34:00 So otherwise we're in here and in this case, we're choosing a new card and we need to match it against other card.
+34:09 Okay? Let's say another card.
+34:12 Now our matching game only matches two cards.
+34:15 In your homework, you have to extend this game to match it to three cards, okay?
+34:19 That's going to be part of your homework assignment, but here we're only going to match one other card.
+34:23 So all I need to do here is look through all the other cards in my cards array up here, alright, this is my internal data structure.
+34:30 I just need to look through them all and find, and go and see if there's another card that is chosen and not matched.
+34:38 And if it is, I'm going to try to match it against this card that was just chosen.
+34:42 So to search, I'm just going to go through my cards, for card other card, in self dot cards.
+34:48 And we go through all the other cards, and if I can find an other card that is chosen and is not matched, [pause], okay?
+34:59 Then bingo!
+35:00 I found another card to try and match.
+35:02 Now, there can only be one other one, because I only do two card matches and I'm always looking for that second match, so, if it doesn't match, I'm going to flip that, un-choose that other one anyway.
+35:11 So, I'm ready to go here, I basically found the only other possible card that can match.
+35:16 Now, again, when you do a three card match or an end-card match, if you so choose in your homework, which might be a good idea, you might find a number of cards here.
+35:24 You might have to collect them somehow in array or something so you can match them against each other, but here, I don't have to worry about that.
+35:31 So I found this other card that's also chosen, let's match them.
+35:34 And I'm going to do that by saying match score equals [pause] the card that we chose up here, right?
+35:41 This is the one that the user is choosing.
+35:43 Match colon, remember that's our method in card that matches two cards.
+35:48 It takes an array though, an array, so I'm going to have make an array on the fly and put the other card in it.
+35:56 Okay? Everyone understand this line of code?
+35:59 I'm matching this card against this card using the match method in card.
+36:05 Okay? But I had to create this little array on the fly because match is actually capable of matching multiple cards, which is good because your homework's going to require that.
+36:14 But here I'm only doing one, so I just create this little, blue at sign square brackets thing to create an array.
+36:21 So now I've got this match.
+36:22 Now, we've defined match, kind of the semantics of match, are that if it returns non-zero, then there was a match of some sort.
+36:30 If it returns zero, no match.
+36:33 Okay? That's what match colon means.
+36:35 Okay, that's what we just defined it that way in the semantics of our model.
+36:40 Probably we should have put a comment in our card dot h that says match colon, return zero if no match, otherwise, how good a match it is basically.
+36:48 So match should be returning high scores if it's a really good match and a lower score if it's not so good a match.
+36:54 You know, that's kind of the semantics of it.
+36:57 Alright, so, what if it is a match or it's not a match.
+37:03 We have to deal with both of those cases.
+37:06 Alright, so in the case that it is a match, then let's give ourselves that score.
+37:13 [Pause] Okay?
+37:14 And, both these cards matched, so let's mark them both as matched, so we're going to say card dot matched equals yes, and the other card dot matched equals yes.
+37:25 Alright? So they're matched, they're out of the game, we got some points.
+37:30 Now what if they don't match, well I told you if they don't match, I'm going to turn that other chosen card, I'm going to un-choose it, basically, so I'm going to say other card dot chosen equals no.
+37:41 Okay? And also, I think I'm going to impose a penalty for doing this, okay?
+37:47 I'm going to subtract something from the score, I'm going to call it my mismatched penalty here and I can make a constant.
+37:54 Now, let's talk a little bit about constants.
+37:57 You know, this is c. Okay?
+37:58 So you're going to make these constants however you want.
+38:00 One way to do it is to say pound sign defined, right?
+38:03 So I could say pound sign defined, mismatched penalty.
+38:07 And we can make the mismatched penalty be, you know, the mismatched penalty, what did I decide, I think something like two, so I'm going to take away two points if you mismatch, so that's one way to do it.
+38:21 Another way to do constants is const, okay, its static const even.
+38:26 Static const int mismatched penalty, if equals two.
+38:32 Okay? So that's another way to do it.
+38:36 This is kind of as you prefer.
+38:38 The nice thing about these static const's is they're typed.
+38:41 Right? Whereas a pound sign defined is not typed, it's just substituting, okay?
+38:45 But here you've got to type in and you'll be able to see this in the debugger better.
+38:49 Because it's typed.
+38:51 But it's really kind of your own thing, I would just say be consistent about what you choose to pound sign define versus what you decide to make a static const.
+39:00 Okay? Totally up to you.
+39:01 You know, the other thing I'm going to do here is if you match, I actually, since I'm basically charging you two points if you mismatch, if you match I want to give you a lot of points, so I'm actually going to give you a match bonus.
+39:18 Match bonus.
+39:19 Okay? And this is going to be another constant here.
+39:23 Put this up here, actually let's copy and paste this over this, paste, and I'm going to give you four times whatever your matching is because I'm giving you this penalty so I want to give you a bonus if you actually match.
+39:36 So whatever the match score is, however good a match it is, you're going to get four times as many points if you match.
+39:41 Okay? And these are things that you would want to tweak or maybe, like, possibly in your homework, you might even want to make these be public API to set these bonuses and penalties.
+39:52 Okay? Maybe that's something that wants to be settable, but we're going to make them constants for expediency in our game.
+39:59 The other thing we can do here is if we find this match, right here, we can break out of this four.
+40:07 Okay? And that's because we're a two card matching game, once we found a match, we're, we're done, okay?
+40:13 We found another chosen card, we processed it, we don't need to keep looking for matching cards.
+40:19 Again, if you have, matching more than two and you're collecting cards, you may not be breaking out of this loop down here.
+40:25 The other thing I wanted to do here is if you are choosing the card and flipping it face up, I want to make it cost something.
+40:39 So I'm actually going to give, make a cost to choose, and I'm going to make it be one point.
+40:46 Okay, that's because I don't want you to be able to just, you know, flip the card over, flip it back down, flip the card over, flip it back down, you'd eventually memorize all the cards and then flip them up and get all your matches.
+40:57 So it costs you a little bit.
+40:58 If you forget a card and you flip it again, it's going to cost you just a little bit, okay?
+41:02 Not as bad as mismatching, but it's going to cost you a little.
+41:09 Question? [Inaudible background comment] Oh yeah, you're right.
+41:12 Good call.
+41:12 See now I rely on all of you to make sure I don't make mistakes like that, so yeah, absolutely.
+41:16 This break needs to be inside this if because we only break out of this four when we find another card.
+41:22 Good, good call.
+41:24 The last thing, of course, is I want to mark this card as chosen.
+41:29 And sorry for the apps there.
+41:33 Okay? This card [pause], woops, not is chosen, chosen, this card is chosen after we've done all of this thing.
+41:40 In any case, it's going to be chosen, it's going to be the new chosen card.
+41:44 Okay? It might also be matched, but it's also chosen.
+41:49 Okay? So, that's it, okay?
+41:51 That's the entire logic of my card matching game.
+41:54 It's pretty simple, it's kind of in a way ultra-simplified.
+41:58 You can imagine much more complicated things, but, you know, I'm doing this on the fly here and we only have, you know, an hour and 15 for, for lecture, so, I've kept it kind of intentionally simple, but the main point I want you to understand from this logic is it has no UI in it.
+42:13 Right? It's purely just dealing with the cards and setting them to be matched or not, whether they're chosen or not, depending on using the match colon method, which is also part of our model.
+42:22 There's no UI here.
+42:24 Okay? It's up to our controller to take this logic and turn it into UI.
+42:28 Alright? So let's take a look at that.
+42:32 I'm going to go back to our storyboard here and make more space.
+42:38 Move this over a little.
+42:40 Give me more space.
+42:42 Okay. So, here's our controller, right?
+42:45 Our simple controller just as we had left it off, and I need to use this logic in this thing.
+42:51 So the first thing I'm going to do is create a property to hold my card matching game.
+42:59 Okay? Now, one could argue, some people would call this model, I don't like that so much, because sometimes a model will expand multiple properties or they might call it game model, okay?
+43:11 That's not so bad.
+43:12 I'm okay with that.
+43:13 I like game, I think it reads a little nicer in the code, but, it's kind of a matter of personal preference, but in any case, I need to import my card matching game header file here, to make this work, and I'm going to lazily instantiate it.
+43:31 [Pause] I'm just going to say if the game is nil, in other words, just our object is freshly initialized, then I'm going to say game equals card matching game alloc, woops, game alloc, and then init [phonetic], okay there's two inits there, the one inherited from NSObject which we know is going to return nil so I don't want that one, and init with card count.
+43:54 Okay? So I'm going to do that one, tab over here, how many cards are in this game?
+43:59 Well there's 12.
+44:00 So I should type 12 here right?
+44:03 [Speaker makes noise] Okay, no.
+44:03 That's like putting a 102 in your homework solution, right?
+44:07 We might add more cards someday, we absolutely do not want 12 here, so I'm going to put 0 here for now, and we'll, I'll show you how we're going to figure out what this number is.
+44:16 And using deck, luckily I have self-create deck, that's why I did that that way.
+44:22 That's going to create my, my deck.
+44:25 Okay? Then we'll return underbar game and it's nice and lazily initialized.
+44:31 Okay? Alright, so let's talk about this zero right there.
+44:35 How are we going to find out how many cards there are?
+44:37 Well it turns out it's possible to create an outlet to multiple things in your UI.
+44:43 Remember that we have this outlet right here flips label, which was an outlet that went to this little flip count thing, that we had down here.
+44:52 It was a single outlet, which by the way, we can delete this single outlet.
+44:56 But it went to one object, the UI label, so let's get rid of that, and we don't need to put county there, we actually don't need deck either, there's lots of stuff we can get rid of now.
+45:06 Alright, so we're going to redo this whole thing, [inaudible].
+45:09 We'll get rid of that in a second.
+45:14 You can see our games gotten significantly simpler now that the model's taking care of a lot of our stuff here and it's going to get even simpler when we delete all this.
+45:22 But anyway, that was a single outlet.
+45:25 We can actually create an outlet to multiple things, and as you might imagine, that outlet will be an array.
+45:31 Okay? So how we do that?
+45:33 Very simple.
+45:34 Exact same way, I'm holding down the control key, okay?
+45:37 Pick the card here, I'm going to hold down control and drag into my interface, just like I do with any other outlet I'm trying to create, and when I let go, you can see that at the top here where it says connection, there's actually the choice of making an outlet collection.
+45:53 So that's an array of things.
+45:55 Okay? We can also make an action messenger, we'd be declaring it here.
+45:59 Or an outlet to a single button, but here I'm going to do an outlet collection, when you do outlet collection, XCode, not objective-C, but XCode wants to know what kind of objects are in there, that's purely for XCode, there's, I told you there's no way to know what's in an array in objective-C and the compiler can't know that, so this is purely for XCode and you're going to see how XCode remembers this answer in a second, and here's the name, I'm going to call it card buttons, that's what these are, these are buttons that are holding all the cards.
+46:28 Notice it's not asking me strong or weak here.
+46:31 That's because this property has to be strong.
+46:35 Okay? And it has to be strong because while the view has a strong pointer to all these cards individually, the view does not have a strong pointer to this array.
+46:45 And if we did not make this strong, than this would be constantly being set to zero because no one would have a strong pointer to it.
+46:54 Okay? So, that's why this has to be strong, because it's an array, it's not a button.
+46:58 Now, this little stuff right here, compiler completely ignores this, it's very much like IB action, it's just some stuff that XCode puts in there so that it knows that this particular property right here is an outlet collection, and you can see if I mouse over this it shows me the one button that I put in here.
+47:19 Now, I'd love to tell you we can just select all of these and control drag, but you can't, okay?
+47:25 I've been asking for that feature for years, but they never give it to me.
+47:28 So, I have to drag these one-by-one, it's kind of unfortunate, but at least, you know, I drag it to the thing that's already existing, and you notice as I get close, it highlights the thing that is appropriate and, again, it knows that because it knows this an outlet collection of buttons, so that's why I can highlight this property.
+47:47 Okay? So I'm going to collect all of them here, and when you do this, you know, it's somewhat error prone, you might miss, so it's nice to go back here and check, and you can see all 12 buttons in here.
+47:58 Question? [Inaudible background question] Okay.
+47:59 Great question!
+48:01 The question is does the order matter?
+48:03 Or is the order determined?
+48:04 And the answer is no.
+48:06 This order, the order of the object mirror is completely unknown to you, and you cannot depend on it.
+48:11 If you need the order, you're going to have to do this a different way.
+48:14 Outlet collections are fundamentally, the order is not known.
+48:18 Okay? So no matter what order I control drag them, that's not going to be the order in the array.
+48:23 Okay? Which was a good decision by Apple, it seems like oh, it'd be cool, but it'd be just too hard for them to, to throw a lot of things in here, it'd be too hard to show and you could get confused, so, you need to use something, a different mechanism, and you're going to learn many mechanisms later in this class that you could do this with.
+48:37 This is just a pretty simple one right here.
+48:39 For a fairly small numbers of things.
+48:42 So anyway, we got this connection to these things.
+48:45 So now we can do card count.
+48:48 Okay? We know the number of cards, we can just say self dot card buttons, that's this property right here, alright?
+48:56 Count. Okay?
+48:59 So this is the number of buttons that's in this array.
+49:01 Okay? So that was good.
+49:04 That worked out well for us.
+49:06 Okay? Now we also have a nice array of these buttons so that we can update them with what's happening in the model, okay?
+49:13 So, first though, let's talk about touching a card, when you touch on a card, what are we going to do, well we don't want to do any of this junk.
+49:19 Okay? So we're just going to rid of all of that.
+49:21 Okay? Because we're going to let the model handle it.
+49:24 So all we need to do to let the model handle this is to get the card that this button is associated with, because these buttons are all still sending this, if you look at this, see all 12 of them are sending this action and the sender is still the actual button you touched on, not the array, but the actual button, because this is the target action thing right here.
+49:46 So, we can still find out who sending it and, in fact, we can even find out it's index in this array by saying card index equals self dot card buttons, index of object, sender, okay?
+50:02 So this is going to tell us where this sending button is in this array.
+50:09 Okay? So now that we know which card it is in the array, we can just tell our game please choose the card at that index.
+50:20 [Pause] Okay?
+50:22 And we're just going to tell our model, hey, choose that card.
+50:25 Now, one thing here though is choosing that card might change the state of the game.
+50:30 Okay? It might cause some points or match some cards, a lot of things can change, so we're going to put a little update UI here, okay?
+50:37 And this update UI method, which we're going to have to write has got to keep our UI in sync with the model.
+50:44 And remember that's one of the primary things a controller does, it syncs up the model with the UI.
+50:50 Okay? So let's go ahead and put a little thing here.
+50:54 Update UI.
+50:55 Okay. So what do we need to do when we're updating this UI?
+51:00 It's actually pretty simple, we're just going to go through all the card buttons, okay?
+51:04 Get that card button, simultaneously look into the model for that card, and make sure the card button is showing what should be on that card.
+51:13 So, let's go four UI button, card button, in our card buttons, okay?
+51:22 So we're iterating through all these buttons.
+51:24 Card button is going to be the variable.
+51:27 Let's go ahead and get that card index, again, for, for the same thing, self dot card buttons, index of object, the card button that is our iteration variable and we're cool with what we're doing there.
+51:40 Alright? So we're just figuring out which card it is.
+51:43 Then we're going to ask our model, give us the card at that index, using card at index.
+51:54 [Pause] Okay?
+51:54 So now we have the card button and the card, awesome.
+51:58 Now we can make sure the card button reflects the card that goes along with it.
+52:03 Okay? So, what do we need to set on the button?
+52:06 Well, let's see, we have to set the card buttons title, okay?
+52:11 So set title for state UI control state, control state normal.
+52:18 Okay? And we have to set the background image, right?
+52:23 Depending on whether it's the Stanford logo or the blank background.
+52:29 Okay? Also, if the card is matched, I'm going to disable the button.
+52:35 Okay? Because you've already matched this card, you can't click on it anyway, so I'm going to disable it because a disabled button looks a little different and I want buttons that are matched to look different.
+52:44 Yeah?
+52:45 >> [Inaudible] card buttons, does that go from 0 to N?
+52:50 >> It does.
+52:51 So the question is does a fast enumeration like this, when you do this four N thing, does that go from the zero to the N and the answer, it does.
+52:59 It does go in order.
+53:00 [Inaudible background comment] You could.
+53:01 So the question is do you, do you not need this, you could just have another iteration variable or you could use an iteration variable here, like four i equals 0 to the length?
+53:12 You could.
+53:12 I don't like to depend on that going from 0 to whatever, so that's why I used this here.
+53:19 It's a matter of style.
+53:20 Totally a matter of style.
+53:21 This is also kind of a little clearer, because here I'm saying I want the card that goes with, you know, the card button that goes with this thing.
+53:28 So, so the last thing I'm going to say is the card button enabled equals the card, not card is matched.
+53:39 Okay? So, the card, the button will only be enabled if the card is not matched.
+53:45 Okay, now of course I have these two things, which I haven't [laughing]
+provided, right?
+53:49 I've just left them, we don't have that argument.
+53:52 And actually for both of those, I'm going to create little other methods here, helper methods.
+53:59 So, I'm going, for the title, I'm going to have a helper method called title for card.
+54:04 It's going to take a card as the argument.
+54:07 And it's going to return the title of that card, and for the background I'm going to have UI image, background image for card.
+54:18 [Pause] Hopefully as we'll go along you'll start to see the naming conventions that we use.
+54:22 We often try to have this last part of a name of a method before a colon indicate what we're looking for.
+54:29 So here we're looking for a card, so we try to make a thing.
+54:32 Look at this one, button, right?
+54:35 This is a button.
+54:35 So we try to make these arguments guide the reader towards what we're asking for there.
+54:42 We don't want to get too overwrought about it, but it's a general naming convention there.
+54:47 So, what is the title of a given card?
+54:49 So I have the card, what's its title?
+54:51 Well, if the card is chosen, then I'm going to return the contents of the card.
+54:58 If it's not, I'm going to return empty string or nil, so I'm just going to say return card dot is chosen, question mark, car dot contents, otherwise, empty string let's say or nil, either one in this case.
+55:11 And how about the background image?
+55:12 This is kind of a cool one, I'm going to say return to UI image, image name is card dot is chosen, so if the card is chosen, then I want the card front, otherwise the card back, now you probably think I'm just in love with this question mark colon [pause] syntax, which I do like it a lot, it's kind of clean.
+55:36 But anyway, you understand what I'm doing here, right?
+55:37 I'm actually having the name in here with the question mark colon nested inside, [inaudible] to get the, the image.
+55:45 Okay? So now, I can use that here.
+55:50 Let's do the title first.
+55:51 I'm just going to self, title for card, the card, and then here I'm going to say self background image for card, card, and both of these I'm going to hit return just to make this a little easier to see.
+56:04 Okay? So, that's pretty much it.
+56:08 Okay? I've matched up my UI with my model, when I touch in the UI I let my model know to choose a card and we're pretty much good to go.
+56:19 I think that's all I had to show, yeah, we'll, we'll do the score in a second here.
+56:23 We need to score, but before we do the score, let's go ahead and run this and make sure that it's working.
+56:29 Okay, so when I click, hopefully I get a random card, and when I click again, hopefully it continues to be the same card, okay?
+56:37 It'd be bad if that was constantly getting random card, but we know that we got rid of that code so it's not going to do that.
+56:41 So there's a king, five, two, okay, now we got two clubs right here.
+56:46 So I could do that, oh, didn't match.
+56:49 Okay? So why don't these match?
+56:51 They should match.
+56:53 And the answer, anyone want to tell me?
+56:56 Yeah? [Inaudible background comment] Absolutely.
+56:58 The only match function we have is this really bad match function, let's go look at it.
+57:03 It's right here in card, okay, this is the only match function that exists in our entire application and it only says it's a match if both cards are identical, well that's never going to be true in our thing, because we have a deck of 52 cards, every single one is different.
+57:19 So it's never going to match.
+57:20 So how do we deal with this?
+57:22 Well we need to teach playing card how to be a better matcher.
+57:27 Okay? Because cards implementation of match is simply not sufficient.
+57:32 So what we're going to do is we're going to override this, we use object-oriented programming, that's what we're here for, so we're going to override it.
+57:38 Let's go to playing card, here's playing card.
+57:40 Now, notice the playing card doesn't declare match in its public API.
+57:45 Okay? It inherits it from card and I'm not going to redeclare it just because I'm going to implement it.
+57:51 So I am going to go here and I'm going to re-implement match.
+57:56 Okay? It knows that match is method I inherit, that's why it was able to escape, complete it like that.
+58:02 But I'm not going to put it in my public API and that's generally the way we do it.
+58:06 Okay? Generally, if you inherit a method and you, a public method, and you override it, you don't have to put it in your header again.
+58:12 Some stylistically would say, yes, put it in there, so that someone knows that you override it.
+58:17 But most object-oriented people would say you shouldn't have to know that you override it.
+58:21 Alright? This is object-oriented programming.
+58:23 You should not have to know that.
+58:24 That, that's implementation detail that you happen to override match here.
+58:29 So, I'm a fan of the not putting match in playing card, it's already in playing cards public API because it inherits it from card.
+58:35 Alright, so what are we going to do in match?
+58:38 Well, I'm going to have a really dumb match.
+58:40 You're going to need a better one for your homework.
+58:42 My dumb match only can match one other cards.
+58:44 Okay? So and the first thing I'm going to say here, let's go ahead and do in score equals zero and return score.
+58:52 The first thing I'm going to say is if other cards count [pause] equals one.
+58:59 Okay? So I'm only going to match one other card.
+59:02 Okay? If there's two cards in there, no match.
+59:04 Okay? Too, too much for me.
+59:06 So I'm just going to say this one thing.
+59:09 Now, I need that other card though, how do I get the other card?
+59:12 I'm going to say card star other, in fact, I'm going to say playing card star other card equals, and I could do a lot of things here.
+59:22 I could say other cards subzero, but I'm actually going to use a method here I want you to know called first object.
+59:31 Other cards, first object.
+59:34 Okay, first object returns the first object in an array.
+59:38 If the array is empty, it returns nil.
+59:41 Okay? That's different than saying other cards subzero.
+59:45 Because if that array is empty, that will crash.
+59:47 That will say array index out of bounds.
+59:49 You see the difference?
+59:50 First object, there's also a last object, they just have this magic piece to them that they don't do array index out of bounds.
+59:57 Okay?? But otherwise they return the first object or nil if there are no objects in there.
+01:00:01 Okay?
+01:00:02 I just want you to know that.
+01:00:02 I don't actually need that here, because I know there's one object in that array.
+01:00:06 So this is not really necessary, I could say other card subzero, I'd be okay here, but I'm just trying to teach you the method first object, that's all.
+01:00:14 So I got this other card.
+01:00:15 So let's go ahead and match it, what's a good match here?
+01:00:18 Well, if the suits match, I'll give a little bit of points, but if the ranks match, I'm going to give a lot of points, so, let's say if my [pause]
+self dot suit is equal 01:00:32 to string the other card's suit.
+01:00:35 Okay? So the suits match, they're both clubs.
+01:00:38 Then I'm going to say the score equals one, okay?
+01:00:41 But, and we can say else or not, because we're going to assume the cards are all different.
+01:00:46 So if the cards are the same, then you're only going to get a suit match, which doesn't really make sense, but let's say if self dot rank, oops, we don't need to send a message there if self dot rank equals the other cards rank, then let's give four points.
+01:01:02 Now why do I give four versus one?
+01:01:04 Well, think of the math, right?
+01:01:06 If you have a club in your hand, how many other cards are there in a full deck that will match a club?
+01:01:12 12. Okay? If I have a king, how many other kings are there?
+01:01:17 Three. Okay?
+01:01:18 So 12 versus 3, it's four times easier to match that club, assuming you have a full deck.
+01:01:23 I'm just picking numbers kind of at random here.
+01:01:25 It's, it's not a bad choice for the scoring here, but most times trying to get these relative scoring right.
+01:01:31 Question? [Inaudible background question] Yeah, so the question is am I using magic numbering and absolutely.
+01:01:36 And you probably, you know, this whole thing of the scoring here is somewhat magic numbers in our simple implementation, you probably, although, [pause] this, okay, this is not necessarily a magic number.
+01:01:49 If you define match to say make the easiest match verse, verse, equal one, and then make any more difficult matches to be multiplicatively, you know, more difficult like this, than this is actually right, because that four is fundamental to a playing card, it's fundamental to how a playing card ranks and suits work, alright?
+01:02:09 So, assuming you define this match only match against other playing cards in this same deck, that four is magic, but it's magic to this class.
+01:02:16 So, yeah, you could put a pound sign define, but that doesn't make it any less of a magic number.
+01:02:21 So it is magic, but you could put it in there.
+01:02:23 You see what I'm saying, see the difference between that and like 102 in your controller, which is trying to be, you know, maybe generic decks, that's a little different.
+01:02:31 Good question though.
+01:02:33 Alright, so now we have a better match.
+01:02:35 So now if we go back to our controller, so let's do that.
+01:02:41 Just [inaudible] on screen right here.
+01:02:42 And run. [Pause] Hopefully now, let's see if we can find a match.
+01:02:51 Okay, so there's a club, right, and this is a club so let's match them, ready?
+01:02:56 Oh! It matched!
+01:02:57 And it even disabled them.
+01:02:59 Okay? But I have no idea how many points I got because there's no score on here, so, obviously, we need a score, so let's put the score in.
+01:03:06 Hopefully by now you can imagine easily how we would do the score, simple, just like flips, we just grab a label here and then drop it down in here, I'm going to say score zero, because that's what I wanted, oops, that's what I wanted to say when we start up.
+01:03:23 And yes, it's possible you could load these strings up at start up, we'll talk about when and where to do that in your code in the next couple lectures.
+01:03:31 So I have this score, I obviously need to be able to talk to it, so I control drag up here into my interface to create an outlet.
+01:03:39 I let go, this one wants to be an outlet, not an outlet collection, but an outlet.
+01:03:43 I'm going to call it score label, okay?
+01:03:46 It can be weak because we know that the view is going to point it, it is the UI label.
+01:03:51 There's an outlet for it.
+01:03:53 I'm just going to update it in update UI.
+01:03:55 So I'm going to say self dot score label equals NSString, string with format, we'll say score colon percent d, and where do we get the score?
+01:04:09 [Pause] Anyone know where we get the score?
+01:04:13 From the game, exactly!
+01:04:14 From our model, self dot game dot score.
+01:04:17 Okay? Now I'm going to go show that just to make sure everyone understands that.
+01:04:22 Here's my card matching game, remember that in its public API, it has the score.
+01:04:30 Okay? And we're keeping the score when we're choosing.
+01:04:34 Okay? Everybody cool with that?
+01:04:37 So that's it.
+01:04:38 That's all we need to do here, to update the score.
+01:04:42 Normally we have, oops, this needs score label dot text.
+01:04:46 Sorry. Alright, we need the text property of the UI label class and we're calling it setter here, set text, this is basically what's happening here and setting the score.
+01:04:55 Okay? One other thing I'm going to do just in case the score is really big, so make that wide, and run.
+01:05:03 And we'll talk about, by the way, text fields that get larger when you put text in them and stuff like that, there's a way to handle that in iOS, as well, we're not, we can't talk about it, everything all at once though.
+01:05:15 Alright, so let's see here.
+01:05:16 Minus one.
+01:05:17 Why did I get minus one?
+01:05:18 Because I have a cost to flip.
+01:05:20 So every time I flip a card, I got to pay, alright?
+01:05:23 Now here's a spade and here's a spade, alright?
+01:05:26 So what's going to be my score after I click this?
+01:05:29 Well, clicking this still going to cost me one, so that's going to make my score go down to minus six, but I'm going to get one point for matching times my match bonus of four, is four more points.
+01:05:40 So my score should be minus two.
+01:05:43 Alright? And it is!
+01:05:45 Woohoo. Okay, and let's see if we can find ranks that match.
+01:05:51 [Pause] Oh, there's a six and here's a six.
+01:05:53 Okay, so I'm going to make these two match, so what's this going to be?
+01:05:56 Alright, so we're at minus 9 now, when I click this one, we're going to be at minus 10, but they're going to match.
+01:06:01 I'm going to get four points for the match times my match bonus of four is 16 points.
+01:06:05 So I'm going to be at plus 6.
+01:06:07 Everyone agree with that?
+01:06:09 And there we are, score plus six.
+01:06:12 Okay? Alright, so that's it.
+01:06:15 That's as much as I'm going to do and I'm, we got some slides here at the end, but that's it on the demo here.
+01:06:22 And your assignment is going to be to make it so you can match two cards or three cards, you can have a little switch or some sort of UI to choose between whether you're matching two cards or three cards, and so that's going to require some change to your logic in your model.
+01:06:39 It's going to require a little bit of UI and it's going to require your controller to do a little bit of glue in between that.
+01:06:46 You're also going to be asked to add another label in here that says what's going on.
+01:06:52 So when I click this, it should say you chose the seven of hearts.
+01:06:55 When I choose this, it should say seven hearts and two of clubs did not match, minus 2, or something like that.
+01:07:02 Okay? So, if you pick two things that do match, like, [pause] those two hearts, it should say four of hearts, seven of hearts match for whatever points.
+01:07:14 Question?
+01:07:15 >> How would you test your program on a device?
+01:07:18 >> How would you test it on a device?
+01:07:20 Okay, let's run this on a device actually.
+01:07:22 Great question.
+01:07:23 So I have a device attached over here, which you can see, and it's asking me to update, which we're not going to do right now, and if you look up at the top of XCode, you'll see that there's a bunch of different simulators you can run on and you can also run on a device if you have it attached, and we're going to have a Friday section probably next week, or maybe the week after, where we're going to show you how to register your device if you don't know how to do that and get this all set up.
+01:07:50 So this is a bit of a preview, but I'm going to actually run this on the iPad.
+01:07:52 So I just pick iPad, and hit Run, and it runs on the iPad.
+01:07:58 And I'm going to start doing this for most of the demos, is running it on a device instead of running it in the simulator.
+01:08:05 It's a little nicer because the screens a bit, little bigger as you can see, and so here it is on my iPad here.
+01:08:12 And so I can tap and oop, it crashes.
+01:08:16 Oh, well, that's not good.
+01:08:18 What did I do wrong here?
+01:08:21 Well, I don't know what I did wrong, but I messed it up when I preset this up so I'm sorry about that, but I will show you that, I'll start running all my demos hopefully on a device starting with next Wednesday's thing and hopefully I won't make this mistake, sorry about that.
+01:08:36 Anyway, okay, so that's it.
+01:08:38 Any other questions about it?
+01:08:39 >> For more, please visit us at stanford.edu.

@@ -1,0 +1,845 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:09 >> Okay. Well, welcome to lecture 15 of CS193p for fall of 2013/14.
+00:15 And our primary topic today is going to be the map kit, which is kind of the UI on what we talked about on Monday.
+00:22 As part of that, though, especially in the demonstration that I do, I'm going to show you two things about SegwayÃs that are pretty important.
+00:27 One is how to fire off a segue from code.
+00:30 So far all the time that we've made a segue go, we just control, dragged from something in a storyboard to another storyboard, and then we clicked on that something.
+00:38 It would segue, so now we're going to able to fire off a segue from in code.
+00:42 And then I'm also going to teach you a new kind of segue today, which is the embed segue, and I'm going to demo that, as well, in a big demo that shows you all the map stuff and manual segue and the embedded segue.
+00:53 Okay? So that's what's on tap for today.
+00:58 And, [pause], so, map kit.
+00:59 So what is map kit?
+01:01 Map kit is basically user interface for locations and its primary class is this UI view, called an MK map view.
+01:11 The whole map view stuff is in a different framework, called a map kit framework.
+01:15 When you want to use the map kit framework you have to actually explicitly go into your project settings and set it to be linked.
+01:22 Otherwise, all these classes like MK map view won't be there, and I'm going to show that in the demo, how you do that.
+01:28 So, inside of the map view, you have these little pins, okay?
+01:33 They look a little red pin there, they can be different colors.
+01:35 These are called annotation views, okay?
+01:40 So every annotation view in there, and you, you can customize this, you can subclass annotation view to make it not look like a pin if you want.
+01:47 But these annotation views are responsible for showing some place in the world, and they have a pin, but then they also have this little call out, if you click on them, you see that little white bar right there?
+02:00 And that call out can be customized, a little bit.
+02:04 The title that's in it and it can have a little subtitle and also it can have left and right accessory views, so this one has a left accessory view, which is an image view, and there's a right accessory view which is a little button that you can click on.
+02:17 So in our demo we're going to do all of this.
+02:19 Okay? And we're going to cover all of these various parts, what's going on.
+02:24 But the main thing to understand is how you create a map view and how you put these things on the map, so map view, just alloc init, or more often we drag it out, from the palate, in Xcode, and the, the way we put the pins on there is we add these things called annotations, okay?
+02:42 So an annotation is really just an ID, the response to this protocol.
+02:47 See this MK annotation protocol up here.
+02:50 So any object in your entire application that responds to this protocol can just be dropped onto the map view.
+02:58 Okay? So what's in this protocol?
+03:00 Very simple, it's got a couple optional methods, the title and subtitle, so in that little white call out that we saw, that's going to be the title and subtitle there.
+03:06 And then it's got a very important required property, which is the coordinate.
+03:12 So the coordinate is just the latitude and longitude, as specified by this CL location coordinate, C struct.
+03:18 And so any object that can answer these, really just this one question of the coordinate, but usually we want title and subtitle 2, can be thrown on a map, and, for example, in the demo that we're going to do, we're going to extend photo mania.
+03:33 I'm just going to throw photo objects in there.
+03:35 In fact, photo objects already implement title and subtitle, so all we really need to do is make a photo object be an MK annotation and respond to that protocol, is to implement the required coordinate method and that's what we're going to do and then we can just throw photos on the map.
+03:47 We don't have to make any other special classes or anything, just throw the photos themselves up there.
+03:54 When you're setting the annotations, this property, there's a property on MK map view which is an NS array of annotations, that's all the annotations that the map view is showing, but that's read only properties, so you can't set the array that way, you have to use these add annotation methods or add annotations, and same thing removing them.
+04:11 So you add and remove them with these methods, you don't manipulate that array directly.
+04:17 It's a pretty good idea, if you can, if you have the information, to add all of your annotations up front to the map view.
+04:24 Adding an annotation is actually pretty low overhead, especially if that annotation is not on screen currently.
+04:30 And that's because those MK annotation views, the little pin that does the call out, those things are reused like a table views rows.
+04:38 Okay? So if you have hundreds of annotations, but only five of them are on the screen, you're only going to create 5 of those MK annotation views, and as you kind of move around in the world and they go off-screen, they'll get reused for new ones.
+04:51 Okay? So letting the map view all the annotations up front, it's nice to help it manage its internal performance, or whatever.
+04:59 So it's generally recommended, but you don't always know, sometimes you don't know all the annotations up front, it's happening in real time or something.
+05:07 So, [pause] what do annotations look like?
+05:11 They generally look like a pin, but there's a lot of methods that you can call in MK annotation view and you can also subclass MK annotation view to draw something different in a pin, and this call out is a little more difficult to subclass and make different.
+05:24 So if you can get by with just doing this left and right call out business, then that's good because that's easy.
+05:32 If you want to do more, then it's kind of beyond the scope of this class and you're going to have to do some searching around.
+05:37 It's doable, but doing something different than that basic call out with title, subtitle, left and right accessory view is a little more difficult.
+05:45 What, the contents of that call out are kind of interesting, when do you set those up?
+05:50 Well, there is a map, okay, the map view has a delegate we're going to talk about, and one of the map view delegate methods is essentially build this MK annotation view for me, including the left and right accessory views, you know, alloc init those, as well, and you can load those up at the time you build it, or you can wait until the pin is pressed to load those up.
+06:11 Now why would you want to wait till the pin is pressed to load up those annotation views?
+06:16 Well, let's look at this example right here.
+06:17 You've got that thumb nail.
+06:19 What if that thumb nail is, requires a Flickr fetch?
+06:23 Okay, well you don't want to fetch that photo for all the pins in the entire world, or even all of the pins that are visible on screen.
+06:30 You only want to load that Flickr, do that Flickr fetch, when a pin is clicked on.
+06:35 So there's this delegate method in the map view called map view did select annotation view, it'll get called when you click on a pin, that's a good place to like do that Flickr fetch.
+06:42 Okay? Load up the call out.
+06:44 And we're going to do that in the demo and see how that works too.
+06:48 So, we have these MK annotation views that are going to show these ID MK annotations, how do those two get connected up, and they get connected up by this map view delegate method called map view, view for annotation, and it returns a view for annotation.
+07:03 This is almost exactly the same as self row and index path and table view.
+07:08 Okay? So for running this path, you give it a section and a row, it gives you back a UI table view cell, which is a view to display that row.
+07:14 Same thing here.
+07:15 It's going to give you an annotation, and you're going to give it back an MK annotation view to draw that annotation.
+07:21 Okay? Now, map view even has this mechanism.
+07:25 The DQ reusable thing, like table view has.
+07:28 Right? So you can say sender, which is the map view there, DQ reusable annotation view with identifier, you give an identifier, and if it's got a pin view on MK annotation view that it got thrown off the screen and it can reuse it, it'll bring it in, and give it to you here.
+07:44 Okay? But if it doesn't have any, then in the table view case, what happens?
+07:48 We, the system will automatically duplicate that prototype, right?
+07:51 You got the prototype cell that we set up in the storyboard, and you'll duplicate it, but that doesn't happen here, because we don't get to do that in the map view, the map view doesn't have all this mechanism for prototype cells and everything.
+08:00 So, if that comes back as nil, the DQ reusable, then we have to alloc init the MK annotation view ourselves.
+08:07 So here, for example, I'm making an MK pin annotation view, which comes in iOS, it's the thing that can draw a red pin, I think you can do purple and one other color, and I just alloc init with init with annotation, reuse identifier.
+08:21 Now the fact that I passed that reuse identifier there when I alloc init, it means that if it ever gets thrown out, it will come back in the reuse queue.
+08:29 So that's the thing that ties it to the reuse queue, so that's how things go back and forth.
+08:33 And then, inside there, I might also set up my left and right accessory views, maybe not put the content in there, like the image, but I might create the UI image view, right, and set that to be the left one and then set the button to be the right one.
+08:45 Okay? Outside of that, if not a view, okay, so now I have an a view either that I DQ'd or that I made myself, here's where I load up whatever is cheap to load up, okay?
+08:56 Into that MK annotation view.
+08:58 Okay? You wouldn't want to do expensive things here, we're going to wait till it's clicked.
+09:03 If this, if it's something that's going to be displayed immediately about the pin, like you're using a different image than the pin, then obviously you would need to set that here, you can't wait till it's clicked on to load that up.
+09:13 Okay? So what kind of properties are there on this MK annotation view, the thing you're returning from that method?
+09:20 There's obviously the annotation, there's the left and right call out accessory view, you see those are just UI views that you can set.
+09:26 There's whether [inaudible], there's even, there's even whether it's dragable.
+09:29 If the MK pin is dragable, then the annotation has to not only implement that coordinate method, it has to implement the set coordinate method.
+09:38 Okay? Because you're going to pick that view up, pin up, and move it when it drops, the annotation has to be moved, so it has to have a set coordinate method.
+09:44 Okay? Otherwise setting dragable here is not going to, to work.
+09:48 And then the image that you see here, this property, that's the image that replaces the pin.
+09:53 Okay? That's instead of the pin.
+09:55 That's not the image that's in the call out, that's, we're going to put in the left accessory call out view, call out accessory view.
+10:03 One thing that's kind of cool, if you set one of the accessory views to be a UI control, most notably a UI button, inherit from UI control, then, yeah, you can put that button in the call out accessory view and you can set up target action to it and that would all be fine, that would probably work, but since that's so common to do in a MK annotation view, there's a nice map view delegate method here called map view annotation view call out accessory control tapped that will get called if the person taps on it.
+10:31 So if you put a button in that little call out, and someone taps on it, this will get called, and you will know which annotation view was tapped on, right, and you won't have to do target action in that button.
+10:41 So we'll do that in the demo, as well.
+10:43 So, did select annotation view.
+10:46 So this is the thing that gets called in the map view, delegate map view, its called map view, colon, deselect annotation view, when a pin is clicked on, okay, when someone actually clicks on that red pin.
+10:55 Now, it's going to automatically put the call out up as long as you set the property can show call out in the MK annotation view, by the way, if you don't implement that annotation view, view for annotation delegate method where you build the view, it'll automatically create one for you, it's just going to be a pin, it's going to have no left and right call out accessory, but it will show the call out with the title and subtitle, okay?
+11:17 That's what you get if you don't do anything.
+11:18 We'll do that in the demo too.
+11:19 So, here in did select annotation view, I clicked on the pin, here's where I might say oh, let's do that Flickr fetch.
+11:26 You know, at least let's fire it off in another thread here.
+11:29 Okay? We don't even want to waste our time firing it off, and hopefully you're learning this in your homework too, you don't want to really fetch that thumb nail for a row that's not on screen, it's kind of a waste of time to do that.
+11:39 Same thing here.
+11:40 Until someone clicks on that pin, we probably don't want to fire this Flickr fetch off.
+11:43 When the Flickr fetch comes back, just like the table view, we're going to have to be careful to make sure that this call out is still associated with this annotation and all that because these things get reused, just like the table view rows get reused.
+11:57 But anyway, so this is where you could load up your call out accessory views.
+12:00 You could also maybe segue here.
+12:02 Okay? This might be a place to segue, but you would have to segue in code here, and, because there's no way in storyboard to like control drag from the pins, they're not on screen, until you start adding annotations, so here we could manual segue and we'll do that in the demo.
+12:19 [Pause] You could configure the way the map displays.
+12:21 Okay, first of all, the map's display is just like the maps app.
+12:25 So I'm not really going to go into all the things you can configure about the map, but pretty much anything you can do in the maps app, including the 3D and rotating around, and zooming in and out, all of that you can do with the map view, okay?
+12:37 Also including hybrid mode, where it's a satellite image overlaid with roads and all that, that's all doable.
+12:43 So you want to definitely check out the MK map view API to see all the incredible amount of things you can do.
+12:49 You can show the user's current location.
+12:51 Okay? So it'll go use that core location stuff we talked about in the last lecture, find out where the user currently is using GPS, it'll show that on your map.
+13:00 You can also restrict things about it, maybe you don't want the user to go into 3D mode, then you can turn the pitch-enabled off and it won't be able to pitch.
+13:07 Okay? They pitch by doing kind of a little two-finger gesture there, they won't be able to do that if you turn this off, same thing with rotate, maybe you'll always north up and you don't want them to be able to rotate around to a different, then you can do that.
+13:20 So let's talk briefly about the 3D of the maps, and a big issue with this 3D, it's not really 3D, it's kind of 2 and a half D, right?
+13:29 This is a 2D map, but, you know, it has some information about buildings and their 3D representations, so kind of when you pitch up, it can show you a bit of a 3D representation.
+13:38 The main way you're going to interact with that in code is you're going to want to specify where the camera is.
+13:43 Okay? Where is the camera that's looking at the streets, or whatever, that the person looking at the map, and you can specify the camera via it, where a coordinate or where the camera is, and which way it's pointing, and how much is pitch, and what altitude it's at, but one of the easiest ways to do it is using this class method here, camera looking at center coordinate from eye coordinate, eye altitude.
+14:06 So, the eye coordinate and the eye latitude, that's where your camera is.
+14:10 Where in the world, okay, using the coordinates, latitude and longitude, your camera is how, what is the altitude of your camera, in meters, and then what point are you looking at?
+14:20 You see how that's a way to set your camera?
+14:23 So you can do that to set your camera, one thing that's really cool about setting your camera, when you move from one place to another, you can kind of move your camera up into space and it'll animate that, and then come back down in the new place and it really orients your user where they are on the planet as they go from thing, from location to location.
+14:41 Question? No.
+14:42 Okay. [Pause] What about the region, what about where on the map we're, we're seeing?
+14:49 Okay? So the region is set with this property in MK map view called region.
+14:53 It's an MK coordinate region, an MK coordinate region is center-coordinate latitude and longitude, and then a span.
+15:00 Latitude and longitude delta, how many degrees of longitude, how many degrees of latitude that tells you what's showing in the map at any given time.
+15:10 Okay? And this is writable and readable, so you can set the map to it and you can also find out where it is now after the user is done pinching or whatever.
+15:17 You can also just have the map keep its current zoom and just move around by setting the center coordinate.
+15:24 Okay? This is all exactly what you would expect, is this map class is super powerful.
+15:28 I mean, one of the more action-packed classes in all of iOS, which [inaudible].
+15:35 And there's a ton of C functions to convert between.
+15:38 Okay, this is just a view, map view is a UI view, and of course you've got map coordinates in latitude and longitude, and then you've got view coordinates in X and Y.
+15:46 So sometimes you want to convert between those two, so it's got a bunch of C functions for doing that and a bunch of methods, as well, so that you can kind of find out what's going on, where they're touching, what's causing things, etc. So there's a lot, a lot in the map view there.
+15:59 This map view delegate method, there's about 20 map view delegate methods, I can only cover a tiny few here, like view for annotation and did select annotation view, but another interesting one is did change region.
+16:13 And the reason this is interesting, this gets called, if the map is animating, moving around, changing the camera or something, when it's done, it'll be showing a new region, it'll send this message to you.
+16:25 Why is that important?
+16:26 Why would you want that?
+16:27 Well, because if you're going to do animation, like I'm showing San Francisco and the user now wants to see New York, if you just say set the coordinate New York, it's going to go whoosh, over to New York, and the whole country is going to rip by in about half a second.
+16:40 So it's not going to be much of an animation, but if you want to move your camera up over the United States a few thousand meters, and then go back down, okay?
+16:49 You'll need to know when you get up to the top so that you can start the animation going down, and so, region to animated will get called when you get to the top, you start the animation to move the camera to the top, when it gets to the top and the region is set, it'll call you this, and the region will be the whole United States, and then you can start your animation and go back down.
+17:06 Okay? And really, for nice apps, you might go up, down to New York, and then drive down the street, okay?
+17:13 It's kind of really cool animation, that each of those steps, you want to use this to go to the next step, not the completion handlers of the animation things, this is much better, because this is going to have all, it's going to do all the rotation, want everything settled down, it's almost like the settle down, the did pause we had in the dynamic animator, okay?
+17:30 So that's an important method to know if you're going to do good map animation.
+17:34 Alright, so in addition to the map view, we also have searching.
+17:38 Okay? So local search, kind of like a geo coder, but lots more powerful.
+17:43 This basically lets you have, specify, let's your user specify a natural language query, like here I might create a search request for 'Ikes', okay?
+17:51 And I might search in a region which is Stanford Campus, and then I fire this off, of course, this is going to go over the network, not all this information is on your device.
+18:00 It's going to go over the network, it's going to do a fetch, going to figure this out, and it's going to return to you and call you to this completion handler so you do it with start , ith completion, it'll call the completion handler later, and you're going to get an array of MK map items, okay?
+18:14 MK map items are basically things that describe a place on the map.
+18:18 And they have inside of them an MK place mark, which is detail about a place on the map, like the postal code or region it's in, things like that.
+18:27 MK map item is kind of cool because it, there's a method in there called open in map with launch options, and if you send that to an MK map item, it will leave your app, launch the maps app and show it there.
+18:38 So if you don't want to have a map view and all that stuff, you can still use this local search and then switch over to the maps app if you want to show them that particular location.
+18:46 Yeah?
+18:48 [ Inaudible Background Question ]
+18:53 Yeah, so the question is what about the tiles of the map itself?
+18:56 All that map data?
+18:57 Yeah, that's clearly not on your phone as well, that's downloaded too.
+19:00 So when you first look at a place on the map, it's just going to be like a grid, kind of like the hollow deck in Star Trek or whatever, like just a grid, and then it's going to fill in with the tiles.
+19:09 Okay? And depending how fast your network is, that's how fast it's going to download it.
+19:12 So yeah, that's all happening, though, in the background, you don't even know.
+19:15 You have no idea what's going on.
+19:16 You can find out there are delegate methods that said got this title, you know, it'll tell you if you want to know, but generally you don't care.
+19:23 There's also a way to get directions from one place to another.
+19:28 So, you just create this MK directions thing, you're going to specify an MK map item at the beginning, at the end, and it's going to, again, go asynchronously over the network and give you back a list of possible roots that you can take, and these roots are going to come back with text descriptions, you know, take highway 101 for this much, or whatever, and also they're going to come back with the MK polylines.
+19:52 An MK polyline, exactly what you would think, it's a bunch of lines, and this polyline, you can see the blue line here, or the purple lines, will, it's basically a description of how to draw and go from place to place in the map, which is really, really cool.
+20:07 But it does beg the question if I got a polyline, in hand, how do I put it on the map?
+20:11 How do I draw it on the map?
+20:13 And the answer is we draw on the map using overlays.
+20:17 Okay? So overlays are essentially descriptions of some shape that you want to draw on the map.
+20:24 So a polyline would be one, but you could also do circles, you know, arbitrary polygons, things like that, and the way this mechanism works is you create this shape, like an MK polyline, you add an overlay, you see that add overlay, the level there is whether it's above the roads or just above the, or above the labels, which is kind of on top of everything in the map, so you could have the polyline be on the roads and have things like 280 symbol be above it, which looks really cool.
+20:51 But then, the MK map view is going to ask you later, okay, now I need a renderer to draw this thing on the map.
+21:01 Okay? An MK overlay renderer, which is a little bit like that MK annotation view, except for an MK overlay renderer is not a view, it's more of a mechanism for drawing on the map, and then that renderer will be used to render on the map.
+21:14 Now, these renderers come with iOS, there's a whole bunch of them, circle renderer, polyline renderer, polygon, there's a tile renderer.
+21:23 The tile renderer is cool because it just renders bit maps, okay, and you can actually use it to replace the data, instead of the data, that comes from Apple.
+21:32 So if you had your own custom map, you could have this tile and it's a little bit involved, because you're talking about being able to zoom in and out and it has an API for that, but you could possibly replace, or you might just want to tile some image over a certain place in the world.
+21:46 And so all that stuff is built in with this MK shape stuff in, in MK overlay.
+21:52 So, overlays are really pretty cool and you can do a lot of stuff with them, so I encourage you to kind of look at that.
+21:59 Okay. So that's it for maps.
+22:01 And I'm going to do a big demo of all this stuff so you can see all this stuff in action, but before I do that, there's another thing I'm going to do in the demo that I want to talk about briefly, which is embed segues.
+22:09 Okay? So, so far about segues, you know how to do push segues, when you're in navigation controller, you know how to do replace segues in a split view, although we didn't demo that and it's pretty rare to actually replace the detail or the master.
+22:23 In a segue, we usually just leave the detail there and go look for it all the time, like we did in photo mania.
+22:28 Pop over segues, we saw that last time, okay, where we said we'll do a pop over.
+22:33 And here's another one called embed segues.
+22:35 And an embed segue is really cool, you create a UI view inside the view hierarchy of some view controller, and inside that UI view, is the self dot view of another view controller.
+22:48 Okay? So you basically take another view controller's self dot view and embed it as a UI view inside another one.
+22:55 Okay? So, that allows you to build pretty complex views and still divide up the responsibility for a rectangular area into MVCs, okay?
+23:06 And I'm going to do this in the demo so you get a little better idea of what I'm talking about here.
+23:12 Xcode makes is really, really easy to do this.
+23:15 You just go to the object palate and you're going to find something down there called container view, you drag that container view into the view you want and then it's going to actually automatically create a little view controller with a segue to it, but you can control, drag from this container to any VC you want to be embedded there.
+23:34 Okay? And then once you add control, drag, it's just like any other segue.
+23:38 It's just a segue.
+23:39 It has to be prepared, right?
+23:41 Because it's going to be displaying something in there, presumably.
+23:43 But otherwise, it's exactly the same.
+23:45 And not only is that segue exactly like any other segue, the view, that container you see right there, that's just like any other UI view.
+23:52 So, in the post view controller, you can set its dot hidden if you want to hide it.
+23:58 You can change its frame, okay, you can animate its frame changing, moving around.
+24:03 You can do anything you want, it's just kind of an opaque UI view to you, it's part of your view hierarchy, you can take it out of the view hierarchy, put it back in, okay, it's just that its contents are going to be drawn as the self dot view of some other view controller.
+24:17 Okay? [Pause] Yeah.
+24:17 The timing [inaudible] this little bit thing to be careful of is the timing of setting things, because when does this embed happen, okay?
+24:29 When does it's prepare for segue happen, basically?
+24:32 Relative to other things happening in that view controller that it's embedded in, like that things outlets being set, etc. And the answer is it happens pretty early.
+24:40 Okay? Before outlet setting, just like all prepare for segues do.
+24:44 So a lot of times you're going to have to do whatever code you do in the prepare also in your outlet setting, if they depend on each other.
+24:51 Okay? And we've already seen this in photo mania before, anything you do in your prepare for segue that depends on an outlet, you're going to do it in prepare segue, you might also do it in the outlet setter.
+24:59 Okay? So whichever one happens second will do the actual work.
+25:03 Does everyone understand what I mean by that?
+25:06 No? Yes? Who does understand what I mean by that?
+25:11 Nobody. Okay, well.
+25:13 Okay, it's maybe a little hard to conceptualize without seeing it, so in the demo I'll talk about it again and hopefully it'll make sense.
+25:20 Alright, so let's do this demo.
+25:22 This is a very big demo.
+25:23 I think I have enough time to do it all.
+25:27 Notes here, make sure, in case I forget something.
+25:32 Okay. So what are we going to do?
+25:34 We are going to start with photo mania where we left off, so here's the exact photo mania we had before.
+25:41 Where we left off.
+25:42 This time we're going to work in this iPhone, in the iPhone storyboard and then we'll copy it over to the iPad storyboard, so we're kind of going back and forth working on each one.
+25:52 Today we're going to go work on the iPhone one.
+25:55 So, what are we going to do here?
+25:56 So this, hopefully you recognize this.
+25:58 Right? This is our storyboard, this is a bunch of photographers.
+26:02 We click on a photographer, we get all the photos by that photographer currently in a table.
+26:06 So what I'm going to build is same UI here, almost exactly, except for that instead of a table of the photos, I'm going to put a map of the photos up.
+26:15 Okay? With a pin for every photo by that photographer.
+26:18 So I'm going to need a photos by photographer map view controller, instead of a photos by photographer core data table view controller.
+26:25 Okay, I'm still going to pull all of this out of core data and everything, but we're not going to be doing a table view.
+26:30 Does that make sense?
+26:31 What I'm going to do?
+26:32 Alright, so let's go ahead and drag, create that view controller.
+26:37 So a map view controller is just a view controller, so I'm drag out a view controller here.
+26:41 We'll put it under here because it's going to be replacing this guy right here, which is the table view controller of it.
+26:48 Now, as with any view controller, I need a class for this, right now it's, you know, UI view controller, so I need a custom subclass, let's go create that.
+26:57 And that custom subclass is going to be a regular, old UI view controller.
+27:02 Oops. UI view, view controller, and I'm going to call it, to be consistent, photos by photographer map view controller.
+27:14 They're getting to be pretty long names here, but, I could call it map MVC, but that's kind of weird.
+27:20 So we'll call it map view controller, alright?
+27:22 So photos by photographer map view controller, we'll put it where we put everything, we'll put it in with our controllers, right there.
+27:29 We got that.
+27:31 In our storyboard, let's go ahead and set this thing to be a map view controller.
+27:36 Here it is, photos by photographer map view controller.
+27:39 Let's build a UI for this thing.
+27:42 Actually, before we do that, I always like to do my public API for any new class.
+27:47 The public API for this class is exactly the same as the public API for the photos by photographer core data table view controller.
+27:54 Okay? In fact, we just copy and paste it here to this thing.
+27:59 Alright? [Pause] Woops.
+28:01 And of course we need to be import here.
+28:03 Okay? So it's the same thing.
+28:07 You set this photographer in our map view controller, and instead of showing the photos by that photographer in a table, it's going to put them in a map view.
+28:15 So let's go back to our storyboard and build the UI for this thing.
+28:19 And so, let's make a lot more space here.
+28:22 And go like this.
+28:24 Get our assistant editor up here.
+28:26 Let's go to automatic mode .
+28:29 Go here. So, here is the code for our map photos by photographer map view controller, we don't need any of this business.
+28:38 Clear that out.
+28:40 We're going to need a map view, so let's go ahead and grab a map view, that is just a view like text view or any other view, here it is right here, map view.
+28:47 So I'm going to drag that out, put this in here.
+28:51 Maybe I want to do its constraints, already set to suggested constraints.
+28:56 Let's go take a look at those and make sure it did something sensible.
+28:59 Oh. Yep, looks very sensible, so it's going to stick to the size, so whatever size our self dot view is it's going to stick to it.
+29:05 Let's create an outlet for this map view.
+29:08 So I'm just control, dragging, I'll call it map view.
+29:11 Alright? So we got an outlet there.
+29:14 Notice that we have this error and warning here.
+29:19 Okay? What's the problem?
+29:20 The problem is we have to import MK map view.
+29:24 So let's do that.
+29:25 Import map kit slash map kit.
+29:28 Now, I told you that map kit, it's not enough just to import map kit like you did for everything else we've done so far.
+29:34 We have to go to our project settings, over here, at the top, and in our project settings, along the top, you're going to see this thing here called build phases.
+29:43 And the build phases specifies what frameworks we link with.
+29:46 Link binary with libraries, okay?
+29:48 So don't forget this part or when you run your app it's going to say oh, no such class, MK map view.
+29:53 Alright? So we're just going to hit plus.
+29:55 Now when you do that you're going to see that iOS 7 has a lot of libraries and frameworks that you can pick from here.
+30:02 And luckily it lets you search them, so I'm just going to type map, and here I get map kit.
+30:06 So now I've included map kit, I'm linking it in with my application so it'll work.
+30:11 Okay?
+30:13 Alright, so we've got this map view.
+30:15 One thing I want to do right off the bat is set myself to be this map view's delegate, okay?
+30:21 Because I'm going to use all those map view delegate methods we talked about in the slides.
+30:26 So, I have this here.
+30:27 So this is the setter for map view and I'm just hitting underbar map view is map view, and here I'm setting the map views delegate to be myself, of course it's warning me, because I have to implement MK map view delegate, so I will do that.
+30:39 MK map view delegate, and now the warning goes away because there are no required methods in the MK map view delegate protocol.
+30:48 All of them are optional.
+30:49 Okay? Now, one other thing that I probably want to do here is what I always want to do when I have a public API that kind of sets my model, which is to do things like self dot title equals the photographer's name, okay, that's a nice thing.
+31:08 And [pause] I also, here, every time I set that photographer, I kind of need to reset the photos by photographer, right?
+31:16 Because the whole point here is that I show the photos by photographer, if you change the photographer, I need to change those photos.
+31:22 So, to do the photos by photographer thing, I am going to create a [pause] new property.
+31:31 Okay? Called photos by photographer, so let's add that, property, nonatomic strong, it's just going to be an NS array, NS array, start photos by photographer.
+31:45 [Pause] Okay, and this is going to be of photo objects.
+31:52 So let's go ahead and import photo here too.
+31:54 We're going to need that.
+31:56 Okay, and, here's the getter for photos by photographer.
+31:59 Very, very simple, alright?
+32:00 It's the getter, so I'm just saying if the photographer, photos by photographer is not set yet, then I'm going to go fetch them from the database.
+32:07 So I create a fetch request, it's for photos.
+32:10 I create a predicate, who took equals self dot photographer, and here, we're in the table view, I set the fetch results controller, here I'm actually going to execute the fetch request in the context.
+32:22 And that returns an array, which is this array that I'm going to store right here, and then we'll return it.
+32:28 Now every time we set the photographer, I better reset this thing to nil.
+32:34 Okay? It's going to lazily do this fetch whenever someone actually wants it, but I better set it to nil every time the photographer changes, otherwise it's not going to do this lazy instantiation.
+32:44 This lazy instantiation is nice because this is core data fetch, but it's still work, and I don't want to do this work until someone actually wants those photos by the photographer mechanism.
+32:54 Alright. So the other thing we need to do is, when our map view is set or when our model is set, we need to update the annotations.
+33:01 Okay? We've got all those annotations on the map that are going to be the photos by photographer, so we got to update those.
+33:06 So we're going to have a method here called update, what'd I call it, map view annotations.
+33:14 And we're going to have call this both from here [pause], when we set the map view, and also from here, [pause] when we set our model.
+33:26 Because we don't know what order this is going to happen.
+33:28 We don't know if our model is set before our map view or if our map view is set before our model.
+33:34 Either way, this update map view annotations better do the right thing.
+33:38 Okay? So that's why we're calling from both.
+33:41 So, how are we going to implement this update map view annotations?
+33:44 Well, I told you what we're going to do, we're going to make a photo object be an MK annotation so that all we need to do to update that map view annotations is add the photos to the map.
+33:56 Okay? So how are we going to turn photo into an [inaudible]
+MK annotation?
+34:01 And the answer is two-fold.
+34:03 There's two things we need to do.
+34:04 One thing, we need to fix our model, or our, you know, core data database, to have the latitude and longitude, otherwise, if we don't where the photo is, we obviously can't show it on there.
+34:14 Right? So, I'm going to add latitude, luckily Flickr provides this information, longitude, and while I'm here I'm also going to add thumb nail URL, and I'll show you what we can do with that in a moment too.
+34:26 So a thumb nail URL is a string, it's actually a URL, but strings the best we can do.
+34:30 Whereas the latitude and longitude are doubles.
+34:33 Okay? Double precision, point and point numbers.
+34:36 Okay? So I'm just adding this to my database.
+34:38 I'm going to go up here and create my managed object subclasses for photo mania, I only change photo, so let's just only regenerate photo.
+34:46 We'll put this, same place, as we usually do, it's asking if I want to replace the other ones, of course I do, and now our photo has a latitude and longitude.
+34:56 Okay? Notice these are NS numbers here, because everything in the database is an object.
+35:01 Of course we need to update Flickr's loader, our photo plus Flickr category, right, which does the loading of all this stuff, to load up the latitude, here I have a thing for that, so here's the latitude being loaded up, here's the longitude.
+35:15 It's just looking at the photo dictionary for the latitude and longitude.
+35:19 I actually take the double value and then turn it into an NS number just in case this is a string.
+35:25 Okay? Cause strings implement double value too, or that'll interpret themselves as a double value, so I'm just going to be double safe.
+35:31 I'm not quite sure what I'm going to get back from Flickr, whether it's a string or a number in the [inaudible], so I'm just being safe there.
+35:38 And then here at the thumb nail URL, I'm just grabbing the Flickr photo format square, which is what you're using for your thumb nail also in your homework.
+35:46 Okay? So now we've got our data model being loaded up with photos from Flickr that have enough information.
+35:53 Now we need to make photo be an MK annotation, and to do that, I'm going to add another category.
+36:00 Okay? I could put in that Flickr category, but it's not really a Flickr thing that it implements MK annotation.
+36:05 So I'm going to create a new category called the annotation category, on photo.
+36:11 Okay? We'll put that, it's still part of our model.
+36:16 Here's the annotation interface, okay?
+36:20 And, and this is, is empty.
+36:22 So, what am I going to do here?
+36:23 Actually, all I'm going to do is say photo is an MK annotation.
+36:28 Okay? And I'll have to import.
+36:32 [Inaudible] here.
+36:33 Okay? So I've said that photo is an annotation.
+36:36 Now I can put photos in that map view.
+36:40 Okay? But if I look at the implementation over here, you're going to see that there's a warning.
+36:46 What do you think this warning is?
+36:49 Nobody? [Pause] Shirley, yes?
+36:55 Yes, missing methods.
+36:56 Because I said, here, that I implement the MK annotation protocol, but I don't implement that coordinate thing, so if I click on this it says property coordinate has to be defined.
+37:06 Okay? So let's implement coordinate here.
+37:10 It's really easy to do.
+37:11 We just have to return a CL location coordinate.
+37:13 I'm going to get it by just getting my latitude and longitude as double values.
+37:18 Remember, these are NS numbers, these are doubles.
+37:22 Okay? So now I don't have that warning.
+37:24 Now a photo is an ID angle bracket MK annotation, and now I can just put a photo into a map view as an MK annotation.
+37:32 So let's go back and do that.
+37:34 There's my map view.
+37:35 Here's the update map view annotations.
+37:37 First, I'm going to remove all of our existing annotations.
+37:42 [Pause] Okay, so I'm just removing all the annotations that are currently in the map view, and then I'm going to add annotations self dot photos by photographer.
+37:55 And I can, these are photo stars, but they're also ID angle bracket MK annotations.
+38:00 So I can call them here.
+38:02 Okay? If we look at the documentation for add annotations, you'll see it takes an array of MK annotations, and a photo is that.
+38:10 I'm going to do another cool thing, which is I'm going to zoom the map in to show all the photos by this photographer.
+38:19 Okay? Now I'm doing this in an animated way, but that just, that's not really going to like zoom out and then zoom back in like I was talking about, it's not going to zoom on over to where it is, so it's not great animation, you're probably going to want to do something much better than this.
+38:33 Okay? So that's really all we need to make this work.
+38:37 One thing, which you've I'm sure learned, is that we've changed our core data base model, so the photo mania that's already on my device or my simulator, I'm going to want to delete that.
+38:49 Okay? Because it's database is now incompatible.
+38:52 It doesn't have latitude and longitude and thumb nail URL in there.
+38:55 So let's go ahead and run this.
+38:59 [Pause] Hopefully our network is working and we can get stuff from Flickr.
+39:05 There it is, we got some stuff.
+39:06 And now, what we'd like to have happen here is we click and instead of a table view here, right, we'd like to see this map.
+39:15 Okay? So how do we do that segue?
+39:16 Alright, we have this iPhone thing here.
+39:20 We've got this nice map view thing ready to go, we want to segue to it, so this segue that goes here, we want it to go down here.
+39:28 Really easy to do.
+39:29 All we have to do is make sure it all fits on screen, so I can show it to you.
+39:34 Here we go.
+39:34 I'm just going to segue by control, dragging from this row in the photographer's table view, down to our new one, okay?
+39:42 It's a push, because we're in the navigation controller, and knows it took away this segue because I can only segue from this row to one place, and now I'm segueing to our map view down here.
+39:52 Okay? So now we have this segue.
+39:54 Now what about photographers control, core data table view controller?
+39:58 It has to prepare for segue properly, right?
+40:00 So here's where it's prepare for segue with the photos by photographer core data table view controller, so, we're going to do the same thing here with a [pause] map view controller.
+40:13 Okay?
+40:14 So here, this is almost exactly the same code, it's just that I'm doing photos by photographer map view controller instead of photos by photographer core data table view controller.
+40:22 And we have these because we have to import, so let's go and import our photos by photographer map view controller, okay?
+40:29 Hopefully it gets rid of all our worms, that's good.
+40:32 So now we have this segue, so let's try again.
+40:36 And hopefully our new segue will work.
+40:38 We got the photographers, we click, we got pins on the map, okay?
+40:42 Showing all those photos by that photographer, and if we click on a pin, it's actually going to show us the title and subtitle.
+40:50 None of these have subtitles, let's see if we can find somebody who has subtitle.
+40:54 There we go, there's one, this person gets around, from Scotland all the way down to somewhere off the coast of Africa there.
+41:00 Okay? So this is kind of cool, but we can't do our next step of our segue, we can't segue to showing the photo, and also, wouldn't it be cool if we had a little thumb nail of the photo in here?
+41:14 So that we could kind of look around at the various photos taken by this guy until we find the one we want, and then we'll click on something over here to segue over to our showing the photo in its grand, all its grandeur.
+41:25 Okay? So let's do that.
+41:26 Let's put these accessory views in.
+41:28 Let's go back here to our map view controller.
+41:32 Some space.
+41:34 Alright, so there's our map view controller, what we've done so far.
+41:37 And now we're going to do that map view delegate method, this is our first one.
+41:41 This is the one that returns an MK annotation view given a certain annotation.
+41:49 Okay? So this is called map view, view for annotation, it's going to give an annotation, that's going to be one of our photos and it's going to ask us to return a view for that annotation.
+41:59 I think for speed here I have something, yeah, let's do that.
+42:03 Okay, so this is going to do what we saw on the slides where it's going to have a reuse ID.
+42:07 I like, this, by the way, is a good code snippet to have.
+42:10 You can see this is kind of completely generic for doing a view for annotation and a map view.
+42:14 I like to use the name of my class sometimes as my reuse identifier, that's pretty unique thing to do for reuse.
+42:22 Here's the DQ.
+42:23 If the DQ doesn't work, I have to alloc init this thing, I still wanted to show a call out, I want it to be a pin and then here I'm setting up the view with anything I need to set up here, it's just setting the annotation.
+42:35 So, inside here is where we want to set up the left and right accessory views.
+42:40 So, let's do that.
+42:42 So the left one is going to be UI image view.
+42:44 Okay? So I'm going to create an image view here.
+42:48 UI image view alloc init.
+42:51 And I'm going to actually alloc init with frame and this is one of the places in iOS I really don't like.
+42:57 There is no way, no API, to find out how big is that call out?
+43:04 Okay? So I'd really like to know how big that call out so I can make my image view be a good size to really fit there, okay?
+43:10 So this is a place where you have to, unfortunately, put magic numbers.
+43:14 Okay? And the magic numbers I found that really work is an image view that is 46 by 46, that seems to really fit nicely in that left call out accessory view, right there.
+43:25 So that's kind of an unfortunate piece of this.
+43:28 So now I'm just going to set that as the left call out accessory view, and then the right one is going to be a button, I just want to do a button, so I think I have a code for that one, yeah, the disclosure button, so that's this code right here.
+43:41 So I'm just going to create a UI button, alloc init, okay?
+43:44 I'm going to set its background image to be this disclosure image I have right here.
+43:49 So let me go down here to my image assets.
+43:53 And let's drag this in, like that.
+43:55 Disclosure, I don't have a high-rise version, but that's okay.
+43:57 This is kind of, this is not a great solution, by the way, to do an image here, because really we want to respect the tint color of the map view and that arrow is blue.
+44:10 So that's bad.
+44:10 It'd be much better to either draw it or if we are going to use an image, you should come to Friday's section and understand how to change the color of an image using core image.
+44:19 Okay? That's what we're talking about in Friday's section this week.
+44:22 Little plug for that.
+44:23 But anyway, for demo purposes I'll use this thing.
+44:26 Now I'm going to size to fit this button to fit that image that I just did, and then I'm going to set it as the right call out accessory view right there.
+44:34 Okay? Question?
+44:35 [ Inaudible Background Question ]
+44:39 You mean is the, the, you know, I'm not sure.
+44:43 I believe it will size if you make a big view in there, it'll make it bigger, but it starts to not look very good, so you kind of want to pick sizes that make it stay the same size because of the title and subtitle.
+44:53 It's a little bit, the whole thing with the call out thing is a little bit, kind of, you have to tweak it pixel by or point by point, unfortunately.
+45:00 So, let's go ahead and take a look at what we got so far.
+45:06 Alright? So now if we look at a photo and we do the call out.
+45:09 We have room for the image.
+45:11 We're not putting the image in there yet, and we have this little button, which when we click on does nothing.
+45:15 Okay? So we're getting closer.
+45:16 So let's put this image in there, and let's make it so clicking on this segues.
+45:22 Alright. So, how do we put this image into the image view?
+45:25 Well, I'm going to have a little method to do it here called, what did I call this?
+45:30 Update left call accessory, yeah, so here's my method that does this.
+45:34 This looks like maybe a lot of code, but it's actually not that much.
+45:37 Mostly what I'm doing is introspection to find out if the left call out accessory view is, in fact, an image view.
+45:44 Because I might have multiple pins with different call outs.
+45:48 Some of them might be showing photos, but some might be showing something else.
+45:51 And maybe those are something else they don't have in image view as a the left call out accessory view.
+45:55 Alright? So I'm both checking to make sure that my call, left call out is an image view, I'm also checking to make sure my annotation is a photo, right, and not something else.
+46:05 Because it's perfectly reasonable on a map to have annotations, some of which are photos, some of which are something else.
+46:10 Okay? The hometown of the photographer or something like that.
+46:12 So that's what mostly what this is it just is introspection of those things.
+46:17 Once I have a photo and an image view, then all I'm doing is this horrendous image with image data, data with contents URL, and why is it horrendous?
+46:25 Of course because I'm blocking the main queue, but this is a demo so I get to do it, you get to do it in your homework, but I do.
+46:32 So, this is going to block the main thread for a short amount while it goes out to Flickr to fetch it, but you get the idea.
+46:38 I put the warning in, I'm sure I'll go back and fix it some other day, yeah, sure.
+46:42 Okay. So that's that.
+46:44 Let's go ahead and look at that.
+46:49 [Pause] Alright, so now if we click on something and we click on a pin, hopefully we'll get an image, maybe that guy didn't have, oh, that's not working, why is that not working?
+46:57 Oh! I, no, that's not why.
+47:01 Okay, so, oh, I see why [laughing], because we never called this.
+47:04 Okay, it'd be nice to call that.
+47:05 It would probably work better.
+47:06 So let's call that from here.
+47:08 Okay, this is the view for annotation.
+47:13 So I'm calling this left call out here from view for annotation, right, because I'm returning the little view for annotation, that includes building the call out view, so that'll work a lot better, I'm going to guess.
+47:24 Alright, so here we go here.
+47:26 Click this up, nice, that looks pretty good, right?
+47:28 So if we click on each one, we kind of get a little look at it and it kind of helps us decide which one we want to step on, press on, and we'll press on this one.
+47:34 Now there's a problem with the way I've done this though.
+47:36 Let's find somebody who has a lot of photos.
+47:38 Hopefully somebody has a lot of photos.
+47:40 Somebody, well, eh, looks like 15 photos is, or 16, alright.
+47:45 So let's click on this guy.
+47:46 When I click on this guy, look, it's taking a long time.
+47:48 Okay? And this is a fast Stanford network, so, it's not too slow, but it still, it's blocking the main thread, but it's blocking the main thread a lot.
+47:55 And why is that?
+47:55 That's because it's fetching the thumb nail image for all 16 of those photos, okay?
+48:01 All at once up front.
+48:02 So we do not want to do that, we only want to do this fetch when you click on the pin.
+48:07 So we're going to implement another map view delegate method, and you can see how many methods, delegate methods, the map view has, quite a few.
+48:15 We want this one down here, did select annotation view.
+48:19 That's get called when the pin gets clicked on, so I'm just going to move this update left call out accessory view down to here.
+48:25 Okay? So now, when we run, even the 16 guy is going to instantly come up, because you're not doing any fetching, but when we click on this, little delay, okay?
+48:35 Now I can't see all 16 of things because they're all stacked up, it's a little problem with our UI, we probably want to have some way to click other things, you can kind of click other things one, but, anyway.
+48:46 But now we want to, if I click here, I want to see this image in my image view controller, full-size.
+48:51 So now let's implement this little thing.
+48:54 And that it's going to do, we're going to do with another map view delegate method.
+48:58 This is the one I told you about, the call out accessory touched, it's the one up here, see it?
+49:03 Call out accessory control tapped, okay?
+49:06 So this gets called whenever any left or right accessory view, that is a UI control, like UI button is, gets tapped.
+49:15 This gets called.
+49:16 Now I only have one because the image view is not a UI control, so I don't have to worry about that.
+49:20 So inside here, I can segue, okay?
+49:23 But now, how do I segue, okay?
+49:26 I've never shown you how to do this, we did cover it in the slides, but I never showed you, how do I actually segue from here?
+49:32 Because if I go back to my storyboard, there's no pins for me to control, drag from?
+49:37 How do I, what am I going to do?
+49:39 Okay? So what we're going to do here is segue from code, and here's how you segue from code.
+49:46 You control, drag from the from view controller to the two-view controller, just from the whole view controller, not from any button in here or anything like that, and if you had a lot of buttons in here, you could control, drag from this bar so you don't accidentally control, drag from a button.
+50:01 So I'm just going, and I'm not control, dragging from the map view here.
+50:04 Okay? In fact, here I'm going to control, drag from down here.
+50:08 Okay? So here's my photos by photographer, here's the, the icon that represents the controller itself, so I'm going to control drag from here up to this guy, if I can reach him.
+50:22 Oh well, trust me.
+50:25 >> I'm going to control drag from here to here.
+50:27 Okay? There we go.
+50:28 No. This to here.
+50:31 Sorry. There we go.
+50:32 Alright. So I'm going to control, drag from this view controller to this one.
+50:35 So, I'm creating a segue here from that view controller to the other one, generically, from the controller to the other controller, and it's very important here I have to give it a name.
+50:45 So I'm going to call it show photo, because that's what it does, it shows this photo.
+50:50 Okay? Why do I need to give it a name?
+50:52 Because from code, I have to refer to this segue, and I'm going to refer to it by name.
+50:57 Okay? We'll call it show photo.
+50:58 So let's go back and do that.
+51:00 This is a one-liner.
+51:01 I just say self, and I'm going to call this method in IU view controller, UI view controller, called perform segue with identifier.
+51:09 And here I press, specify show photo.
+51:12 And notice I get to specify a sender.
+51:14 Okay, where does this sender come in?
+51:16 Well, this segue that I'm going to perform, in code here, still gets prepared for segue, it's a normal push segue so it has to prepare for segue and if we remember prepare for segue, it takes a sender.
+51:30 And what is that sender?
+51:31 Well, in the table view controller case, remember the sender is V table view cell.
+51:36 So what would we want the, the sender to be here?
+51:39 Probably this annotation view.
+51:43 Okay? This annotation view, right here, is the annotation view that has the call out that we tapped that accessory view in, so that's going to tell us which annotation we're talking about, right?
+51:53 So that's the sender that we're going to see when we go do prepare for segue for this thing.
+51:59 Alright? Alright, so let's do the prepare for segue because this is a normal segue.
+52:03 It has to be prepared, just like all the rest of the segues that we have, and to do that, I'm going, just like I did in table view, I'm, I have a little prepare here, which is right here, and this prepare kind of generally will prepare this map view controller to segue to an image view controller, okay?
+52:27 And it looks a lot like the other one, okay, here I'm going to find out if the annotation that we're going to prepare, so we're going to prepare for view controller, this is going to be an image view controller, to do a certain segue to show a certain annotation.
+52:40 And this had better be a photo, because that's all I know how to do.
+52:43 So I'm checking here to make sure it's a photo.
+52:46 And if it is a photo, then I'm going to check the identifier, same thing with table view, if there's no identifier, then it's the kind of class, it's an image view controller class, then I'm going to segue to it.
+52:57 Okay? So this, I'm going to call this from prepare for segue in a second.
+53:00 Let me go ahead and import image view controller.
+53:02 [Pause] Okay?
+53:03 Just so you don't have the warnings there.
+53:09 So, everyone understand what this code does?
+53:12 Well I do the code significance for speed, but I want to make sure you understand all the code that appeared there, okay?
+53:17 Alright, so now we can do the prepare for segue and it's going to be pretty easy.
+53:21 So void, prepare for segue.
+53:23 Okay? And in prepare for segue, the sender is that MK annotation view.
+53:29 Alright? So we know from that MK annotation view which thing it is, so I'm just going to say if the sender is an MK annotation view, which it should be, okay, then I'm going to call this prepare thing, that I did up here, this prepare view controller.
+53:49 Prepare view controller.
+53:50 And the view controller I'm going to prepare is segue dot destination view controller.
+53:55 The segue is the segue's identifier.
+53:58 Oops. Identifier.
+54:00 And the annotation we're going to show is what?
+54:04 The annotation is this sender, which is an MK annotation view, is it's annotation, so MK annotation view has a property called annotation, which returns to the ID MK annotation that, which is we want here, that that MK annotation view is showing.
+54:19 So I'm going to say MK annotation view, sender, annotation.
+54:24 Okay? Make sense?
+54:26 [Pause] So, we make it so we perform the segue, when we call out accessory is tapped, prepare for segueÃs going to get called when that happens, and we're going to call this thing to do the actual preparation, checking to make sure we're talking about photos, making sure we're segueing into an image view controller.
+54:47 Okay? Everybody got that?
+54:50 Alright, so let's see if that works.
+54:53 [Pause] Okay, so let's go to this guy.
+54:58 This is our world traveler here.
+55:00 Let's go click down here.
+55:01 It's got this, it's got a nice image view here.
+55:03 Let's try and click on this, and it segues.
+55:06 Okay? And we'll get the exact same kind of segue we got before.
+55:11 Make sense?
+55:13 Questions about that?
+55:15 Alright. So that's really pretty awesome in, you know, about 20 minutes, or 25 minutes we were able to add full map capability to our iPhone version.
+55:24 But what about our iPad, our iPad version?
+55:28 Let's turn off my phone here, and go do the iPad version.
+55:33 So the iPad probably wants to be slightly different than this.
+55:37 Although I'm going to start off having it be very similar.
+55:40 What I'm going to do in the iPad is I'm going to get rid of this photographer's table and photos by photographer table.
+55:47 So I'm just going to delete that, and I'm going to copy and paste what I just did, here, in this one.
+55:53 Copy, over here, paste, okay?
+55:57 Let's control, drag.
+55:59 Push segue, or sorry, root view of this split view controller.
+56:04 Let's go find everything.
+56:07 Make some more space.
+56:09 There it is.
+56:10 Okay? So now we're going to do the exact same thing we did before.
+56:12 We got the photographers here and we're going to have the maps here.
+56:15 So let's go see what that looks like, at first.
+56:18 [Pause] Alright.
+56:20 Is this working?
+56:23 Yes. [Pause] Oh, wait, we're going to have to, sorry.
+56:29 We're going to have to stop here because we are going to crash because we changed our [pause] database scheme.
+56:38 So let's get rid of that.
+56:40 Run again.
+56:42 [ Background Sounds ]
+56:47 [ Inaudible Background Question ]
+56:51 Okay, so the question is if I were in the real world and I had apps on the app store here and I changed my scheme and my users upgrade, how would I handle that?
+56:59 And the answer is, and we don't teach this because, you know, you know how it is, time constraints, but there's actually a mechanism for versioning your scheme and then doing auto-migration from previous versions, getting the data out of a previous version to the new scheme.
+57:14 So you have to change your scheme in a compatible way, obviously you want to keep all your user information, but that migration can be automated.
+57:20 So it's pretty cool actually.
+57:22 So, check it out in the core data documentation, how to do it.
+57:26 Alright, so here's our photographers, and if I click on a photographer, then awesome, I get the map, okay?
+57:32 And if I click on these, woo, that work, this is just awesome, it works great.
+57:36 Let's try and show the photo.
+57:38 Uh oh. Why doesn't that work?
+57:41 Because it's doing perform segue here, okay?
+57:44 And we don't use a segue on the iPad, we just go find the image view controller in our detail and update it directly, right?
+57:51 So we have to do the same fix we did when we made this work on, with the tables, we got to do the same thing with the map.
+57:58 So, I'm going to go back, back to my map view controller.
+58:02 Right here.
+58:03 And I'm going to put some, I'm going to put a property in here that finds an image view controller in the detail of a split view I'm in, if there's one there.
+58:14 Okay? Call this image view controller.
+58:16 And here's the property I'm going to add.
+58:19 Right? So this property is going to be nil if I'm not in a split view controller where my detail is in image view controller.
+58:27 Right? Otherwise, it's going to be that image view controller.
+58:30 Ya'll recognize this code from our table view, right?
+58:32 Split view controller last object, that's our detail.
+58:35 If it's in a navigation controller, I'll look in to see if it's the root view controller.
+58:39 And then if it's a view controller, an image view controller, I'll return it.
+58:43 Otherwise nil.
+58:45 So on the iPhone this is going to be nil, because it can't be a split view on the iPhone anyway, right?
+58:49 So this is cool.
+58:51 So now I know whether there is an image view controller, so I could do something, for example, when I'm doing that segue, where's that segue?
+58:57 Right here, this perform segue.
+59:00 I could say if I have an image view controller, then just update it directly, directly, otherwise, you can try this perform segue.
+59:09 By the way, there's really no way to try this perform segue without crashing.
+59:14 So you really got to know whether you're actually segueing, okay?
+59:17 Luckily, here, if I have an image view controller around, I know I'm not going to be segueing, and if I don't have an image view controller around, I probably do want to be segueing, because I got to show the photos somehow, if I'm going to allow that, the, that little button to be there.
+59:30 So if I have this self-image view controller here, I can just prepare it.
+59:34 So we've got this prepare controller, I'm going to prepare the image view controller, segue is nil.
+59:39 The annotation, what, where does the annotation want to show, again, its right here, okay?
+59:45 View dot annotation.
+59:47 [Pause] Woops.
+59:49 I always do that, don't I?
+59:51 Okay? So there's that.
+59:53 Okay, so I'm just going to prepare that image view controller if it's there, otherwise we'll segue.
+59:57 Everyone understand this?
+59:58 So let's go look at this.
+01:00:00 See how this works.
+01:00:01 [ Background Sounds ]
+01:00:09 Alright, so let's look at some photos again.
+01:00:11 I'll find some photos like, I don't know who we got here, this guy, so we got this.
+01:00:18 Click this, okay?
+01:00:19 We got this right here.
+01:00:21 If I click this little button, it worked.
+01:00:25 Okay? So it uses the thing, if I go over here somewhere else, let's do this guy right here.
+01:00:31 Notice that overlaps, I don't really like that UI very much, but it is what it is.
+01:00:37 Okay? So that's kind of okay.
+01:00:40 This is kind of okay, this UI, it's really not that great though because I'm showing that little thumb nail there and then I'm, I click on it, I'm also showing the big one.
+01:00:49 Why don't I just not have a thumb nail, not have the little blue arrow, and every time I click on a pin, just show the photo.
+01:00:56 There's no reason not to just show the photo.
+01:00:58 So how would I do that?
+01:00:59 So just forget this whole thing with that little blue arrow, you don't even need that blue arrow.
+01:01:04 Let's do that.
+01:01:04 Let's go up here to, this is where we build the left and right accessory views, right here.
+01:01:09 So I'm going to say if I don't have an image view controller, then go ahead and put those call outs in there.
+01:01:18 [Pause] Otherwise don't put them there.
+01:01:21 And then also, now that the call outs are there, aren't there, this is never to get called, in here, because there's no call out accessory if I have the image view controller.
+01:01:29 So let's go ahead and cut this out of here, and let's put that code in select.
+01:01:36 So here's where it's selected.
+01:01:38 So when it's selected, let's go ahead and [pause], views control higher, woop, nope, that didn't work.
+01:01:51 [Pause] Control I, there we go.
+01:01:52 Alright. So when the pin is selected, when we click on the pin, if I have an image view control around, I'll just prepare it.
+01:01:59 Otherwise, I will update the call out accessory views and all that stuff, which I don't have if I have an image view controller.
+01:02:08 So let's see what this looks like.
+01:02:09 [ Background Sounds ]
+01:02:17 Okay. So, no.
+01:02:18 Let's click again here.
+01:02:20 And it's going to be a multiple, oops, multiple photo.
+01:02:24 Okay, so, let's click on one here.
+01:02:27 Alright, automatically, as soon as I click on it, it's going to update the image view.
+01:02:31 Okay? So that's kind of cool.
+01:02:35 That's a nicer UI.
+01:02:36 I don't really need that thumb nail.
+01:02:38 I don't need the [pause], the other stuff on there.
+01:02:42 So that's cool.
+01:02:43 One thing though that's a little weird on it is watch this.
+01:02:46 So now if I go here, okay?
+01:02:49 Now I've got dead man Jones, his photos, but I've got somebody else's photo on the right.
+01:02:54 That's kind of weird.
+01:02:56 Okay, that's kind of a bad UI.
+01:02:57 So let's make it so that every time we show the photos by a photographer, let's just autopick one.
+01:03:04 Okay? How would we do that?
+01:03:05 Very simple.
+01:03:06 When we update our view, map view annotations here, I'm just going to autoselect a photo.
+01:03:14 But only in the case where I have an image view controller lying around.
+01:03:18 If I have an image view controller lying around, then I'll autoselect a photo.
+01:03:22 And how am I autoselecting?
+01:03:23 Well, I'm just grabbing the first object out of our photos by photographer array, okay?
+01:03:28 And if there's any in there, then I'm going to select that annotation, okay?
+01:03:33 That causes that call out to appear, but it doesn't, when you select it with this, it doesn't call that did select method up here to get called.
+01:03:41 Okay? This method, up here, did select annotation view, this only gets called when the user selects it.
+01:03:49 Okay? So the user didn't select it here, we selected it, so we still have to do that prepare ourself.
+01:03:54 Okay? Let's take a look at that.
+01:03:58 [ Background Sounds ]
+01:04:07 Alright. So let's pick somebody here.
+01:04:10 Click on that, and you can see it autoselected the scooter one, I picked something else, we'll go here, it autoselects one.
+01:04:16 It goes here and autoselect one.
+01:04:18 So now we're kind of all in sync between the two, between what's on the right and what's on the left.
+01:04:24 Okay? But if I click another one, it'll change it.
+01:04:27 Okay? So that's not a bad UI.
+01:04:28 I kind of, kind of like it, it's kind of okay, but I'm going to show you another way to do this on the iPad, to show you the embed segues.
+01:04:36 One could argue whether this is a better UI or the embedded one, you can kind of see them both and you can tell me what you think is better.
+01:04:41 But what I'm going to do is, you see where the sun is right there, in that photo?
+01:04:45 I'm actually going to take this map view that's on the left, and I'm going to embed it inside this image view.
+01:04:51 So this map view is going to showing there, and so what we're going to see in this column is just the photographers, these will be photographers.
+01:04:59 Embedded where the sun is will be the map for whatever photographer we choose and then we'll have our photo, and we'll still be able to zoom in our photos, zoom around, it'll be occluded, right?
+01:05:08 It'll be covered up, although maybe we could add a button somewhere that would hide that map and reshow it, a little bar next to the URL, because that map, it's just going to be a UI view, in there, we can hide, set it to dot hidden, we could animate it, transparency, fading away, whatever we wanted to do because it's just going to be UI view.
+01:05:24 But the contents of that UI view are going to be the same contents that are in this map view over here, exactly the same.
+01:05:30 I'm going to use that exact same view controller.
+01:05:33 Okay? And this is, again, we're talking about view controller reuse.
+01:05:37 Okay? So, let's go ahead and do that.
+01:05:39 By the way, we noticed we have warnings back in the code here.
+01:05:42 Why do we have this warning?
+01:05:44 That's because autoselected photo is a photo star, and we don't import anything here that tells this code that a photo star is an MK annotation.
+01:05:55 Okay? So we have to go up here to where we import a photo, and instead import photo plus MK, or sorry, plus annotation.
+01:06:03 Okay? Because this is where, this is the file in which we declared that photos were MK annotations.
+01:06:11 Everyone understand that?
+01:06:12 Okay, so you got to make sure you import whichever interface defines that.
+01:06:19 Okay. So how are we going to do this embed thing?
+01:06:21 Let's go over here to our iPad, storyboard, all I'm going to do to start is to drag an embedded thing in here, so let's do that.
+01:06:30 This is a bit of a challenge when it comes to screen real estates.
+01:06:33 Let's go here.
+01:06:34 So the embedded thing, it's down towards the bottom, here it is right here.
+01:06:37 You see it says container view defines a region of view control that can include a child view controller.
+01:06:43 Okay? So I'm going to drag that into this view controller right here, this is our image view controller, so let's drag that in.
+01:06:51 Now when you drag this in, it's a bit of a pain in the neck to size this to where you want and all those things, but I'll show you another way, when you have a big view like that, that you're dragging in and you want to place it somewhere to do it, which is use the document online.
+01:07:06 So here's the document outline, here's my container.
+01:07:08 Notice it added it as a subview of my scroll view, but I don't want to scroll that map around, I want it to sit on top of the scroll view, I actually want the scroll view in the back, and then the container view, and then we can do our activity indicator.
+01:07:20 So that's one thing I can do is move it out from being a scroll view.
+01:07:25 And can anyone think of a way that I can place this container where I want?
+01:07:30 Magic word, begins with an A?
+01:07:33 [Pause] Down here?
+01:07:35 Yes, we can use autolayout.
+01:07:38 Right? To specify exactly what we want.
+01:07:40 So let's fix its width and height.
+01:07:42 This is a case where we would want some magic numbers of width and height, because we want to kind of decide how much of that view we want to occlude with the map, what the relative value is, and then let's also pin it to the top, by the standard value, and then let's pin it over here to the right, so we're going to put it in the upper right-hand corner.
+01:08:00 And let's see what that looks like, first of all, and notice we have the little yellow thing here.
+01:08:05 Because we have a misplaced view, and so I'm going to go ahead and fix that misplacement.
+01:08:09 And now let's go look and see how this looks like.
+01:08:11 Eh, it just doesn't quite look like I want, because it's under this bar, I don't really want it under this bar, so it's a standard width from the top, but under this bar.
+01:08:21 The way you can, by the way, control whether things are under the bar is select your whole controller and inspect it.
+01:08:27 And you'll see down here, there's extend edges, okay?
+01:08:31 So if I say under top bars, no, then it moves that container down.
+01:08:35 Now that created some autolayout things, both for this little spinner guy and this, so let's fix those.
+01:08:41 Right? Because we moved everything down a little bit, so those need to be put back relatively to where they should be.
+01:08:47 So that's a way to do it.
+01:08:48 Now, of course, now the image view is not under there, and I might want one and not the other, and we can certainly set our autolayouts constraints to whatever we want, but I just wanted to show you this extend edges thing.
+01:08:57 Some of you discovered this when you were doing your homework before, but, so, okay.
+01:09:03 One thing that happened through all of this, we got this container, is we have to specify what's in this container, and it actually put something on here.
+01:09:14 Okay? It's hard to see, let's move it down.
+01:09:16 It actually put this, this is a generic UI view controller, if we inspect it, you can see it's a generic view I view controller.
+01:09:21 So this view controller, self dot view, is going to appear in here.
+01:09:25 But I don't want this view controller, self dot view, in here.
+01:09:28 So I'm going to delete that.
+01:09:30 Instead, I want this view controller's self dot view, the map view controller, right?
+01:09:36 So how do I do that?
+01:09:37 This is a segue, control, drag.
+01:09:40 So I'm control, dragging from the container to here, only option I'm going to have is embed, because the source of this is the container, and now I've embedded that in there.
+01:09:49 Okay? I don't want this segue anymore, because I don't want when, I choose the photographer, I don't want to load this table up, so let's get rid of that, okay?
+01:09:57 And so now, we have this here, let's move it down again.
+01:10:02 Okay?
+01:10:03 So this photos by photographer map view is going to appear inside here.
+01:10:07 Now this is a segue, okay, maybe we would call this embed map or something like that, because that's what this segue does.
+01:10:15 This segue has to be prepared, just like any other segue, this is a normal segue.
+01:10:20 Who's going to do the preparing?
+01:10:22 Well, it's the view controller into which this is embedded.
+01:10:26 That is this.
+01:10:28 Which is an image view controller.
+01:10:31 How does this photos by photographer need to be prepared?
+01:10:35 It needs the photographer, right?
+01:10:38 That's its public API, just to remind you, over here, photos by photographer map view controller, needs a photographer.
+01:10:45 So if we're going to prepare it, we need to pass the photographer.
+01:10:48 Well, that's a problem, because this image view doesn't have the photographer.
+01:10:52 All the image view has is the image.
+01:10:55 Okay? So we're going to have to create a little subclass, of image view controller, which I'm going to call photos by photographer, image view controller, and it's going to pass the photographer on through.
+01:11:06 Okay? So we're going to segue to it, like we are already segueing, it's not really segueing, but we're setting this detail view controller, we're preparing already, but we're going to have to prepare it with this photographers.
+01:11:20 So let's create that subclass with this controller.
+01:11:25 Okay. It's a subclass of image view controller, we're going to call it photos by photographer image view controller.
+01:11:35 Okay. We'll put it with our controllers.
+01:11:39 Okay? Now in the iPad only, I'm going to change this to not be an image view controller anymore, I'm going to change it to be a photos by photographer image view controller, okay?
+01:11:51 So now it's a photo by photographer image view controller, which is this thing.
+01:11:54 The public API of this, again, it's the same as all these other photos by photographer, it's this, actually watch this, we'll copy this, and we'll paste that, put that there, put that there, get rid of that, see it going back and forth too much.
+01:12:11 So it has a photographer, it's a photos by photographer, but this is an image view controller, so it has a photographer.
+01:12:17 What does it do when it gets the photographer?
+01:12:19 Well let's look at that.
+01:12:21 In fact, before we even look at that, let's talk about that embed segue and, and having it prepare.
+01:12:26 So I got that code here so we can look at it.
+01:12:30 Okay? I'm going to put this up here, talk about all this in a second here, and I'm going to import photos by photographer map view controller.
+01:12:40 Alright, so let's look at this code that comes in.
+01:12:42 So this is photos by photographer image view controller.
+01:12:45 It is, right now, trying to handle preparing that embed.
+01:12:49 So it's preparing this segue right here.
+01:12:51 Its doing the prepare on this segue.
+01:12:54 Okay? How is it doing that?
+01:12:56 Well, it's looking to see if the destination view controller is a photos by photographer map view controller, which it should be, that's what we're embedding.
+01:13:05 Right? Photos by photographer map view controller, and if it is, then it's going to set the photographer.
+01:13:10 Completely obvious, right?
+01:13:12 And it's setting it to self dot photographer, that's this method right here in photos by photographer image view controller.
+01:13:19 That's all good.
+01:13:20 But notice also I'm grabbing a hold of this photos by photographer map control.
+01:13:24 Why am I grabbing a hold of this thing?
+01:13:26 Well I'm grabbing a hold of this because this might get called before [pause] this gets called.
+01:13:35 Okay? In other words, before my image view controllers, photos by photographer image view controller, gets it photographer, it might be asked to segue to the embedded one, and it might not have this photographer yet.
+01:13:49 So we need to go here, in our set photographer, which we always do this anyway, things like self dot title equals photographer dot name and stuff like that.
+01:14:02 We, here, we need to [pause], if we get here after we've embedded, then we need to say self dot map view controller photographer equals our photographer.
+01:14:13 Okay? So this is the exact same thing we're talking about for prepare can happen before the setting, setting can happen after, you know, back and forth, so, but I have to do it in both of these places.
+01:14:22 Does that make sense?
+01:14:25 Okay? Good, now I'm seeing more nodding heads this time and that's good.
+01:14:27 Because when I talked about it in the slides you were like huh?
+01:14:29 Okay, but now you understood.
+01:14:30 If we set our model after we are asked to prepare that embed, then we have to go back and set the photographer.
+01:14:39 Okay? Now the last thing we need to do is do the preparing of this guy now.
+01:14:46 This guys needs to be prepared, it's the detail view controller, right, of this split view.
+01:14:51 And so now when we click in the photographer's thing, we need to prepare this guy by passing him the photographers.
+01:14:57 So that's really easy too.
+01:14:59 Here's where we prepare, right?
+01:15:00 So right now, in our photographers table view, we know how to prepare the photos by photographer core data table view.
+01:15:08 We know how to prepare the photos by photographer map view controller, and now we know how to prepare the photos by photographer image view controller, as well.
+01:15:18 Okay? We prepare them all exactly the same way, right?
+01:15:22 But they're all different destination view controllers.
+01:15:25 So let's import, make that go away, photos by photographer image view controller, and now we can run.
+01:15:35 [ Background Sounds ]
+01:15:47 Okay. So you can see our map, comes up the United States, we haven't chosen a photographer, so there's, there's no photos in there.
+01:15:53 Let's pick a photographer.
+01:15:54 This guy. Okay?
+01:15:56 Here's our map, we can kind of see where in the world we are.
+01:15:58 Looks like we are in Taipei, okay?
+01:16:01 And it's showing the scooter thing.
+01:16:03 If I click on the other one, we get that one.
+01:16:05 Okay? So this is quite a different kind of UI, I can still zoom out here, I can still move this map around, I could rotate it around, I can zoom in.
+01:16:16 Alright? I can click on another photographer here.
+01:16:22 Right? [Pause] Okay?
+01:16:24 Make sense?
+01:16:25 How that's working?
+01:16:27 So, I mean, again, you can argue which is the better UI.
+01:16:31 This one's kind of cool.
+01:16:31 I think if I had a little button up next to URL that said map, that was maybe a little map icon and I pressed it and the map would disappear and reappear, this might be kind of cooler because if you look at this UI, I have my photographers and my photos and the selected photo all on screen at the same time.
+01:16:45 Alright? So I can be zooming in, looking at anything I want, clicking on another photo by this guy, switching to another photographer, back and forth, all, right at my fingertips so that I don't have to, you know, be segueing and things changing and all that.
+01:17:00 Make sense?
+01:17:03 Okay. That's all I have for you today, and I will see you on Monday.
+01:17:06 Good luck with your homework that's due on Friday and I'll be here for any questions you have.
+01:17:11 >> For more, please visit us at stanford.edu.

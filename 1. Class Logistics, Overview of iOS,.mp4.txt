@@ -1,0 +1,567 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:09 >> Alright, so welcome to Stanford CS193p, fall of 2013-14 academic year.
+00:14 This is our very first lecture and we are going to be covering developing applications for iOS, so specifically iOS7.
+00:22 Today's lecture kind of has a first part and a second part.
+00:26 The first part is a little bit of logistics.
+00:28 The second part is I'm going to dive right into the course material because there's a lot to cover and so, we need to start covering it.
+00:36 [Pause] So, what will I learn in this course?
+00:38 I think you know what you're going to learn in this course.
+00:40 You're going to learn how to build cool apps, okay?
+00:42 iOS is a really cool platform for building apps, you probably already know that.
+00:47 The apps look cool, they've got animation.
+00:51 What's really cool is they're in your pockets so you can whip them out and show them to your friends.
+00:55 You don't have to send them to a website or go get a computer.
+00:57 It's also really easy to develop really powerful apps in a really short amount of time, as you're going to find.
+01:03 This course is only 10 weeks long, and while this is Stanford, I know, you're all really, really good programmers and all that, it still, 10 weeks is not a lot of time, so when we get to the end, you're going to see that it's a very leveraged platform for building things.
+01:17 And, you know, the community is quite vibrant, being able to distribute your apps via the app store and not have to put them in a box and put them on a shelf in a store, is really a big, big difference when it comes to marketing a product.
+01:30 Okay? And you'll, you'll see that.
+01:32 The second thing you're going to learn in this course though is real-world application, a lot of the computer science things you're learning in other classes.
+01:39 Okay? So, we're going to be doing networking, we're going to do multithreaded, we're going to be doing all kinds of graphics, we're going to be doing animation, we're going to do object-oriented databases, we're going to do all that stuff for real, okay?
+01:51 You're going to see what it looks like to apply all those computer science concepts, especially how to combine them into a real-world platform, where you're making real apps, okay?
+02:00 And quite a few, many dozens of my former students have shipped their apps on the app store and you may well too.
+02:07 Okay? So this is really, this is a good course to kind of combine or synthesize all of the things you've learned in a lot of your other computer science classes and touch it up against the real world.
+02:19 Okay? The prerequisites for this class are super duper important, okay?
+02:24 This, it's just key to make sure you have these prerequisites and really think long and hard, if you don't, whether you want to give this class ago.
+02:31 CS 106 A&B or, or CS16x are absolutely required, okay?
+02:37 If you don't have that or equivalent, definitely, don't even think about it.
+02:40 The second requirement I've added this quarter, based on experience, is CS107 or CS108, which is great, by the way, if you're taking CS108, you'll really be ready for this class.
+02:50 Or even CS110, and part of the reason I'm requiring these extra classes is just so you're farther along the programming experience curve because this class is a lot of programming, and so for those of you who are used to a lot of programming, you, you're used to it.
+03:06 But for those of you who aren't it's kind of like, whoa, do a lot of programming here.
+03:10 It's going to be a little unbalancing.
+03:12 So, that's why I've required all those.
+03:14 Now if you've done a summer internship of you've done some programming or something like that, that's definitely a substitute for CS107, 108, or 110, right?
+03:23 Or if you've done some other CS class that's even more advanced than these, that's fine too.
+03:26 You've just got to understand that this class is, you know, a programming class, there's a lot of programming.
+03:32 And most importantly, you got to really be comfortable with object-oriented programming.
+03:35 So I put a bunch of terms up here, like message and instance variable and superclass and subclass, if you don't know these terms like the back of your hand, it's going to be hard for you to get this class, because I'm going to be throwing those terms out left, right, and center.
+03:48 iOS7 is completely object-oriented.
+03:51 Okay, the whole structure, the design of the thing, is object-oriented.
+03:54 So, you just got to know that, and if you don't know that, you definitely want to go get that first.
+03:59 Okay? Take CS106a&b equivalent first, and then get a little more programming experience and then you're good to go.
+04:05 Okay? We're going, you're going to be writing apps in this class with dozens of classes that you're going to write by the fifth, sixth week so, you know, if the biggest app you've ever written is got 3, or 4, or 5 classes in it, oh, this is going to be a step up.
+04:22 Okay? The assignments, we've got this weekly assignments for the first six or seven weeks, and then you've got a final project at the end.
+04:30 All of the homework assignments have detailed write-up of the required task and what we're evaluating you on.
+04:35 And they also have hints in there, because I'm not trying to make the homework assignments be really, really hard, and all the homework assignments also directly are re [pause], they're basically reinforcing what has been taught in lecture in that week, they're not a bunch of random new stuff to learn.
+04:51 I'm a big believer in a teaching methodology, which is I'm going to tell you about a concept, via slides, and then I'm going to show you it by demoing it to you, actually writing an application that does, then I'm going to ask you to do it on the homework.
+05:06 So that's three times you're going to see every single thing pretty much in this class.
+05:10 By the end of that, you're going to know how to do it.
+05:12 Okay? And you're going to feel confident and experienced to do it.
+05:15 So the homework is all about that.
+05:17 It's about just doing what you saw me do in class and talk about in class and apply it.
+05:22 Alright. Now I'm going to really briefly go over what's in iOS, I think most of you know what's in iOS, hopefully you've all seen an iOS device or you have one in your pocket, I bet 90 percent of you do in this room, but I'm going to try and summarize it, this is really hard to do because I'm going to try and do it in four minutes or less, or five minutes, and it's so big that, I mean, I could have two lectures where I just talk about all the different things and just summarize them.
+05:48 So, this is going to try and group them into some sort of sensible groups so you have an idea of what's there from a development standpoint, then when we go off and start doing it all then you'll start realizing whoa, and once you learn how to look in the documentation you'll see, oh, look at all that stuff in there, and you'll figure it out.
+06:06 So this is just a high-level overview.
+06:07 So, I, I've used this division into these four, kind of groups.
+06:13 Core OS, which is the stuff that's close to the hardware.
+06:17 Core services, which is an object-oriented on top of that, that kind of makes it so you always are programming an object-oriented layer.
+06:24 Media, because these devices are basically iPods with a phone in them or with a big screen on them, but media is really important to these devices, and then finally Cocoa Touch, which is the UI layer.
+06:34 Okay? Of buttons and all the switches, things like that.
+06:37 So let's talk about what's in each of those layers, kind of, little skimming the surface of what's in those layers.
+06:43 At the Core OS layer, near the hardware, is a Unix kernel.
+06:48 Okay? This is a Unix operating system on this device.
+06:52 And BFD-based mock, and so you get everything you get with Unix.
+06:58 You're getting sockets and you're getting file system, permissions, all that stuff, plus you're getting a bunch of other stuff that's kind of specific to a mobile device like this, like power management, and key chain access to kind of manage the security of things.
+07:14 Bonjour, which is this kind of network, finding other things on the network.
+07:18 So it's got all that stuff, it's a very powerful underlying operating system.
+07:23 But all of that API or most of it is in C, and we want to be programming kind of purely object-oriented layer.
+07:29 So we're going to be mostly operating when we're talking, touching those things at the Core surfaces layer.
+07:35 So this layer has things like language, things that, that kind of make the language more powerful, like arrays and dictionaries, and strings and things like that, plus it has object-oriented ways to access the file system, it has object-oriented ways to find out the GPS location of your device, for example.
+07:53 It has ways to do multithreading.
+07:57 All this stuff what you want to be able to do, but you want to stay in an object-oriented kind of mindset as you're doing them all.
+08:04 There's a huge layer, foundational layer there at Core services for doing that.
+08:10 At the media layer, don't sleep on this layer, really important layer, you've got video here, you've got video editing, you got images, of course, that it can display, it's incredibly powerful audio for doing 3D audio, if you have games, you can make the Thai fighters feel like they're ripping by you and stuff.
+08:25 All that stuff is in here.
+08:27 This is part of, the part of iOS that really I can't cover in a lot of depth.
+08:31 I'm just going to try and let you know that it's there and you're going to dive down depending on what kind of applications, later in your life, you want to build.
+08:39 But there's an enormous amount there.
+08:40 This is a fundamentally, a multimedia device, obviously, and then, Cocoa Touch is where we're going to spend most of our time.
+08:48 This is where you are going to be building buttons and sliders and text fields, talking to each other, and animation happening, things sliding in and out, and, you know, fading out and fading in.
+09:00 If you want to get the, a picture from the camera from the user, you can do that.
+09:04 Things like localization so that you're app can run in many countries in the world and up your sales by doing that.
+09:10 A whole map kit for doing all the 3D maps that you've probably seen in iOS7 and all that stuff is all in there.
+09:17 And, there's even a view in there that's an entire web browser in a little rectangle that you can just plop right into your app.
+09:25 So these are really high-level objects, and we're going to really be diving into this layer, alright?
+09:32 So this is really the primary.
+09:33 And it's called Cocoa Touch because the API in here was originally developed for Mac OS X, and it was called Cocoa, and of course then when they went to iOS, they adapted, and a lot of API is shared between the two platforms, and, in fact, if you develop an iOS app and then you say someday, oh, I want to develop an app for the Mac using Cocoa, it's going to be very similar.
+09:54 Okay? You're going to be really, it's going to look familiar.
+09:58 So Cocoa Touch, obviously, is the touchscreen version of that, of Cocoa.
+10:03 Okay?
+10:04 This technology, Cocoa, has been around a long time, okay?
+10:08 Probably almost 30 years, believe it or not.
+10:11 From even before Apple acquired it to make Mac OS, what is now Mac OS X, and so it's a very mature API, okay?
+10:19 And it's very well thought out, so, especially if you go with the flow of it, it's very easy to build really powerful things.
+10:28 So, that's what's in there.
+10:30 So let's talk about the tools we use as programmers, as developers, to build these apps, okay?
+10:36 And I've divided those into kind of four sections here.
+10:38 One is the tools, the actual programming tools, and what's great, on this platform, is itÃs pretty much a one-tool fits all.
+10:47 Okay? There's this one tool, XCode 5, and everything's in there.
+10:51 You're debugger's in there, all your source code editing, your source code control, the UI building, everything is in this one app.
+10:57 There's a little adjunct there, instruments, which is for things like profiling your app and things like that.
+11:03 Memory usage, those kind of things, but you're really, all was inside XCode 5, which is really nice because, you know, when you're debugging, you're usually editing your code at the same time, back and forth, back and forth, you're going to different apps and all that would be a pain in the neck, and they've really done a good job of arranging the screen space so that it's sharing between all these different tasks that you need to do.
+11:23 So that's the primary tool, XCode 5, you should all, right after this class if you want, go to the Mac App store, not the store on you iOS device, the Mac App Store on your Mac, and download this.
+11:34 It's free, available, came out last Friday, and you can download it, install it, and, you know, start playing around with it.
+11:41 Some of you might have already used XCode, like in CS106, raise your hand if you've used XCode before for anything.
+11:47 Okay, so two-thirds or more, three-quarters of you.
+11:50 So, you're going to be used it.
+11:51 You're just going to start using XCode now to develop for iOS, alright?
+11:55 There's a new language for you to learn, objective C, it's kind of a funny-looking language, okay, its square brackets and colons, no parentheses on message calls, which is kind of weird for people who are coming from Java or C++ or whatever.
+12:08 The arguments are not put in parentheses or whatever, and I'm going to show you all about objective C, I don't expect you to know anything about it coming in, and if you know Java and C++, which you should if you've taken CS106A&B, then objective C is not going to be a big leap for you.
+12:23 It's a little bit different language, it's a little more fast and loose than Java, for example, and it's a little more, kind of simple and elegant, than C++, when it comes to the object-oriented stuff.
+12:32 So, I think you'll like it.
+12:34 It won't. Some of you who are very, you know, correct programming kind of thing, you love Java, might find objective C a little wild west for you, but you'll get over it.
+12:44 Frameworks, obviously, any big system like this groups all of its objects into libraries, essentially.
+12:50 We call them Frameworks in iOS, so there are dozens of frameworks in iOS.
+12:56 The two main ones we're going to look at, at the beginning of the course, are foundation, that's where all that core services stuff is, like arrays and dictionaries and all that.
+13:04 And then UI kit, okay, that's where buttons and sliders and all those things area, so those are the two main ones, but, there's a whole bunch of other ones, like, you see the Core Data written up there, that's the object-oriented database.
+13:14 Okay? So we're going to be doing that.
+13:16 Core Motion, that's the gyro and accelerometer.
+13:19 Map Kit, obviously the maps.
+13:21 And there's dozens more, okay?
+13:23 And we'll cover as many of them as we can, obviously we can't do it all in 10 weeks, but we'll do as much as we can.
+13:28 And then the last part of developing application in this platform is a design strategy called MVC.
+13:34 Now, this is not unique to iOS, other platforms use MVC, Model View Controller, as their fundamental design strategy.
+13:42 So how many people in this room have used MVC on any platform?
+13:46 Okay, so about half, so you'll know what this is.
+13:48 So, I'm actually going to go over MVC for those of you who haven't and I'll go through it pretty quickly, because it looks like most of you, half of you have done it, and [pause] the main thing to see in MVC here, for those of you who already know what it is, is to see how I talk about it so that when we get into iOS and I start saying things like your model is UI independent, you'll know what I'm talking about and we'll all be on the same page.
+14:13 So this is mostly kind of getting us all on the same page terminology-wise.
+14:18 So MVC, Model View Controller, is essentially a strategy for how to organize all the classes in your application.
+14:28 And what we do fundamentally is we divide all the classes into one of three camps.
+14:34 The model camp, the controller camp, or the view camp, and what, how you decide what goes in each of these camps, well, the model is essentially the what of your program.
+14:45 What is your program?
+14:46 So, as we're doing this MVC talk, I'm going to talk about our first application we're going to build which is a card matching game.
+14:52 Okay? So we're going to build this game, it's gotta bunch of cards on the screen, like playing cards, you know, Ace of Clubs and all that, and you're going to be able to go choose the cards and you'll get certain points if the match.
+15:03 Like the suit matches or the rank matches, or whatever, you get more points, less points whatever, but you're doing that.
+15:08 In that kind of application, a little card matching game, the cards and the deck, and even the logic for how the game is played are all UI independent and in the model.
+15:20 Okay?
+15:21 So how the cards get drawn on screen is the job of the controller.
+15:25 So the controller is, it's job to figure out how am I going, you know, take this set of cards and display them on screen, and then animate their movement and things like that.
+15:35 Okay? That's up to the controller.
+15:36 So the controller controls how the model is presented on screen, and the view, the minions, the classes that the controller is going to use, kind of like the building blocks, the Lincoln Logs, I don't know maybe that's before all your time, but, you know, the things we're going to do build our UI we're going to use in the view, so, the stuff that's in the view is pretty generic.
+15:59 Generic UI elements, the stuff in the controller is very specific to how your UI works, and the stuff in the model is completely independent of how you're UI works.
+16:08 Okay? So, doing MVC is about knowing where things go, but also about how to communicate between these three camps and so I'm going to try and summarize how the communication works between these camps and I've used road markings, you see the double yellow line and then the dashed white line, so that's like you're driving in your car, try to use them as that I have an image for how this communication happens, where it's allowed, where it's not allowed.
+16:35 Okay? So let's talk about the controller talking to the model.
+16:39 Okay? Going from that side of the road over to the model side is a dashed white line, in other words, you can head right across there, you probably want to look before you go, but you can go right across, okay?
+16:49 The controller has to know everything about the model and it has to have complete ability to talk to the model, use its public API as much as it wants, because the controller's job is to present the model to the user using its view as its minions, so it has to have this access.
+17:06 So that's full, unrestricted access the controller has talking to the model.
+17:10 This is a one-way era, or one-way arrow, from the controller to the model.
+17:15 And similarly from the controller to the view, is also unlimited communication because the controller is responsible for talking, using, it's own minions, the view is the controllers' minions to lay out the user interface and all that stuff, so the controller can do anything it wants, I've put that little green word outlet up there because when we have a property of a controller that points into the view, we call it an outlet.
+17:39 Okay? And you're going to see that in the demo on Wednesday, I'm going to say oh, let's create an outlet from our controller to our view so our controller can talk to its view.
+17:47 Alright? What about this communication?
+17:49 Model to view, never, and why is that?
+17:52 100 percent obvious.
+17:54 The model is completely UI independent.
+17:56 So there's absolutely no way it could talk to a view or object or anyone in that camp.
+18:01 Because the view objects are fundamentally UI objects, they're kind of generic, but they're still fundamentally UI objects.
+18:06 Similarly, since the view objects are kind of generic, they can't be talking to any specific model.
+18:11 They need a controller to interpret a model for them.
+18:15 Okay? So there's never any communication this way, that's why it's a double yellow line, that's why these lines are red, that's why there's fire, okay?
+18:23 Never go across that line, ever.
+18:25 [Pause] What about the view talking back to the controller?
+18:30 You got these generic view objects, like buttons, can they talk to the controller?
+18:33 Well...yes, they can, but they have to be careful because the view objects are generic, so they can't really know much about the control, so, they can only communicate back to the controller in a blind way, where they don't know the class of the thing they're talking to, and, in a structured way, a way where we all agree, we're going to communicate this way, between the view and the controller, so what's an example of a structured way?
+18:58 Well one is called target action.
+19:00 So the controller basically drops a target on itself and then it hands out an action, which is like an arrow, to the view and says to the view, okay, when you do what you do, like you're a button and someone touches you or you're a slider and someone moves you, send me that action.
+19:18 Okay? So in this way, the generic button, or slider, is communicating back to the controller, it has no idea that it's a card game controller or a space game controller, it doesn't know what kind of controller it is, all it knows is that when something happens in itself, boom, it sends messages to targets.
+19:33 So that's a blind, simple, structured way for the view to communicate with the controller, okay?
+19:40 But what about more complicated ways?
+19:42 Sometimes the view, things are happening in the view that are somewhat complicated and the controller needs to be informed of what's going on, synchronizing what's happening.
+19:52 And one way to think about this is these words I put here, will, should, and did, when the view is kind of like [pause], let's say on the scroll view and I'm scrolling around, and I want to let the, the controller, somebody, know that the user just did scroll.
+20:08 Okay?
+20:09 Or the user puts down the touch and is about to scroll, I want to let the controller know the user will be scrolling.
+20:16 Okay? Or the user puts a touch down and the scroll view wants to know, should I allow the user to scroll here, is that allowed?
+20:23 All those things, the scroll view itself might not have enough logic to know the answer to those questions, so what it does is it delegates the authority to answer those questions to some other object.
+20:36 Now it doesn't know the class of that object, all it knows is that other object can answer these questions, will, should, did, this, that or the other thing, like, should allow scrolling, did scroll to point, things like that.
+20:48 So those are the kind of methods you're going to see in these delegate protocols.
+20:52 Now I know that CS106A&B do not teach protocols, the word proto, how many people know what the word protocol means in object-oriented programming?
+20:59 See, very few of you, so I will be teaching that.
+21:02 A protocol is just a blind way to talk to another object.
+21:05 You're, you're going, when I teach you, you're going to be like, oh yeah, I know what that is, we didn't really call it protocol, or whatever.
+21:10 But, that's how we do delegation, okay, this blind communication.
+21:15 Also, another important thing is that views should not own the data that they're displaying.
+21:21 They should not own it.
+21:22 In other words, it shouldn't be a property inside of them where that's the truth of that data.
+21:28 And the easiest example for this is all the songs in your iPhone, on your phone or your iPad, right?
+21:34 You might have 10,000 songs in there.
+21:36 So if you have some kind of generic list view in your view, you can't transfer all 10,000 songs to its instance variables and expect it to hold 10,000 songs so it can list through it.
+21:48 A, that would be inefficient, and B, that information, those 10,000 songs belongs where?
+21:53 In the model, okay?
+21:55 Because you're song database is a model.
+21:58 It has nothing to do with UI's, just a list of songs and artists and albums and all that, it's in the model.
+22:03 Some controller has to look at that database and tell a view how to display all those songs, okay?
+22:10 So, we need that communication to happen here and the view is displaying some sort of list, and you're touching down and you're flicking on the list and trying to see more songs, how does that communication happen, and the answer is, we have another special kind of delegate, which we call a data source.
+22:27 Now the data source doesn't do the will, did, should, it's going to be asking questions like count, like how many songs are there?
+22:34 And the controller looks in the model, 10,000.
+22:37 Response to the view, there's 10,000.
+22:39 The view makes space, internally, for 10,000 things, it doesn't know what they are, moves the scroll bar indicator a little bit, so that you know where it is, and then you start scrolling, flipping through it, and its start sending the message to the controller, give me the data at [pause]
+line 150, next 10 items.
+22:57 See what I mean?
+22:57 And then you flick down some more, now it's saying 250, 10 more items, and so the controller is going back to the model and saying give me more, give me more data, and it's providing it to the view in this blind way.
+23:07 So see how the view is getting data from the model through the controller, in this kind of blind structured way.
+23:13 Okay? That makes sense to everybody?
+23:16 So data source is just a kind of delegate, it's a specific kind of delegate for getting data.
+23:20 So you're going to see that there are classes in iOS that have a data source, and they usually also have a delegate.
+23:26 Most sophisticated classes in iOS have a delegate, the will, did, should kind of things.
+23:31 Some of them have a data source, it depends on whether they're showing a lot of data or not.
+23:36 Now simple data, like if I had a view, if I invented a view for my card game called playing card view, and it just has a suit and a rank, okay, we're not going to do count data at for just suit and rank, we are going to set those properties.
+23:49 And so the view then would have those, that data set in it, but it wouldn't be owning it, right?
+23:54 The model would still be owning the suit and rank, the view is just getting that data to present it.
+24:00 Okay? So simple data we might transfer to the view, but it's merely for it to display it.
+24:06 Okay. This all adds up to the controller's job being to interpret and format the model data for the view.
+24:16 That's the controller's job.
+24:17 And when we do our demo, I'm going to be marking like, oh, see, I'm writing this code, this makes the controller perform its job, which is to take the model data and put it in, and using it to view minions, put it on screen, okay?
+24:30 That's what the controller does.
+24:32 What about this communication?
+24:33 Can the model talk to the controller?
+24:36 Again, obviously that's verboten because model knows nothing about UI, so it couldn't possibly talk to a UI object like the controller.
+24:44 But sometimes things change in the model and the controller needs to know about it.
+24:47 Okay, data changes, a database changes or the model is some network database and somebody changes something on the network and it changes, and the controller needs to find out.
+24:56 So, how do we do that communication?
+24:59 We do that using kind of a radio station model.
+25:03 Okay? So the model, a radio station concept, the model will use this concept to essentially broadcast information to anyone who's interested, okay?
+25:14 And the mechanisms for doing this in iOS are called notification and key value observing, KVO we call it, and so the model can just say, oh, anytime something changes in my model, I'm just going to broadcast on my radio station and then the controller simply tunes into that radio station.
+25:32 And it can find out things are changing.
+25:33 And when it finds out something changes, it's going to communicate via its green arrow to the model, and say, okay, give me that data that changed.
+25:42 Alright? Does that make sense?
+25:44 So towards the end of the quarter, we'll start seeing a little how to do notification to find out, for example, if the data in the database changes.
+25:50 We'll get a notification, the UI can then, you know, the controller can then go talk to the model to get the info.
+25:58 Okay? [Pause] Some people have asked, can a view tune into the radio station?
+26:01 They probably could, but you probably wouldn't want to do that.
+26:04 That would probably be a violation of MVC.
+26:07 Alright, so, we do this, we have all this nice communication and all these rules, and we can imagine building something simple using this, but what if we want to build a big, complicated app?
+26:19 An app that has multiple screens on our iPhone or on an iPad it's got, you know, three or four different areas on screen where things are happening, how do we do that?
+26:28 Well, we're essentially going to combine multiple MVC's, okay?
+26:33 Because you, an MVC can use, as part of its view, another MVC.
+26:40 Okay? So, an MVC, an entire MVC, can be one of the minions of some bigger MVC.
+26:48 Okay? And by doing that and cascading it down, we can build more and more complicated applications.
+26:55 So, an example of this is you might have your calendar app, and it's showing you the entire year, and you click on a month, and now it shows you a month view.
+27:06 Well a month view looks a lot different than a year view.
+27:08 Month view just has all the days and maybe some circle that tells you where you have an appointment on a day, and then when you click on a day, and now you get a day view.
+27:16 Okay? And the day is showing you the hours and what all your appointments are, and you click on an appointment, and now you get an appointment view and it's showing the detail of where you're going and when it is etc. Okay?
+27:25 Well each of those views, the year view, the month view, the day view, and the appointment view are their own MVC's.
+27:33 Okay? But you can see how the last three, okay, are used as, essentially, a minion of the top-level view, the year view, to show more detail.
+27:44 Okay? So the year view, you click on a month, it's going to use the month view MVC to show more detail, so it's part of its view, okay?
+27:53 So, you see this also in iOS with tab bar controllers, right?
+27:57 You have the tab bar, along the bottom, I have four or five things you can choose, well there's some MVC at the top who has four pointers to four minions, which are the four MVC's that are each going to appear in a tab bar, okay?
+28:11 We'll be doing that, for example, in assignment number two or three, where we'll be making a tab bar and you're going to have to do multiple MVC's.
+28:18 Okay? So, that basically results in a picture that looks kind of like this.
+28:23 Alright? Where you got this MVC and you see the purple one that's like underneath the word together there, and it points to three other MVC's outside of its view thing, okay?
+28:34 That's how we're going to build this, that might be a tab bar controller and those might be the three tabs.
+28:39 Okay, and each one is its own little MVC, completely independent, operates on its own, doesn't even know it's a generic, reusable view like thing at this point, it doesn't even know that it's in a tab bar.
+28:50 Okay? It just knows that it's supposed to do whatever it does.
+28:53 And so it's modular in that way.
+28:54 You can also see that there's no communication between any other, there's no other arrows, except for some of the models.
+29:00 You see some of the models are communicating with each other, you know, a big application might have single, shared model.
+29:07 Or, you know, the models might be split off into pieces to be used by sub MVC's, okay?
+29:12 But that's the only kind of communication you're going to have there, all other communication is either the structured communication we saw in the MVC or it's using MVC's as part of the view of another MVC.
+29:24 Any question about that?
+29:27 So we definitely don't want to be having designs that look like this, okay?
+29:32 Where everybody's talking to everybody, we can't tell who's talking to what, it's just impossible to debug a program like this and it doesn't scale.
+29:38 You can't build really big programs this way, it just becomes impossible to know how touching anything would break everything, right?
+29:44 So we're definitely not going to be doing that.
+29:48 Okay? Okay, so that's MVC.
+29:51 No questions about that?
+29:53 Alright. Onto objective-C.
+29:55 So, objective C is a strict superset of C, so everything you can do and see, you can do in objective-C.
+30:02 Okay? And we'll do a lot of C things in this class.
+30:05 We'll do a lot of object-oriented stuff too, but we're going to do a lot of C things, as well.
+30:10 But, there's obviously a few things that you want to think differently about because you have object-oriented stuff added onto a language, and we're going to talk about one of them today, in addition to showing you a little bit of the syntax, we're going to talk about one of these different, think differently things about objective-C that's different than C++ or Java, which is properties.
+30:33 Okay? And I'm not going to read through all of this, I'm just going to show it to you, but properties are basically how we access our instance variable, right?
+30:40 Everybody knows what I mean by, raise your hand if you know what I mean by instance variable?
+30:45 Okay good.
+30:45 So pretty much everybody.
+30:46 So, we want to access the instance data of our objects.
+30:52 And, normally, in Java or in C++, you just, you know, have some syntax to access them and you just access them.
+31:00 In objective-C we don't do that.
+31:02 In objective-C, we have what's called a property, and a property is basically a setter get method and a getter method.
+31:09 And that's how all access to the instance variable goes, through a setter method to set the value and a getter method to get it.
+31:15 And some people who maybe are kind of [pause] performance junkies might say, oh my gosh, every instance variable I have to call a method to set it or get it?
+31:24 But, remember, you're building for a user interface system here, when the user touches down, that's taking million, a million code, you know, you're executing a million instructions there in that amount of time.
+31:38 So, having a few extra setters and getters is completely irrelevant, right?
+31:41 So it's the old [inaudible]
+thing, right?
+31:44 You don't want to optimize things that don't need to be optimized, okay?
+31:47 You want to optimize the things that are taking a lot of time and accessing instance variable turns out not to be taking a lot of your time, so, let's look at what it looks like, don't get freaked out here by seeing this syntax.
+31:59 It's all new, so, it's going to take some getting used to.
+32:02 In objective-C, every class we have and the class I'm going to show you today is a, is in our, essentially our model that we're going to build for our card game matching app.
+32:13 We're going to have a card and a deck, and we're also going to have a subclass of card called playing card and a subclass of deck called playing card deck.
+32:20 Those are the four classes that are going to be in our model, to start.
+32:23 And, so, I'm going to show you, in today's lecture I'm just going to show you card, only card, and then on Wednesday I'll show you deck and playing card deck and playing card.
+32:33 So, every class in objective-C, you have a header file, card.h, and you have an implementation file, card.m. Okay, this is just like in C++ you might have that h and dot c, or whatever, this is dot m, m I guess is for implementation, I don't know.
+32:49 But it's m [laughter], and so you have these separate things, the difference here is card.h is the public API.
+32:58 That's what your dot h is.
+32:59 It's your public API.
+33:03 Card.m is your private API and all your implementation, okay?
+33:09 Don't get confused about dot h and dot m. All dot h is your public API, that's all it is.
+33:14 It's what methods in your class you want to make public so that other people can call them, okay?
+33:21 So, let's see what the syntax looks like.
+33:24 In your public API, you must say who your superclass is.
+33:28 Okay? You are not allowed to make your superclass be a secret, okay?
+33:33 It has to be public so we have to put it in the header file, and you can see the syntax we use is at sign interface, the name of our class, which should always match the name of the file, by the way, card.h should always have the interface for the class card.
+33:47 And then a colon and then your superclass.
+33:49 Now the superclass of the card class is NSObject.
+33:52 NSObject is in the foundation framework and it's pretty much the root class of every single class in all of iOS, including all the classes you write.
+34:03 Okay? It's this kind of basic class, we'll talk about it when we talk about foundation, but it's going to be the superclass eventually of every single class.
+34:10 Right? Everything, eventually, inherits from NSObject.
+34:13 Now, on the implementation side, it looks very similar, but instead of saying at sign interface, you say at sign implementation and the name of the class.
+34:22 And here you don't specify your superclass, okay?
+34:25 Because you're only allowed to specify that once, and its public, so it goes in your header file.
+34:30 Notice that the bottom of both of these, little at sign end, do you see that?
+34:34 Okay, that just means that's the end of the interface or of the implantation.
+34:38 Okay? So all of your public API goes inside this at sign interface block, at sign interface, and all of your implementation, your private implementation goes in the at sign implementation part.
+34:49 Now, if you import, if you have specified your superclass here, you have to import it.
+34:56 Okay? Which is like pound sign, include.
+34:57 It's a little more powerful than pound sign, include, in fact, it's a lot more powerful, as I'll talk about in a second here.
+35:03 >> But you must import it, otherwise the objective-C compiler won't know what that superclass is, so you have to, obviously, import your superclass.
+35:10 However, we don't usually, when our superclass is something that's in iOS, we don't usually import just that classes header file, which in this case is foundation, we actually import the entire framework.
+35:23 Okay? Now you might say, oh, that's inefficient.
+35:26 [Pause] A huge framework, but of course this is all precompiled and optimized.
+35:32 And, in fact, in iOS7, the syntax for this is really to say at sign import foundation.
+35:39 That means I'm going to use all the public classes in the foundation framework.
+35:44 iOS7 still supports the old important foundation slash foundation.h so you can use that if you want.
+35:51 Now on our implementation file, we have to import our header file, obviously.
+35:57 Okay? Because our implementation file needs to know what we're committing to publicly, in terms of our API, so we have to import that.
+36:05 Makes perfect sense.
+36:07 We can also have private declarations, okay?
+36:11 Declarations of properties and methods that are private inside of our implementation file by putting this little at sign interface, name of our class, open parentheses, closed parentheses.
+36:23 Okay? And then at sign end.
+36:24 So we can have a little space here where we can little private declarations.
+36:27 Now, objective-C does not require you to declare something before you use it in a file, you know what I mean by that?
+36:34 And there's a lot, a lot of languages, you have to declare a method before you can call it, right?
+36:40 But you can do it out of order in objective-C, you can implement a method here that calls, you can implement method A, calls method B, and then method B is implemented down here later in the file.
+36:50 Okay? So you don't have to declare method B first, then implement method A, and then implement method B. So, this little private at sign interface we're mostly going to use for properties.
+37:01 Okay? Because when we declare a property, as you'll see, that setter and getter get written for us.
+37:06 So let's see what that looks like to declare a property.
+37:10 So here's a simple property.
+37:12 It's called contents.
+37:13 So this is the content of the card.
+37:15 This is what's on the card.
+37:17 So this might be ace of clubs.
+37:19 Okay? And because this is your first day, we're going to make the contents be very simple, just a string.
+37:26 Okay? So these cards, they can be like a flashcard, maybe, for learning a foreign language, maybe this is the, the contents are the word that you're trying to learn and maybe it's a flashcard of images where this content is the name of some image and it's up to UI to display an image that matches it.
+37:43 Or in the case of our playing cards, we're going to have this be like, literally the character A and then the character clubs, because there's Unicode character clubs, so the A clubs, that would be the content.
+37:53 So this is the content of the card, what's on the card.
+37:56 And you can see that it's an NSString star.
+38:00 You see at sign property is how we're going to declare that we need storage, per instance of card, in other words every card has its own contents, and it's going to be a string, and so we say property NSString star, now, it's important to understand that in objective-C all objects, all of them, live in the heap and we have pointers to them.
+38:23 Okay? There's no such thing as making an object on the stack or anything like that, okay?
+38:29 They're all in the heap.
+38:30 Everyone knows what the heap is?
+38:31 Any questions about that?
+38:32 That's just where you allocate free memory.
+38:34 So all objects are there.
+38:36 What's' really cool about objective-C is, objective-C will manage all that storage for you.
+38:42 It will allocate for you and free it for you.
+38:45 Okay? Now how does it know when to free it?
+38:49 And the answer is this strong thing, you see the word strong there?
+38:54 If, your properties can either be strong, like this one, or weak, two things, strong or weak.
+39:00 Okay? And all pointer properties have to be strong or weak because the objective-C has to know what to do with the memory and the heap.
+39:05 Strong means keep the memory for this, for the thing this points to, in the heap, as long as I or anyone else has a strong pointer to it.
+39:18 Okay? So, this is called reference counting, it's not garbage collection, its reference counting.
+39:22 So we're going to, the objective-C is going to keep track of every single strong pointer to an object in the heap and as long as at least one strong pointer exists, it's going to keep that thing in heap.
+39:33 As soon as there are no strong pointers left, it will free the memory out of the heap, instantly.
+39:37 Not garbage collected later.
+39:39 But actually instantly, reclaim that memory.
+39:42 Okay? So this is probably new to you, you're probably used to like garbage collection in Java, for example, or explicit memory management in other languages.
+39:52 This is called automatic reference counting and it's awesome.
+39:55 It's really very predictable, this is much better than garbage collection, because, you know, the garbage collector can come along later and do, wreak havoc on the performance of your application as it goes and collects things from the heap.
+40:06 This is very predictable, you know exactly when things are going to be released, it's when there's no strong pointers left to it.
+40:11 What would it mean if this was weak?
+40:12 Okay, if you have a weak pointer, that tells objective-C, okay, I have a pointer to this thing in the heap and keep it in memory as long as someone else has a strong pointer to it.
+40:22 But as soon as no one else has a strong pointer to that thing, it gets freed from memory and this pointer, if it was weak, gets set to nil.
+40:30 Nil means this pointer doesn't point to anything, okay?
+40:33 Nil is the same as zero.
+40:36 Okay? In other languages, you're probably afraid of nil pointers.
+40:40 Okay? Because you do reference a nil pointer, it crashes your program, right?
+40:45 In objective-C, you can send messages to nil pointers even and it will not crash your program.
+40:50 In fact, if you send a message to a nil program, to a nil pointer, it will not execute any code, obviously, because there's no instance there.
+41:00 And it will return zero from, if that message had a return value, it'll return zero.
+41:05 So you have to be a little careful of messages that return structs, okay, but as long as it returns a primitive type or a pointer, it'll just return zero.
+41:13 So, this is going to take getting used to.
+41:16 The fact that we are going to program knowing that we can send messages to nil, to pointers that are nil and that that's good.
+41:23 We'll actually make our code work nicely and we'll use that to our advantage.
+41:27 And that is definitely going to be a change for you who are used to if pointers not nil, then send message all the time, right?
+41:34 Protecting against crashes, you don't do that in objective-C, you just don't code it that way.
+41:39 Okay? So, this pointer could have the value nil, n-i-l, which means it doesn't point to anything.
+41:46 Alright? So if you have a strong pointer and it points to something and then you set it to nil, now that strong pointer doesn't point to that thing, as long as no one else points to it, you can clean up that memory, objective-C will clean the memory up for you.
+41:57 Or if you have a pointer that points to something in the heap, then you make it point to something else in the heap, then you no longer have a strong pointer to that other thing in the heap and as long as no one does, it'll get cleaned up.
+42:07 Okay? And remember weak not only cleans it up, but it sets your pointer to nil, because you only wanted a weak pointer, you only wanted it to point to that thing as long as someone else does.
+42:16 Okay? So that's the strong versus weak.
+42:19 The other thing we're going to put in this little parentheses is nonatomic, okay?
+42:24 Nonatomic means calling this setter and getter that go along with this property is not thread safe.
+42:31 Okay, so you can't have two threads trying to set this property at the same time.
+42:36 Why do we say nonatomic here, why do we want this to not be thread safe?
+42:39 Because the way we do multithreading in iOS is not by having a single object that multiple threads are setting on, we usually have a separate set of objects that are running in another thread, like your model, and then other, than your UI stuff is running in the UI thread and they're talking thread to thread.
+42:56 Okay? So we don't need this and not only that, what's going to happen here when we do this at sign property is objective-C is going to create that getter and setter methods that I told you about to set these contents automatically for us, and we want them to be simple, okay?
+43:12 This is what they're going to look like.
+43:14 We want them to be simple.
+43:16 If we don't say nonatomic, there's going to be all kinds of locking code in there, right?
+43:20 If you have multiple threads and you're allowing multiple threads to access the setter and getter here, then you need locking code, and we don't want locking code, especially if we're going to implement the setter and getter ourselves, which we're going to, sometimes.
+43:34 Okay? But the default here is that we don't implement this setter and getter, it's automatically in there forest.
+43:40 So you can see there's three parts to this.
+43:42 There's the at sign synthesize, you see that?
+43:44 That's basically just saying underbar contents is the name of the instance variable in which the property contents is going to be stored.
+43:53 Now we could say at sign synthesize contents equals foo [phonetic], and then contents property would be stored in an instance variable called foo.
+44:00 But that would be very confusing, so we always use underbar name of the property.
+44:05 Okay? And so that's part one, just basically allocating an instance variable to store this contents property.
+44:12 Then there's the getter, that's NSString contents, return contents, so the dash, parentheses, NSString contents is a method declaration in objective-C, the dash means this is a method, parentheses NSString star means this is a method that returns a pointer to a string, and contents is the name of the method.
+44:33 Okay? So the name of the method of the getter is the same as the name of the property.
+44:37 Then, the implementation is just return that instance variable that we synthesized.
+44:43 Okay? And similarly, the next method is a method in objective-C for setting it.
+44:49 And, again, dash [inaudible] method.
+44:51 Parentheses void means this method does not return anything.
+44:55 Okay? That's what parentheses void means.
+44:57 Then set contents colon, that's the name of this method, set contents colon.
+45:03 Parentheses NSString star is the argument to this method.
+45:07 Contents is just the name of the argument, the local name of the variable in the local contents, context, and the implementation is just underbar contents, our instance variable equals that argument.
+45:20 Okay? So, before I move on, does everyone understand how these two methods are allowing you to set and get an NSString storage space inside your card?
+45:33 Everyone understand that?
+45:35 Question? [Inaudible background question] Okay, so the synthesize line, again, is just specifying the name of the instance variable that we're going to use to store this stuff in, underbar contents.
+45:47 It's kind of weird, you could maybe, it might be better saying at sign synthesize contents to use instance variable with name, underbar contents.
+45:56 That equals, I know, is a little weird.
+45:58 It sounds like it's assigning something, but it's just, that's what, think about equals as, you know, we'll use the instance variable with the name, underbar contents.
+46:06 So that's what the synthesize is doing.
+46:08 If you don't put the synthesize, it's not going to create the space in your card instance, and it won't, there won't be any name for it so you can't refer to it in your getter and setter, okay?
+46:17 Everyone understand this?
+46:19 Any other questions?
+46:21 Okay, now, the thing about it is, when you type the at sign property on the left, this gets added to your at sign implementation; however, you will not see it there.
+46:31 [Pause] Okay?
+46:32 So it's there, but you don't see it.
+46:34 Okay, objective-C is, made it for you, but it doesn't show it to you, but it's there, okay, that setter method and that setter-getter method are there.
+46:44 Okay? They exist.
+46:45 And not only that, they're public, because you put that at sign property declaration in your header file.
+46:51 Everyone got that?
+46:53 So let's look at another couple properties just to see the syntax a little more.
+46:56 So here's two properties that are bullions [phonetic].
+46:59 Okay? There's no bullion primitive in C, so objective-C has to find, typedef all caps BULL, probably a short or something or an int or a char, I don't know what, but you can think of it as a primitive type, it's a boolean, it's value can either be yes, which is some non-zero value, or no which is zero.
+47:18 And these properties don't need the strong or weak.
+47:21 Do you understand why that is?
+47:24 Because they're primitive types, they're not stored in the heap, okay?
+47:27 They're just a int or a float, so there's no memory to manage so you don't need to know about strong and weak pointers, there's no pointers involved here, this is just a BULL, a bullion.
+47:35 So there's no strong or weak, but we still have the nonatomic, because we still want the setter and the getter to be simple, not having any locking code or any of that business.
+47:42 So we're always going to have nonatomic on every property in this class.
+47:46 We will not have a single property in this entire class that is not nonatomic.
+47:49 So just put it in there, I wish it were the default.
+47:51 Okay? So that's what we're going to do.
+47:54 You can see we've synthesized them both and we've got the setter and the getter for them both, and this is all being done for us by objective-C.
+48:02 Now, one thing that's kind of cool is we may not like the name of this getter, because we want our code to read something like if card is chosen, then do something.
+48:12 If card is matched, then do something.
+48:14 So we really want the getter called is chosen, not just chosen.
+48:18 You know, if card chosen, not as nice as if card is chosen.
+48:22 So it's actually possible to rename the getter by saying getter equals the new name you want.
+48:29 Okay? And that's essentially renamed it, same thing, we'll do the same thing with this one.
+48:32 Getter equals is matched, now that getter is called is matched.
+48:36 And I bring this up because you're going to see how iOS does this with bullion properties, it tends to rename them to is this or has this, depending on what the verb there is.
+48:46 Okay? And again, objective-C is writing all this code on, in the implementation, but you don't see it.
+48:53 But it's there.
+48:55 Okay? Now, [pause]
+we're going to talk 48:58 about why properties are good and why it's better than just accessing instance variables directly, [pause] in later lectures, but the bottom-line is it's good for doing things like balance checking, it's good for doing things like when you set a property and you want to updated the UI.
+49:13 It's doing good for things for initializing pointers.
+49:16 Like that end string star contents property is going to start off nil.
+49:21 All properties, in objective-C, all of them, start off zero.
+49:25 So for pointer, that's nil.
+49:27 Okay? So that contents property, when we create a new card, it's going to not point to any contents.
+49:33 That cards going to be blank, okay, it's not going to have anything on it.
+49:35 So, it's nice to use the setter and getter, we implement our own setter and getter that will check to see if it's nil, and if it's not, and sometimes, not with contents, but with some properties, if it's nil, we'll create something in memory.
+49:49 Okay? So that's another reason you use it.
+49:50 So you'll see all these reasons why we want properties in the next lecture basically.
+49:55 Alright, so now, let's look at a method.
+49:59 Okay? Just a regular, old method.
+50:01 You've seen some methods, the setter and getter methods, but what if we wanted to find our own method, our own public method, so I'm going to define this method called match.
+50:09 Remember that I'm building a model here for a card matching game, where I'm going to put all these cards on the screen and the user is going to try and match them.
+50:16 Pick ones that match, alright?
+50:18 So I need a match method.
+50:19 A method that tells me whether two cards match.
+50:23 Okay? So, I'm trying to make this simple, so I've made a simple match method that has the following semantics.
+50:29 It takes another card as the argument, and it returns it an integer.
+50:33 That integer is zero if the cards don't match, otherwise, it's an integer that is higher, the better a match it is.
+50:42 Okay? So like a really good match might be a thousand, but a not so good match might only be a hundred, and, or, or it could be one.
+50:49 Now, the semantics of what that number is, totally depends on the cards, because we're only going to match cards against other cards, alright?
+50:56 And we're going to find out how good a match they are by how that, whatever that card class is, and we're going to make a subclass of this class, called playing card, that's going to give more points for matching the rank, okay, than it is for matching the suit.
+51:11 Okay? But that's up to subclasses of cards to determine what the point system is, okay?
+51:16 So, for our implementation of match, okay, we're going to do a really simple implementation, so, first let's assume that they don't match.
+51:25 Okay, so I just made this local variable int score equals zero, you can see that you can assign a variable, actually all local variables also start out zero, so I don't even really need that equals zero, but I'm a big believer in putting that in if that's really, you know, what you intend, and in this case I intend the score to be actually zero.
+51:42 The score of this match until I go and see if these cards match, right?
+51:46 So it's just a kind of programming style thing here.
+51:48 So, how I'm going to tell, how am I going to tell if this card that's been passed in match, matches the card that it's being sent to?
+51:56 And the answer is I'm going to send some messages, okay?
+52:02 You see the open square brackets notation there, that's the first time you're seeing me send a message in objective-C, and I'm also sending two other messages in this one line.
+52:13 Card.contents and self.contents, you see both of those, those are message sends, as well.
+52:20 So there's two different syntaxes here for sending a message.
+52:23 One is open square brackets, okay, and we'll talk about that one in a second.
+52:27 And another one is dot notation, card.contents.
+52:31 When do we use them?
+52:32 We only use the dot notation for properties.
+52:37 That's how we call the setter and getter of properties, using dot notation.
+52:41 Okay? Now, here we're calling the getter, card.contents is calling the getter of the contents property on the card instance.
+52:52 Okay? How do we call the setter?
+52:54 Exactly the same.
+52:55 Card.contents, but we put it on the left-hand side of the equals.
+52:59 Card.contents equals, now we're calling the setter for contents.
+53:04 You see? So here we're calling the getter.
+53:05 We're also calling the getter for contents on self, on our self.
+53:09 So, in other language this might be called this, right, but you know what self is, right, self is this instance that this code is operating on.
+53:17 So, we are going to compare these two strings, card.contents and self.contents to see if they are equal and we are going to do that with the NSString method is equal to string colon.
+53:30 So [inaudible] equal to string colon can only be sent to a string [pause], so is equal to string can only be sent to a string and card.contents is a getter method that returns a NSString, so we're good to go, right?
+53:43 We're sending is equal string to a string, and the NS equal to string takes as an argument, an NSString and, again, self.contents is a getter method that returns NSString; therefore, we have satisfied all the requirements of this equal to string and we put square brackets around it, and it's going to return a bullion is equal to string is defined to return a bullion whether the contents of those two strings are the same.
+54:07 Notice we did not say equals equals.
+54:10 Okay, we did not say card.contents equals equals self.contents.
+54:14 Because we'd just be impairing the pointers then, not what the pointers point to, okay?
+54:20 Everyone understand why we didn't use equals equals to see if those two strings are the same?
+54:23 So if those strings are the same, I'm going to give one point, okay?
+54:27 So this is either the dirt simple implementation of match, which is if the cards are exactly the same, their contents are exactly the same, I'll get one point, otherwise I get zero.
+54:37 Okay? Now we're going to do much better implementation in match when we do playing card, but this is our kind of dirt simple one.
+54:44 Now, to give you just a little more about objective-C, what if we changed this method, oh, so, yeah, here's a little bit about who's the sender and who's the receiver here.
+54:55 You can look at this in the slides later.
+54:57 Okay? But I'm going to make this a little more complicated.
+55:00 I'm going to make the argument to match be an array of cards.
+55:04 Okay? So now I'm matching this card that I'm sending this to, to a whole bunch of other cards.
+55:09 So now I'm going to need some new algorithm to match, right?
+55:14 So, again, a playing card match, if let's say you had matching three cards, you might give a lot of points if all three cards are the same rank, they're all jacks, you get a lot of points.
+55:23 If only two of them are jacks and the other one is something else, well you don't get very many points at all.
+55:28 If they're all through the same suit, you kind of get a medium amount of points, you see what I mean?
+55:32 So, here I'm changing match to take an array as the argument instead of just a single card.
+55:37 And how would I change my implementation to deal with that?
+55:41 Well, I'm just going to put a four-loop around my if and iterate through all the cards and so this implementation, hopefully those of you who are quick thinkers, you can know what this does, this gives you one point if the card that's receiving this matches any of the cards in the array.
+55:58 Any, not all, any.
+56:01 Okay? Now you can imagine a lot better algorithms here.
+56:03 Maybe you get one point for every card you match in the array or you get two points for one match and four points for two and eight points for three, you know, some sort of binary thing, exponential point, whatever, this is first day of lecture, we're just going to give one point if it matches any, okay?
+56:18 But mostly what I wanted to show you here is what it looks like to have an array as the argument instead of a single card.
+56:25 So that you understand that the argument, what the argument to the method is and also so I can show you the four-loop there.
+56:31 You see that four n [phonetic], a lot of languages have that these days.
+56:35 That just basically means it's a four-loop where it's going to go through every object in that NS array and assign it to card, card is the iteration variable, and execute that if once for each of the cards in the array.
+56:47 Everyone understand that?
+56:50 If you have a question about that, ask?
+56:56 No? Yeah? [Inaudible background comment] Oh, okay.
+56:59 That's a great question.
+57:00 So the question is if I just have that four-line, but I said four card card, not four card star card, in other cards, okay?
+57:09 We'd get a syntax error.
+57:11 Why? Because all objects are always pointed to so we always have that star.
+57:16 Okay? Always.
+57:17 Alright? You can't have a card not being a pointer to it, so the, you know, objective-C would give you a syntax error there, it's impossible to not have that star.
+57:27 Whenever you have the name of the class, it's always going to have that star.
+57:34 Question? [Inaudible background comment] Yes.
+57:36 The question is, another great one, can I use the square brackets to call the setter and getter instead of using that dot notation?
+57:42 And that's a really insightful question and the answer is absolutely you can, it's perfectly legal, because that setter and getter are completely normal methods.
+57:50 There's nothing special about them whatsoever.
+57:52 Okay? That dot notation is a nicety, syntactic sugar only.
+57:57 The question is should you use square brackets for setter and getter, and I think it's a matter of style.
+58:02 You would definitely would want to be 100 percent consistent, you would never want to mix them.
+58:06 And I think most people, most people would say use the dot notation.
+58:10 It makes it clearer, it's a little simpler, nicer, but, you know, you could.
+58:15 In this class, please use the dot notation just so I know you know how to use dot notation.
+58:19 Question? [Inaudible background comment] Okay, awesome question again.
+58:26 Gosh, you guys are so good.
+58:28 Can I use dot notation for a method that takes no arguments, but is not a getter or a setter?
+58:34 And the answer is objective-C will warn you about that, not give you an error, but warn you, and you should never do that in this class.
+58:41 Okay? That is really not that good form, whereas his question was kind of like you can argue, that one, don't do it.
+58:47 Okay? So. Use dot notations only for setters and getters.
+58:52 Other questions?
+58:53 Yeah?
+58:54 >> How do you use a setter with dot notations?
+58:59 >> So, yeah, question is how do you use a setter with dot notation?
+59:02 And it's exactly the same as a getter, it's just that you're using it on the left-hand side of an equals.
+59:07 So card.contents equals, you know, A of clubs, that would call the setter of contents, whereas, you know, this is calling the getter, because it's not on the left-hand side of the equal.
+59:20 Okay? Excellent!
+59:22 That's all I had today, so on Wednesday, we will do deck and playing card and playing card and I'm going to dive right into a big old demo of XCode 5 and show you how all this stuff is actually done, and then next week we'll do, yet more objective-C.
+59:38 Thank you very much!
+59:40 >> For more, please visit us at stanford.edu.

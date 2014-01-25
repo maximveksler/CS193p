@@ -1,0 +1,732 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:08 >> Okay, well, welcome then to lecture 10, yes 10, of CS193P, Fall of 2013/14 academic year, and today, we are going to talk about multithreading.
+00:20 Okay? I'm only going to talk about it briefly, but, because you'll learn a lot from multithreading kind of through experience.
+00:28 Then we're going to talk about UI scroll view, a very important view that allows you to expand what you can see on that little phone screen, to let you look at larger things.
+00:38 I'll do a demo that's going to cover both of those things, multithreading and scrolling.
+00:42 And then however much time we'll have left we'll get started on our next topic which is UI table view, we'll continue that on Wednesday.
+00:50 So multithreading, okay.
+00:54 The idea with multithreading is that you want to divide up the execution paths of your program into different and distinct paths that are possibly running at the same time.
+01:06 Now I say possibly, from your standpoint as a programmer, they look like they're all running at the same time.
+01:11 But, of course, if you have a computer or a phone that only has one processor, there's no way for them to run at the same time.
+01:18 But the OS makes it appear that they are by basically time slicing, giving each one of them a little bit of time to make it seem like they're all running at the same time, okay?
+01:28 And, [pause] so, if you did have a multiprocessor, maybe they would actually running at the same time, or maybe not, but you don't care and you don't know.
+01:37 Okay? It's totally not for you to know.
+01:40 Why do we want this kind of behavior where we have these multiple threads of execution?
+01:43 Well, a couple of reasons.
+01:45 One, we've got one thread of execution which is that main thread of execution where the user is interacting, doing touch events, we want thing to be very responsive.
+01:53 We want that to always be listening, we never want that to not be listening.
+01:58 The other thing is we have other threads of execution that actually might block, okay?
+02:02 Why would they block?
+02:03 Why would they stop?
+02:04 Well, let's say they do a network call and they're waiting for something to come back over the network.
+02:08 Well they have to wait for that thing to come back.
+02:10 So they are blocked, they're stopped.
+02:12 Okay? We would never want that main execution that's listening for touch events to be stopped, okay, or blocked, right?
+02:19 But these other ones, it's okay if they're blocked.
+02:21 If they're waiting for something, they're waiting for something.
+02:23 Okay? So to understand how we do multithreading, in iOS, there's one thing you have to understand and that's queue.
+02:31 A queue, just like a queue in the real world, queue means like a line, like you go to the movie theater and there's a line of people, that's called a queue.
+02:38 For those of you who don't know that word.
+02:40 And so you got that queue and the same thing is happening here with iOS multithreading.
+02:46 You have these queues, but in these queues, instead of people waiting for the theater, there are blocks.
+02:51 Blocks in the way we talked about last week.
+02:54 You know, the curly, curly brace thing, okay?
+02:56 So you got this queue, in line, you have these blocks, and they're all waiting in line to be executed.
+03:02 And depending on which queue they're in, when it's their turn, when they get to the front of the line, they get taken off the queue and they get to run.
+03:10 Okay? Possibly in a separate thread.
+03:13 Okay? Usually there might be multiple threads assigned to one queue, or single thread, again, you don't know what's going on, all you know is you're putting these blocks in a queue and they are being taken off and allowed to run.
+03:26 And they, people can be allowed to come off the queue one at a time, so at the movie theater, one person gets to go and watch the whole movie, and when they're done, the next person goes in.
+03:34 Okay? That's called a serial queue, that's what the queues we're going to talk about are, it's a very simple queue.
+03:39 There's also concurrent queues, however, where a whole bunch of people get to go into a theater and they're all get to be doing stuff simultaneously.
+03:46 Okay? It's a little more complicated, because you got this queue, you're pulling off these blocks and they're all running together, if they ever want to share resources or something they need a little more advanced multithreaded program and we're going to do the simple kind where one person coming out of the queue, one block coming out of the queue at the same time.
+04:02 Okay? So that's really what you understand, is that's how this multithreading works.
+04:05 Queues of blocks, okay?
+04:07 Now there's a very important queue, which is the main queue, that's the queue on which multi-touch is happening and all the UI stuff is happening, and this is special for two reasons.
+04:17 Alright? One is that we never want to block it, okay?
+04:20 So we never want to do anything that's going to take very long on that main queue.
+04:24 And the second thing is we use it for synchronization for everything that is UI related, okay?
+04:31 So all the methods, not all, but most of the methods in UI kit, you want to call them only on the main queue, and in fact, if you call them on some other, some block that came off from some other queue probably wouldn't work.
+04:42 Now there's a few, like UI image, UI font, UI color, a couple of those things, they'll work off the main queue, but anything that is going to cause the screen to have to change or synchronize or anything like that, or that might cause that, that all needs to happen on the main queue, so we use that main queue, both to have something that's constantly responsive to the user and for synchronization, to keep everything in sync of what's going on in the UI side.
+05:06 Everything else we could do in other queues, and actually, amazingly, iOS is doing things like actually drawing in another queue.
+05:14 Okay, you don't know that, you don't know what queue it is, you don't see it, but it's actually doing the other queue, why?
+05:19 Because if its drawing something very graphic-intensive and the user multi-touches in the main queue, you want to switch back to that main queue and give it the, the priority and the drawing can wait a little bit while that multi-touch gets done.
+05:32 Okay? So this main queue doesn't want to be blocked, it's where we do the synchronization, and I'm going to show you how you can write code that is running on other queues, but needs to do UI, because that's a problem, right?
+05:44 If your got a block that's on another queue, non-main thread queue, non-main queue, then, and you want to do some UI, you got to somehow talk to that main queue, you got a block, basically, on that main queue.
+05:57 There are other queues, mostly they're created by iOS behind the scenes, I'm going to show you an example here in the slides of a queue that is visible to you in the API and how we deal with that.
+06:08 Alright, so how do you execute on a block on another queue?
+06:12 Okay? This is a C-level API, it's a very low-level API, below object, so you're not going to see any object stuff in this lowest level API.
+06:21 There is an object-oriented layer on top of it called NS operation, NS operation queue, but it's kind of a thin object-oriented layer.
+06:28 This is the core layer.
+06:29 And this is the fundamental method, dis, or, sorry, this is fundamental C function, dispatch, underbar, async, and that means asynchronously put this block on this queue, okay?
+06:42 So you see I've declared a queue there, local variable queue, it's a of type dispatch QT, which is a typedef, and I'll, I'll talk about how to get a queue in a second.
+06:50 And then you just say dispatch async, the queue you want to put the block on and then the block.
+06:55 And the block takes no arguments and it returns no values, it's just a block, and you can put any code you want in there, and that block will take its place in line on that queue, and when that queue gets around it, it will take it off.
+07:06 One thing, by the way, about the main queue, it never takes anything out of its queue to run until its quiet, meaning whatever current touch events have been processed, okay?
+07:15 It's not going to right in the middle of a touch event take something off its queue and go do something, right?
+07:20 So the main queue waits till its a little quieter and then it'll take things off the queue and run it, so you can always post things on the main queue and be sure that it's not going to interrupt the user in anyway.
+07:31 Alright, so how do we get a queue to send this, to do this dispatch async with?
+07:35 Well, let's talk about the main queue first because that's the most important queue that we need to dispatch things, and the way you do that is dispatch underbar get, underbar mean, underbar queue, that will return the main queue to you and then you can call dispatch async with a block on that.
+07:49 At the higher level, that NS operation queue level, you can do NS operation main queue, it's a class method, it'll return NS operation queue object, which represents the main queue.
+07:59 Again, it's just a thin object-oriented layer, pretty much, on this C layer, and we'll, we'll see where that comes into the API.
+08:06 What if you wanted to create another queue.
+08:09 Let's say you're going to do some big math calculation or some big image processing calculation and you don't want to block the main queue, the main thread, so you can create another queue.
+08:18 Very simple, you just dispatch underbar queue, underbar create, and the first argument to that function is the name of the queue and that's like going to show up in the debugger and stuff, so this is kind of an internal name, notice that's not an NS string, because this is a low-level API, this is about the non-NS string you're ever going to see in this class, because this is the lowest levels we'll go.
+08:38 It's a constant care star, and here I'm just using the main name, okay?
+08:43 You just want to give it a name so you can recognize this queue when you see it in the debugger or something like that.
+08:47 And then the second argument is whether it's a serial queue or a concurrent queue, right?
+08:52 So, null means it's a serial queue, and so, that's the kind of queue we're going to talk about, again, so one person comes out of the line at a time.
+09:01 And there's kind of an easy mode for dispatching back to the main queue, which is perform selector on main thread, it's an NS object method.
+09:09 You can send it to any NS object.
+09:11 And you just pass a selector and its argument, the width object argument, it could be nil and then it has no arguments, that's fine.
+09:18 And the wait until done is whether you're going to wait until this thing gets pulled off the main queue and run on the main queue and then finishes before this thread, that's calling this, goes or not, usually wait until done you would say no, we don't need to wait, we're going to put this, call this method on the main queue, and whenever it executes is when it executes.
+09:38 So, this perform selector main thread is just like saying dispatch async onto the main queue, a block that just calls that method.
+09:47 Okay? That's all it is really, but it's just kind of an easy mode, it looks nice, and so, you know, you have to do the dispatch async business, but you got to be able to have one method to call, put all the stuff you want to do on one method.
+10:00 So let's look at an example that uses this, okay?
+10:01 This is more understandable, probably much more by example.
+10:04 So, this example is I want to download the contents of an URL from somewhere on the internet.
+10:11 So I have a URL, http// something or other, and I want to download that from the internet.
+10:16 Well, I might be on cellular, I might even be out of network range right now, that could take a very long time.
+10:22 It could take minutes, okay, well clearly I don't want my user interface, for example, to be blocked waiting for the network to give me that URL back.
+10:30 Okay? So I have to, basically, call this, do this download, network download, in a different queue, in a different thread, not the main queue.
+10:39 Okay? So there's an API in iOS for doing exactly this, you give it a URL and it will go do it in a different thread.
+10:46 Now, when it's done though, it needs to call you back, and tell you hey, I got that URL, and the way it does that is kind of cool, it downloads the URL to a local file, and then it calls you back and gives you a URL to the local file.
+10:59 So now it's all local, and so now you can open up the file and do all you want and it's not going to be blocking because you, the network is not a part of it anymore, it's download the contents of the URL.
+11:08 Okay, so here's how that works.
+11:10 First we create a URL request, a URL request is just a wrapper on URL, you can see I created there, request with URL, NS URL, object, URL with string, some URL.
+11:19 Okay? So that's how we create a URL request.
+11:21 A URL request is a little more than URL because you can specify some other things about that request, things you want to do, and most of the time we just create it, just like this, and we don't do anything else to the request.
+11:30 So now we have a request, a URL, a URL request, and, I apologize in advance for URL, I have trouble saying that, I'm going to be saying that 100 times in the next few slides.
+11:42 Then we have this configuration thing, don't worry about that for now.
+11:45 And then we have, we create what's called a URL session.
+11:49 So URL session is an object that manages a session of time that goes out and talks to the internet and gets the answer and all this stuff, so the session is the main thing that it's doing here and we're going to talk about how we create that, because how we create the NS URL session determines where, what thread, which queue, our code is going to be executed on, and so now we have a session and we can ask the question, please create us a task which downloads that URL, very simple download task with request, you give it the URL request, and then you give it a completion handler.
+12:23 Now that completion handler very important to understand, you can see that it's a block.
+12:27 Right? The arguments to that block, the first argument is the most important argument, that's the URL of the local file that it put the URL into for you.
+12:36 So it downloaded this URL off your internet and it put it in a local file and now it's giving you a file URL, not an http// URL, but a file, colon, URL, right?
+12:44 URL that points to a local file.
+12:47 And then the other arguments are about errors and responses, don't worry about those, but the main thing is you got this local file.
+12:53 And then inside this block, okay, what if you wanted to do UI things here?
+12:58 Okay? Well, if this block is being executed on the main queue, you're good to go.
+13:05 But if it's being executed on some other queue, any other queue, you're not good to go, you're going to have to talk back to the main queue.
+13:11 So let's look at those two examples.
+13:12 First of all, let's look at creating the session using this method, session with configuration, again, don't worry about configuration, delegate, colon, nil, delegate queue, colon, some queue.
+13:25 Okay? So this NS URL session thing, it has a delegate.
+13:29 Remember delegates, we're just getting used to delegates now, hopefully you are, remember the dynamic animator delegate that we set and it told us when all the animation stopped and then we blew up the blocks?
+13:40 Okay? So we just set a delegate of the animator to be the controller in the controller-implemented method.
+13:46 Same thing here.
+13:46 You can set yourself as a delegate to this URL session, and as its doing all its downloading, it'll give you updates, oh, I loaded it at 5,000 bytes, I just loaded some more bytes, oh, I've got the file now.
+13:57 Okay, I'm putting it into a file, a local disc, it'll tell you all these things.
+14:01 Usually you don't care about any of that, you just want it to tell you when you're done, which is what that completion handler is for.
+14:06 So here I'm going to set my delegate to nil.
+14:08 I don't even want to hear any of that mess, I just want my completion handler that you see here, called.
+14:15 But, the delegate queue, okay, tells you which queue are all your delegate methods going to be called on, okay?
+14:24 And you can specify the main queue, as we have here, or you can specify some other queue.
+14:28 Okay? You can even pass nil here and it'll just make up a queue for you, a random queue.
+14:33 So even though we're not doing delegate methods here, we are having that completion handler, and it calls your completion handler on the same queue as the delegates.
+14:41 So that's why that delegate queue line there is really important.
+14:44 What that says is call my completion handler, and all my delegate methods if I had them, call my completion handler on this queue, and I've specified the main queue.
+14:53 So that means the code that's inside my completion handler block down there, the part in yellow that says yes, can do UI things directly, that's being executed on the main queue.
+15:02 It gets put in line to run on the main queue, and when the main queue is quiet, it'll grab it and execute it.
+15:08 So I can do whatever I want UI-wise in here.
+15:10 I'm on the main queue.
+15:11 Now, conversely, I wouldn't want to do anything expensive here, like, look in the URL and parse it and build some huge data structure and all this stuff, something that might block the main queue, right?
+15:21 By being, taking a long time.
+15:23 I mean, it would have to really take a long time, but, you know, or you certainly wouldn't want to make another network call in that block, okay?
+15:31 [Pause] But, mostly, most importantly I can make UI calls here, I could update, it this was an image URL I could update my UI to show the image or whatever I want it to do.
+15:39 Because I've specified that it's going to run in the main queue.
+15:43 Okay? Question?
+15:44 [ Inaudible Background Question ]
+15:49 The question is does a queue finish a block that it takes out of the queue first before it grabs another one?
+15:55 Yes. If it's a serial queue, which is the kind of queues we're talking about.
+15:58 Yes. It, it does them in order, serially.
+16:01 Okay. So now let's look at a different case.
+16:05 What if we created NS URL session that does not specify the delegate queue?
+16:09 So I just use NS URL session, session with configuration, no delegate, or delegate queue argument there.
+16:15 This case does not use the main queue, it uses a different queue.
+16:19 Okay? There's no delegate, so, there's no need to have the delegate method specified.
+16:25 But, the callback, okay, this completion handler gets executed on a different queue, not on the main queue.
+16:32 Okay? Because I haven't specified the main queue as the queue I want it to execute on.
+16:35 So in this case, if I want to do UI stuff, I have to make a, another block of stuff and put it onto the main queue.
+16:45 And I can do that either with dispatch async, dispatch get main queue, a block, with this stuff, UI stuff I want to do, or I could do self perform selector on main thread with some method on the main queue, or method that I want to execute, and it'll be called on the main queue.
+17:02 Okay? So do you see why I had to do that in this case?
+17:05 Because this completion handler is not being called on the main queue, it's being called on a different queue.
+17:10 So this is what, what you need to understand in iOS is, when I have a block that's passed to some method, what queue is it going to be called on.
+17:18 Now most time when you pass a block to an iOS method, it's going to call it on the same queue that you called that method on.
+17:25 Whatever method you called and you handed it a block, it'll call you back on the same queue, most of the time.
+17:29 But if the method, like this one, goes off and does something in another queue, then it's probably going to call you back in some other queue, unless you specify the main queue, okay?
+17:40 Question? [Inaudible background question] Is the call dispatch async thread safe?
+17:46 And the answer is yes it is.
+17:48 And so you can use it for thread synchronization, actually, because it is thread safe.
+17:52 It's an anatomic call, okay, it happens automatically.
+17:54 It can't be interrupted by something else coming in and doing it.
+17:58 So, that's a good question.
+18:00 Notice all, the small thing, you notice I have task resume, you see that task resume?
+18:04 When you create a download task using this, it starts out suspended, in other words, not downloaded.
+18:11 So you have to immediately resume it to start it, okay?
+18:14 Now that resume is going to start something happening in a different thread, not on a main thread, but still, task resume, don't forget the task resume, okay?
+18:22 Okay, that's it for multithreading.
+18:24 I'm going to do it in the demo, so you'll get another look at it.
+18:27 You'll be doing it in your homework so you'll get a feel for it.
+18:30 The idea here is to get this idea, this main queue and these other queues, and that I have to post back to the main queue anytime I'm doing something on another queue.
+18:38 Okay. UI scroll view.
+18:40 So UI scroll view is a really important view.
+18:42 You know, the iPhone screen, anything that's going to fit in your pocket is going to have a small screen, but you might want to have it looking at a lot of information, okay?
+18:51 And you want to easily navigate through that.
+18:53 Now I have this little video here, this is like from iOS 4, or something, that's why I left it with the, or it has the old background, the old kind of phone, but it's really good at showing what scroll view can do, because you can put any kind of view in a scroll view, including another scroll view.
+19:08 So you can see that I've got a scroll view that's scrolling horizontally, and the things in it are scrolling vertically.
+19:14 Okay? Or here's a stock app where I'm going scrolling horizontally through other scroll views that can scroll vertically inside of them.
+19:22 You see that?
+19:23 So I can present a lot of information here, not just the stock ticker value, but news about a stock, charts, etc., and I can just easily get at them by scrolling through.
+19:31 So scroll view is a really powerfully designed view that lets you put almost anything in the, in the area it scrolls, including other scroll views.
+19:39 Okay? So, let's look at how scroll view works.
+19:43 Scroll view is really just a, a view that you add sub views too, but it treats those sub views specially, because it lets you scroll around them and zoom in on them.
+19:51 So you know how to add a sub view to a normal UI View, right?
+19:54 You just set the frame to sub view, you call add sub view, bloop, it appears in the view, easy.
+20:00 Even if you have a huge view and you say add sub view, somewhere down there, oop, it gets added, but, of course, you can't see the whole view.
+20:08 Now you could shrink the view way down small, but then, like this Stanford picture, you'd hardly even be able to see anything.
+20:15 Okay?
+20:16 So really what we want to do is be able to scroll around on these things.
+20:18 So, how does this work adding sub views to UI scroll view?
+20:22 Well, there's one really important thing, this is the take-home point on UI scroll view.
+20:28 You got to set its content size.
+20:30 So it has a property, called content size, which is just a big size, and it makes the area that the scroll view is going to scroll around on.
+20:37 Okay? This, I made a big content size here, 3,000 by 2,000.
+20:42 Then, now when you add sub view to the scroll view, it puts it in its content area, essentially.
+20:50 So here I put this sub view 1, which is the Stanford logo, 2,700 across, 100 hundred down, you see that?
+20:57 And then let's put that big one in there, somewhere.
+21:00 Okay, I put it 50 by 100 in there.
+21:04 And now what the scroll view is going to do is really kind of provide a window on that content area.
+21:09 So as the user scrolls around, with their finger, it's essentially going to move around showing you what's in that content area, alright?
+21:18 Does that make sense?
+21:19 So that's all scrolling is, really, when it comes to the panning part of it.
+21:24 And you can position these views anywhere you want, so if I move this Stanford logo here and then I move that huge thing to the upper corner, maybe I change my content size to be smaller, to include the views, now, again, I can scroll around, and you can see various parts, there's that Stanford logo, it's kind of overlapping the, the view here, because those two views overlapping the content area, etc. So it's as simple as that.
+21:49 It's all about that content size thing.
+21:51 Now, as a programmer, you might want to know where is the current, the user currently looking, okay, in my content area.
+21:58 And the, the way to get that is the scroll view property content offset.
+22:03 It tells you the X and Y of the upper left corner of the area that's being viewed.
+22:09 Okay? So that's an important part of it.
+22:11 The other thing you want to know is what's the bounds of the area the user is looking at, and somewhat, some people had a little trouble understanding this, but it's very simple, that bounds is actually just the scroll views bounds.
+22:23 Okay? The scroll view is a view, it has bounds, self dot bounds, and that bounds is the area that's being looked at.
+22:31 Now that bounds is in the content areas coordinate system, okay, and you may not want that, you might want to know in that image what is being looked at.
+22:41 And to do that, you simply convert those coordinates using this view method, convert rect to view.
+22:47 So you take those scroll view bounds, you convert rec to view, whatever sub view in there, like the UI image view that's displaying, displaying that Stanford picture, and you can find out where, what it is in that view's coordinate system.
+23:01 Now why would those be different?
+23:02 Well, okay, that Stanford thing happens to be up in the upper left corner at 0, 0, so it looks like it would be the same, but if that were not at 0, 0, then that would matter.
+23:10 Also it could be zoomed.
+23:12 We'll talk about zooming in a second, because scroll views can also zoom in, and so if you imagined if you were zoomed way in, looking in a window there, that the rectangle inside the Stanford views view would be a very small rectangle, right, as in scroll view it's containing huge amounts.
+23:28 So that's why it makes a difference what those two things are.
+23:33 Okay? So let's [pause] talk about how you create a scroll view.
+23:38 Very easy.
+23:39 You just drag it out from your storyboard.
+23:41 Okay? That's the number one way to create scroll view, you can also do alloc init with frame, it's just a view like any other view, but usually you drag it out.
+23:48 It is possible to have a view sitting in your storyboard and do edit menu, embed in scroll view, just like you do embed in navigation controller.
+23:58 You know, maybe I don't understand exactly how that's supposed to work, but it seems to me like it doesn't do the right thing a lot of the time.
+24:05 For example, it seems to put like a little extra space around it, I'm not sure, I don't recommend embed in scroll view.
+24:11 I recommend just put your scroll view there and then add your sub views in code, okay?
+24:17 Or, drag them in to a scroll view that's in your storyboard to put them in there, okay?
+24:22 But dragging them into your scroll view it kind of weird, because your scroll view in the storyboard can only show you its visible area, it can't show you that huge content size.
+24:30 So I'm kind of a fan of put your scroll view, sub views in in code.
+24:34 Okay? You put the scroll view itself in, drag and drop, into your storyboard, but then, put your things in code, I kind of recommend that.
+24:40 And the way you do that is just with add sub view.
+24:42 Just set the frame you want for your view, which is in that content area, coordinate system, and there's add sub view.
+24:48 Simple as that.
+24:50 Don't forget to set that content size.
+24:52 That's the very first thing I talked about and I'm talking about it again.
+24:55 If you don't set that content size, that big white area, the scroll view is going to be scrolling over nothing.
+24:59 It doesn't matter what views you've added a sub view, that content size is what it scrolls over.
+25:04 It doesn't scroll over the views, the views just happen to be there if they're in the content size coordinate system, but it's that content size that's key, don't forget to set that.
+25:12 And to reset it, if you're going to scroll over something that changes size, it gets larger or smaller or whatever, reset that content size.
+25:20 Most of the scrolling around is the user with a touch gesture panning, but you can also scroll around using code.
+25:27 For example, scroll rect to visible.
+25:29 You specify a rectangle in the content area, and it will scroll that to make that rectangle visible, and you probably want it to be animated so it slides over, instead of just jumps, right?
+25:41 And there's a ton of other things you can control in a scroll view, which we're not going to talk about, just time constraints, but you can go look at UI scroll views documentation, things like whether scrolling is enabled at a given time, whether you can scroll horizontally or vertically or both, [pause] there's no scroll bars in iOS, but there are scroll indicators, you don't use scroll bars, because you just scroll with your finger, or you pan around with a touch gesture, but there are little things that flash on that kind of show you where you are n the content area, you can look at all that stuff in the documentation.
+26:11 Alright, so now let's talk about zooming.
+26:13 Okay, so we've talked about panning around the scroll view, what if we want to zoom in on the content and zoom out?
+26:19 Remember that all UI views have this transform property.
+26:23 Okay? We used it to grade effect in the animating world, and the transform let's you rotate and scale and translate a view, arbitrarily, okay, it's doing bits, though, bit-wise zooming, and UI scroll view takes advantage of that to do its view, do it's zooming by changing the scale of the transform.
+26:45 Okay? So it scales the transform.
+26:46 So that means that your view, if it's zoomed in a lot could be kind of greeny, unless your view doesn't know how to adjust itself once it's zoomed in, and we'll talk about that in a second.
+26:57 Zooming requires two very important things to be set, the first thing is the minimum and maximum zoom scale, by default these are one, meaning you can't zoom in or out.
+27:07 Okay? It's just going to show you a zoom scale of one, in other words, the thing the user sees is one times the size of the thing as it really, it's actual size, right?
+27:16 So, if you want them to be able to zoom in or zoom out, you have to set the minimum or maximum zoom scale.
+27:21 Okay? Otherwise you will not zoom.
+27:23 The second thing is a delegate method.
+27:25 So, scroll views that zoom have to have a delegate.
+27:29 Okay? And delegate is just a property, on scroll view, just like it was on the animator, you're going to set that delegate to be some object, usually your controller, and your controller's going to implement whatever methods in the UI scroll view delegate protocol, remember we talked about protocols that it wants.
+27:45 All the methods in the UI scroll view protocol are optional, but this one is not optional if you want zooming, and all of this method, view for zooming and scroll view is returning is which view, in the content area, which sub view of the scroll view, is going to have it scale changed when it zooms?
+28:03 Okay? So you might have a view at the top level inside your content area scroll view that contains all your other views and they're zooming in, that's fine, or there might be just one view that makes sense to, to zoom, but you have to return which sub view is going to get scaled, which it's going to have its transform applied to it.
+28:21 Okay? You can also zoom programmatically, again, the user is usually pinching to zoom, but you can do it programmatically by just setting this property zoom scale.
+28:28 When you do set it you probably want to set it with set zoom scale animated, instead of just setting the zoom scale property directly so that it gets animated.
+28:35 And you can also zoom to a rectangle, which looks like this, so here's zoom scale 1.2, so I'm zoomed in a little bit.
+28:42 If I got to zoom scale 1, okay, this actual size, I can go back to zoom scale 1.2.
+28:49 I can also zoom to a rectangle, let's say I have this little rectangle right here, this nose of this beast, and if I zoom, it will make it as big as possible, okay?
+28:59 It still fits, so it zooms in.
+29:01 Or, if I had a square that was bigger than what was currently showing and I said zoom to rect, it'll zoom it down.
+29:06 Okay? So you can basically just take a rectangle to make it fit as best it can.
+29:12 Alright. So scroll view has lots and lots of delegate methods besides that view for zooming and scroll view thing.
+29:17 For example, if you zoomed in, you pinched to zoom and you zoomed way in on a view, it's going to be really pixelated because it's going to be doing a transformed-based scale, right?
+29:27 Scaling the bits up, bits might look huge, but you get a delegate method, scroll view did end zooming with view at scale, that will tell you, the scroll view will tell you, I just finished zooming this thing and now it's at this scale.
+29:40 And now you could redraw your view to not be pixelated.
+29:44 Okay? So this would be a good way to kind of let them zoom in and out, really high performance, a little pixelated, but their fingers are in the way anyway, so they can't probably can't tell that much.
+29:54 And then when they let go, you can do it.
+29:56 And, in fact, you even get notification while it's doing it, so you could even do it while it's doing it, it better be a high-performance drawing because they're pinching it out.
+30:02 But, you could do it.
+30:03 But I just wanted to show you an example of a delegate method.
+30:05 There's probably a dozen more scroll view delegate methods, you could go look at the UI scroll view delegate documentation to find out what they are all.
+30:12 Okay?
+30:13 So, we'll do a demo.
+30:15 It's a pretty comprehensive demo.
+30:16 I'm going to be doing, showing you scroll view, and that URL downloading thing, and I'm also going to show you, we'll do another navigation controller, just to show it again in class.
+30:28 And, at the end, I'm going to show you a little animation thing, a spinner that can spin while things are happening in other threads, so the main thread can show his little spinner so people can see what's going on.
+30:39 So, we'll try to get all of that to fit into our time.
+30:43 So we're going to make a new project here.
+30:46 So I'm just going to create new project.
+30:48 And I'm going to call this project Imaginarium.
+30:53 Okay? Imaginarium, we'll put it in my home directory developer, which I highly recommend.
+31:00 Here it is.
+31:01 Okay, I'm dragging app delegate to supporting files.
+31:04 Probably the week after next we'll start talking about this app delegate.
+31:08 Really the app delegate mostly comes in when we talk about multitasking in iOS.
+31:11 Okay, and we will start talking about multitasking the week after next, but not today.
+31:17 So here we go with this basic view controller, right here, this blank view controller.
+31:21 And I'm going to start off right off the bat by making a new MVC, a new view controller, and what this view controller does is it takes a URL, and displays, it, it is a URL that's for an image on the internet, some jpeg file, and it displays it.
+31:35 Okay? So that's what this, this first thing I'm going to create is.
+31:37 So let's just go straight to that, new file, I'm going to create a new class, it's going to be a UI view controller, okay, I'm going to call it image view controller.
+31:46 Okay? Because that's what it does, the view controller displays an image.
+31:49 Put it right there.
+31:51 So here's my image view controller, I'm going to start right with this public API, as I want to do with new classes, so, I'm going to have a property, which is non-atomic strong, which is going to be an NS URL, which is image URL, okay?
+32:07 So this is the public API.
+32:09 If you set this image URL, this view controller will display that image.
+32:13 Okay? How's it going to do that?
+32:15 It's going to use a class, which we talked about a few weeks ago, called UI image view.
+32:18 UI image view is kind of like UI label is to text, UI image view is to image.
+32:23 It just takes a UI image, it has a property which is a UI image, and it displays it, so it's exactly what we want.
+32:28 So this controller is obviously going to use that, so let's get rid of all this stuff, and, so what do I need here, to do this?
+32:37 Well, I'm going to need one of those image views.
+32:41 So let's create a UI image view [typing sounds], okay?
+32:49 Alright, why is that not doing the right thing already?
+32:55 [Mumbling] Okay.
+32:56 Let's see there.
+32:57 Oh, maybe because this.
+32:59 [ Background Sounds ]
+33:08 But anyway.
+33:09 Okay, sorry, we have this image view, that's going to be the main thing, so I'm going to lazily instantiate that.
+33:15 Image view, image view, if not image view then image view equals UI image view alloc, and at this time, I don't know its frame, so I'll just make it be 00, but I'll have to make sure its frame gets set properly, at some point, when I set its image I better to make sure its frame is set properly.
+33:36 And, so we have that, now I'm going to do another interesting thing while we're here, just to show you how this is done.
+33:43 I'm going to have another property, which is going to be a UI image.
+33:49 And this is going to be the image we're displaying, but what's interesting about this property, is I'm not going to use an instance variable to store it.
+33:57 Okay? I'm going to implement the setter and the getter, and I'm not going to use an instance variable.
+34:03 Okay? So how does that work?
+34:04 Well, let's do the getter.
+34:08 Oops. Image.
+34:10 And when I do this, I'm just going to return my image views view, image, rather, my image view's image.
+34:19 Okay? So when someone wants this property, it's a private property, but whenever I want this property in my code, I'm just going to return the image view's one, and, similarly, when I set this image, okay, let's see if we can make this do the right thing in terms of code coloring, I'm not sure what's going on here.
+34:43 Let's try this again.
+34:46 Okay, I'm not exactly sure.
+34:48 Oh, there we go.
+34:50 Okay, I want to get this colors going here.
+34:53 Alright, so, let's set our UI image.
+34:57 And same thing here, I'm going to just self dot image view, dot image, equals the image.
+35:06 But here's why I'm defining this little image, because whenever I set the image in the image view, I need to do one other thing, which is self dot image view size to fit.
+35:18 Okay? I want the image view to adjust its frame to fit that image.
+35:22 So, since I always want to do that whenever I set the image view's image, I'm just preparing my own little property, which has sensible semantics, that does this little size to fit.
+35:31 There are some other things we're going to want to do when we set an image, and we can put them all in here, but we'll start with just these.
+35:37 Okay? [Pause] The next thing I need to do is, if view did load.
+35:43 [Pause] This, and let's go ahead and add this image view to self dot view.
+35:50 So let's do super, view did load, and then I'm going to say self dot view, add sub view, self dot image view.
+35:58 Okay? So that way I make sure I get it on screen.
+36:02 Question? [Inaudible background question] Yeah.
+36:05 Great, great question.
+36:06 So, there's no at sign synthesize for UI, this UI image thing, right?
+36:12 And compilers not complaining either.
+36:14 What is going on?
+36:15 Why don't I need an at sign synthesizer?
+36:17 Anyone want to hazard a guess?
+36:22 [Inaudible background comment] Correct.
+36:23 The answer is because I never use the instance variable.
+36:27 Okay? Since image is totally defined in terms of another object, I'm never using underbar image, and therefore I don't need to synthesize that instance variable, that's what at sign synthesize does.
+36:37 It creates that instance variable, and I don't need it.
+36:40 So, the compiler's not complaining because I'm not using it, so I don't even need it.
+36:44 Everyone, that's kind of why I did this property, so that you would see that.
+36:48 Okay? Everybody got that?
+36:50 Okay, so now I have this wonderful view.
+36:52 The last thing I want to do here is when someone sets my public API, set image URL, obviously, I want to set that image view's image to be that, so let's store our image URL here, and then I'm just going to say self dot image equals NS [pause], sorry, UI image, image with data, NS data, data with contents of URL, self dot image URL.
+37:26 Okay? Let's make some more space.
+37:31 Okay? So, all I'm doing here is I'm calling this self dot image, which is going to call this down here, this set image.
+37:39 And, I'm creating a new UI image using the data that I get by getting the contents of that URL.
+37:47 This is going to block, because that URL, it's going to be out on the internet.
+37:53 If that, if this URL is on the internet, this will block.
+37:56 If it's a file URL it won't, it'll just get the data.
+37:59 Okay? But this is very important to understand.
+38:01 This is where we might be blocking the main queue.
+38:04 Okay? And that's going to be bad.
+38:06 We're going to block the main queue and then we're going unblock it, okay?
+38:09 But we're going to start out blocking out, which is bad, but this is the line of code, the offender, because data with contents or URL will go out on the network if that URL is an http something.
+38:19 Okay? Okay, so, now what image are we going to display?
+38:24 Right? We have this nice, generic image displayer, what are we going to display?
+38:33 And, now let's go in the internet.
+38:36 So, I've got these images right here, that actually Apple has, they put up a few images that were kind of example images that were taken by an iPhone, iPhone5s, I guess, and you can see there's this one, photo one, which is this flower and then there's photo two, which is these peppers, I guess those are, and three, which is this jellyfish, okay?
+38:59 So I want to have my app be able to display these images.
+39:03 Okay? So I'm going to make it so it can display any of these three images.
+39:08 So how am I going to do that?
+39:09 Alright, I'm going to go to my storyboard, and first I'm going to drag out a view controller to be my image view controller, so let's drag that out, and we know that we need to set its class to be image view controller, so now I have this nice image view controller that can display an image.
+39:26 And, now I'm going to put some buttons in this view controller, this is this default view controller that got created when I created the app, so I'm going to create one here.
+39:34 We'll create one for the peppers, and, or whatever those things are, and then let's create one for the, what was the first one, a flower, and then, what was the other thing, it was a [pause] jellyfish.
+39:50 Okay, so I got these buttons and I want to, when I click on these buttons, I want it to show up here, okay?
+39:56 So, I'm going to use that by doing a navigation controller and have it segue, okay?
+40:00 Just so we can review the segues.
+40:02 One thing I want to do all of these is, let's give them some nice [pause] things here.
+40:07 Let's have them, horizontally center that way, let's have this guy horizontally centered, or vertically centered this way.
+40:16 Let's control, drag from this guy up this and keep the vertical spacing, control, drag this into that vertical space, so I do all that, you can see I have some yellow here, some yellow constraints, let's go fix those.
+40:28 We'll go over here, do this, we'll fix the misplacement there.
+40:33 And fix that one, and we'll fix that one.
+40:35 So now they're doing it.
+40:37 This might be a nice chance to go here and select on this and go switch over to landscape.
+40:42 It looks like it's doing something there, so that's good.
+40:45 Okay? Everybody got that?
+40:47 Just a little review of auto layout there.
+40:49 Alright, so, let's put this inside of a navigation controller, which I'm going to embed in navigation controller, so that puts that here.
+40:57 That's good.
+40:57 Let's go ahead and put a title in here, we'll call this Imaginarium.
+41:02 Now I want to segue, when any of these buttons is pressed to do this, so I'm just going to control, drag, so let's control, drag this one.
+41:09 Push. Control, drag this one.
+41:12 Push. And control, dray this one.
+41:14 Push. Now, you see I've got these three segues in here, if I click on one, it'll tell me what sent, what, what is causing that segue to happen, which is kind of a nice feature.
+41:25 Now what am I going to use for my identifier for here?
+41:28 Well actually, I'm going to be a little bit tricky here, I'm going to use the name of the photo as the identifier, and then in my prepare for segue, I will use that to pick which of the three photos I'm going to show.
+41:42 So, you know, it's a demo, so I'm trying to make this as little code as possible, so here's my three things, they're going to have these three identifiers, and I need to do prepare for segue in this guy, right, so let's go do that.
+41:55 Let's do it this way, let's go over here to our view controller.
+41:58 We don't need any of this, this is our generic view controller, on the side there.
+42:02 So I only need to implement prepare for segue, and I'm going to use the image view controller that I just created, because this is the thing I'm going to segue to, alright?
+42:13 So all I'm going to do is I'm going to say if the segues destination view controller is kind of class in image view controller, okay, then I know how to segue to that.
+42:26 So, I, oops, one more [inaudible] there.
+42:28 So I'm just going to create a local variable here, image view controller IVC equals image view controller segue dot destination goal, which I know is okay because I did this introspection right here, so I know this is, line is not going to cause a problem, and then I'm just going to say IVC dot image URL, okay, remember this is the public API of our image view controller, okay, and that's what we do when prepare for segues, we call public API on the destination view controller.
+42:56 So I'm going to set that to be NS URL, URL with string, and I'm going to make a string with a format, and what I'm going to do is I'm going to copy and paste this thing right here, that I went to, this Apple thing, so let's copy that.
+43:16 And paste it in here.
+43:17 Paste. But instead of just doing photo one here, I'm going to use the segue identifier.
+43:26 [Pause] Okay?
+43:28 And just so we can see what's going on, I'm also going to set the title of that view controller to be the segues identifier, as well, that little photo underbar one, or photo two, just so we can see at the top what it is.
+43:40 Does everyone understand what I'm doing in prepare for segue here?
+43:43 How I'm preparing my image view controller to do what it wants to do?
+43:48 Okay? So, let's see if we got everything working here.
+43:51 Hopefully I didn't forget anything.
+43:55 [Pause] Try to get it working on our device here, oop, here comes something.
+44:01 [Pause] Alright, so, look, it's starting off in the landscape mode, I can rotate to either one.
+44:08 So let's try to take a look at the flower.
+44:09 Now, it, it did show me the flower, at least the [laughing]
+upper corner of it, 44:14 but I can't scale around, I can't zoom, I can't do anything, I could go look at the peppers.
+44:19 Notice that my UI is kind of stuck.
+44:22 When I press jellyfish, ah, now I can't, like I can't change my mind.
+44:25 Once I change from peppers, I can't change my mind.
+44:29 And that's because I'm blocking that main queue by doing this fetch.
+44:33 Okay? So we're going to see how to fix that a little bit later.
+44:36 So, this is good, so far, but it'd be a lot nicer if I could take a look at this flower, right, scroll around and look at it, so let's do that next.
+44:46 And, we're going to do that by adding a scroll view.
+44:49 So, I'm just going to go here to my storyboard and here, inside my image view controller, this is my image view controller, I'm going to add a scroll view, and we do that just by going down here, where we add everything from, and finding a scroll view and it's down towards the bottom, oh, there it is.
+45:07 Okay, scroll view.
+45:08 I'm just going to pull it out.
+45:09 I'm going to make it match the whole thing, I'm going to actually do reset to suggested constraints, I always like to see if it actually picked good constraints, which it did, okay?
+45:19 It's going to have that scroll view stick to the edges, so as we rotate or if It were in a different size viewer, or whatever, it would stick to those edges, I really like that, let's also wire up a outlet for that, an outlet for that.
+45:34 We'll call it scroll view.
+45:35 Alright?
+45:36 So we have that, so now we can talk to the scroll view, and all I really need to do to make this work is instead of adding the image view as a sub view of the view, I'm going to add it as a sub view of the scroll view.
+45:50 But, of course, this will not work.
+45:51 I'll go ahead and prove to you this will not work.
+45:54 [Pause] And I'm doing this intentionally, and I'm taking time to do this because you'll make this mistake, as well, a very common mistake.
+46:02 Just looked at the flower, here's the flower.
+46:04 Oh! It's not working.
+46:06 Okay, it's in that scroll view and I know I put it in a scroll view, how come it's not working?
+46:10 Anyone want to tell me why?
+46:13 Content size, exactly.
+46:15 We have to set the content size.
+46:16 So right now the scroll view doesn't know where to scroll over, and, you might ask why is it even showing anything here, and the answer is I think scroll view, when you add it in a storyboard, it might set its content size to be its bounds, or something like that, so it's just some defaulting that's even make it so we see anything there.
+46:33 Okay, so let's go back here and fix that.
+46:35 So where do we want to set the content size then?
+46:38 And, let's make it so we can see all this code.
+46:41 The content size, for sure we want to set, anytime we change the image, we want to set the content size, there's no doubt about that, so let's do this, self dot scroll view dot content size, oops, size, equals self dot image dot size.
+47:01 Okay? Now, this line of code could cause trouble if self dot image is nil, because I told you that if you have a method, this is just a getter of the image, that returns a struct, and you send it to nil, you'll get undefined results.
+47:18 So this is bad.
+47:19 So let's protect against that, self dot image, question mark, then we'll use the size, otherwise, we'll use CG size 0, which is 0 by 0.
+47:30 Okay? Now, this will work, but there's actually one other place that we need to put this.
+47:35 And that, maybe surprisingly, is in set scroll view.
+47:41 In other words, in the setter for this outlet, this scroll view outlet right here, it's just an outlet.
+47:49 We want equals, scroll view, we want to make sure that we do this exact same line of code, and why is that?
+47:56 Well, the reason for that is this scroll view property might get set after this happens.
+48:05 Specifically, prepare for segue, right, prepare for segue happens before your outlets get set, make sense?
+48:13 So this set image is going to be happening because of this set image URL which happens in the prepare for segue and so the scroll view is not even set up at that time, so this is going to be nil, at the time that is executed.
+48:28 Okay? Everyone understand that?
+48:31 No? Nod your head if you understand.
+48:34 Not too many of you.
+48:35 Okay, well you might have to think about that one a little bit, okay?
+48:39 Just understand that your outlets are not send, are not set when prepare for segue is preparing you, okay?
+48:47 So prepare for segue is setting this image URL, which is happening this, which is causing this, which is going down to here, which is trying to do this, but this is nil, so this line will do nothing.
+49:00 Because we're sending a message to nil here, so it just does nothing.
+49:04 So later when this outlet comes along and get set, then if we have an image, we want to make sure that we set our content size, okay?
+49:12 Alright, so, you can cogitate on that.
+49:15 Meanwhile, [pause]
+let's run this, 49:19 and hopefully now it'll work.
+49:21 So we'll look at the flower.
+49:24 And oh it's working!
+49:25 Okay. So there's our flower, it's a little hard to see because we can't zoom in.
+49:29 Alright? It'd be nice to be able to zoom in on this, same with the peppers, the peppers, a little nicer to look at, this, that's not so nice to look at, but, there you can look at the peppers over here.
+49:39 Okay, so these are too big, obviously we want to zoom in, so how are we going to zoom in?
+49:44 Let's do that.
+49:45 Zooming in, really simple, remember I said you only need to do two things, okay?
+49:50 One is you got to set the scroll views minimum and maximum zoom scale, so we'll let it zoom into, let's say 20 percent, of the size of this image, or zoom out.
+50:01 And then, we'll have the maximum zoom scale be two times.
+50:05 Okay? So, we won't allow the image to get any bigger than twice as big and we'll zoom down to 20 percent.
+50:13 And the other thing we need to do besides setting those is to set the scroll view's delegate and implement that other method.
+50:19 So I'm going to set the scroll view's delegate to self.
+50:22 Okay?
+50:23 This causes a warning.
+50:25 You see that yellow triangle?
+50:27 Why do you think there's a warning here before I clicked on it, anyone?
+50:30 Yeah?
+50:31 [ Inaudible Background Comment ]
+50:36 Yes. So the, that's, yes, but there's an indirect step, and this warning is actually telling me something slightly different, but it, it's telling me something on the way to exactly what you're saying, which is we got to implement that view to zoom thing.
+50:47 But that's not what this warning is warning us about.
+50:49 This warning is saying that you are assigning this delegate to an object that does not implement the scroll view delegate protocol, okay?
+50:58 Now that's not implementing the methods, that's declaring that it does it.
+51:04 That's this up here.
+51:06 Okay? This is what it's complaining about, is that you don't declare self, which is this image controller, to implement the delegate protocol, okay?
+51:16 So remember the delegate protocol, there's two things.
+51:18 One, they're saying that you do it and then number two, doing it.
+51:22 Okay? So it's the saying that you do it that it's complaining about, and now it's not complaining.
+51:26 Even though I don't actually implement any of those methods.
+51:29 Okay? Why is that not complaining?
+51:31 Because they're all optional.
+51:32 If any of those methods would required, then it would be complaining here, it would be saying you don't implement this required method.
+51:39 Okay? But since they're all optional, it doesn't do it.
+51:42 But, it's not really optional for us because we want zooming, it's only optional because zooming is optional, but we have to specify here the view for zooming in scroll view.
+51:52 Okay? We have to return which of the sub views we want to, to zoom, and we only have one, which is in our image view.
+51:59 So we're going to return that and it's going to cause the image view to be zoomed when zooming happens in the scroll view.
+52:04 If we returned nil here, then that pan, the zooming rather, pinching, would do nothing in the scroll view.
+52:10 Okay? It's only going to zoom, i.e. change the transform, of whatever sub view you specify by returning here, okay?
+52:18 So let's try this.
+52:20 See if we can zoom in.
+52:23 [Pause] Alright.
+52:27 So we get the flower.
+52:30 There's our flower, let's try zooming in, indeed we can.
+52:33 Okay, and zoom out.
+52:36 Now, I haven't set it so that it zooms small enough to be smaller than the scroll view, but, because I'm holding it right here, if I let it go, it zooms out, but I allowed that, then what would happen is you'd have this white border at the bottom.
+52:48 You see that?
+52:49 That white border?
+52:50 That's the background color of the scroll view showing through.
+52:54 Okay? And I can zoom in, I can zoom even in so far that it starts to get a little pixelated, because I'm zooming in more than the picture even has pixels to show me.
+53:03 So right in the middle there, you can see the little stair step.
+53:06 Okay? Make sense?
+53:08 We can look at another one, the peppers.
+53:10 Okay, there's the peppers, let's zoom down.
+53:14 Okay? Make sense?
+53:16 So, we're making really good progress here.
+53:18 One problem though is if I say flowers, and then oh, again, my UI is blocked, what's going on?
+53:24 I really got to fix that.
+53:26 Okay? We don't want our UI to be blocked when we pick one.
+53:29 For example, if I pick jellyfish, I might, if it's taking a long time, I might want to change my mind and then go pick flower.
+53:35 Okay? So I want to be able to do stuff in my UI without it being blocked by this network call.
+53:41 Okay? So, let's fix that.
+53:44 And the way we're going to do that is by doing that URL fetch, this one right here, in another thread, okay, on a different queue.
+53:53 And, so how are we going to do that?
+53:56 Really, really simply.
+53:57 I'm just going to get rid of this line of code, comment it out actually, and I'm going to say self start downloading image.
+54:05 Okay? And then we're going to implement this method [pause], start downloading image.
+54:11 Okay? And all this thing needs to do is start the download happening, it's going to happen in another thread, it's going to call us back with that completion handler and when it does, I'm going to execute this line of code, basically, okay, but this part I'm going to do using the URL download task that we saw in the slides.
+54:31 Okay? So let's, let's talk about this start downloading image and what this method needs to look like.
+54:37 The first thing is I'm going to set image to nil, okay?
+54:41 I've been asked to start downloading a new image, while it's downloading, I'm going to clear whatever's in my image view currently.
+54:49 Okay? So I'm just going to blank that out.
+54:51 So I'm going to set my image to start off to be nil.
+54:54 And then, as long as I have an image URL to go try, then we'll try doing a download, and as we saw in the slides, let's make a lot of space here, oops.
+55:05 We need to make UR request, okay?
+55:10 We'll call it request, and that's just NS URL request, request with URL, and what's the URL we want?
+55:18 Self dot image URL.
+55:19 Okay?
+55:20 So this creates a request to go get that image URL, now we have to create a task, a background task to go do that request.
+55:28 So let's do this URL session configuration thing, which I kind of hand waved in the slides, but the configuration, really, there's three different kinds of configurations you can have, it's pretty simple, one is an [inaudible]
+session configuration, 55:43 that's just if you're going to download something and you're going to be done.
+55:46 And that's exactly what we're doing.
+55:48 There's another one which his default session configuration.
+55:51 That means you might be multi, downloading multiple files or otherwise you keeping this session active and doing multiple things, but it's just the default, and the last one, really powerful, but we need to understand iOS multitasking to do it is background session configuration.
+56:06 A background session configuration means start downloading this file and even if the user switches to another app or my app dies, keep downloading it, and when it's done, call me back and launch my app, if necessary, to handle that.
+56:21 Okay? So it was a very powerful session.
+56:23 But today, we're just going to do the simpler [inaudible], okay?
+56:27 And so now we'll just create the session, URL session.
+56:31 And I'm going to create this NS URL session using the default way to do it, which is just by specifying the configuration only.
+56:44 I'm not doing the delegate or delegate queue.
+56:46 So my callback is going to be on a different queue, not on the main queue, alright?
+56:52 And so now let's create that URL session download task, okay?
+56:58 So this task is going to be the, the task that's going to do the downloading for us, and we just asked the session, please create us a download task with that request, with this completion handler?
+57:09 And let's go ahead and put this on the other line so you can see it.
+57:13 One little trick, if you have an argument that's a block like this, okay?
+57:17 If you double click it, it will put it in there for you.
+57:22 Okay? In other words, it'll type all this stuff in.
+57:25 I don't like this name, location, just to make this clear, this is local file, this is URL of the local code that is downloading this content to this URL too.
+57:34 That's why I like to call that local file.
+57:37 And then here's the code that we want to do in here.
+57:40 And, what happens when it's done?
+57:45 Okay? When we get this completion or handler called.
+57:47 Well, we want to set self dot image, okay, but the only thing here we have to be careful of is we're not on the main queue, so we have to do that in the other queue, so let's do this.
+57:57 If there's no error, first of all, you can see that there's error argument, so I'm going to say if there's no error, if there was an error, you might want to put not found or something in your view somewhere, but, if there's no error, then I'm going to do an interesting thing here that you might be like, what, which is I'm going to check to see if the request URL's URL is equal to self dot image URL.
+58:22 Okay. Why would I do that?
+58:24 Oops, request dot URL.
+58:26 Why would I do this?
+58:27 Why would I check to see if this is, which we set to be this, why would I check to see if this is equal to self dot image URL, anyone have an idea?
+58:42 [Inaudible background comment] Absolutely.
+58:43 Okay, in case we, somebody else in the app changed the image URL, asked us to display something different, while this was outstanding.
+58:53 Okay? This URL is out fetching, let's take, it takes 10 minutes, okay, it really is a slow website out there, it takes 10 minutes, and in that 10 minutes, the user clicks on something else and wants this view to display something else.
+59:04 Well, this download task is still going to complete 10 minutes later, but we want to ignore it, basically, because it's a request for something we're not going to use anymore.
+59:13 So this is something that would be important to understand about multitasking, is that things take time, and when things are finished, you have to make sure the state of the world still matches what you thought it was when you asked it to start.
+59:25 Okay? Multitasking programming, multithreaded programming rather, is really, can be kind of mind-bending in that way, but you really have to have the discipline to think, okay, what if this takes 10 minutes, then what, what do I want this to do?
+59:39 Alright? So that's the kind of thing you have to do.
+59:41 So, in this case though, it is the same.
+59:44 So let's go ahead and create a UI image out of the URL data that came back, so I'm going to create a local UI image here and I'm going to do that doing UI image, image with data, and this time I can just say the local file, oops, sorry.
+01:00:01 Go do NS view data.
+01:00:04 Data with contents of file.
+01:00:06 But now the URL is this local file.
+01:00:12 Okay?
+01:00:13 So this [pause], this right here, is doing locally, so it's not going to block, like this one did.
+01:00:20 This one blocked because this could be a network http URL, this one, is a local file so it can't block.
+01:00:28 Okay? Now, notice that I'm doing this.
+01:00:31 It looks like a UI kit call.
+01:00:33 Am I doing this on the main queue?
+01:00:37 [Pause] No.
+01:00:38 I see nodding heads or shaking heads.
+01:00:40 You're right, no.
+01:00:41 This is not happening on the main queue.
+01:00:43 And it turns out that that's okay.
+01:00:46 UI image is one of the few UI kit classes that you're allowed to do things to off the main queue.
+01:00:53 And that's because this is not actually going to do anything on screen, I'm just creating a local variable here that is parsing this URL, looking at its data, and creating an image for me.
+01:01:04 Okay? Here let's make this a little more readable by moving this back.
+01:01:10 Okay? So, this is not going to actually touch the UI, I'm just creating the UI image object at this point, that's okay.
+01:01:17 But the next line of code I want to do is self dot image equals image, okay?
+01:01:21 Now I want to set my image to that.
+01:01:23 This line of code has to happen on the main thread, because look at all the UI stuff we're going to do when we do set image, we're going to be talking to the scroll view, we're going to be doing size fit, we're going to change the content size, this can be doing all kinds of stuff, so this has to be on the main thread, and so I'm going to do that with dispatch async.
+01:01:43 Dispatch underbar queue, get main queue, and block here, and inside this block, I'm going to put this call right here.
+01:02:02 [Pause] Okay?
+01:02:02 Now another way I could have done this was self perform select our main thread, at sign selector, set image with object, the image, wait until done, no.
+01:02:15 Okay, these two lines of code are pretty much exactly the same thing.
+01:02:18 Okay? Everybody understand that?
+01:02:24 Okay, everyone understand this line of code?
+01:02:26 Question?
+01:02:28 [ Inaudible Background Question ]
+01:02:38 Yeah, so the question is before I start downloading this image, wouldn't I want to check to see if I already have a download going on, [inaudible], and the answer is yes you would.
+01:02:47 You know, this is demo, we're not doing it, but you would want to do that, you probably want to have a local variable which is the URL that you're currently downloading, maybe even an array of them.
+01:02:56 Because the person might click back and forth and back and forth, and so these are all the ones I have outstanding, and then you'd want to go and look and see if it contains that object, and if it does, just don't, don't do this.
+01:03:06 Okay? Wait for it to come back.
+01:03:07 So that's really good, good point.
+01:03:09 And then oh, I have this warning right here, oh sorry, question?
+01:03:13 [ Inaudible Background Question ]
+01:03:25 Yeah, so, the question, so you mean which, where is this queue that all this stuff, [inaudible background question].
+01:03:31 Yeah, so that, that queue, that is going to do this completion handler, right, this completion handler right here, the queue to create that is created by the session task, and it creates it when it needs it.
+01:03:43 Probably it creates it right before it calls this completion handler, but if you had a delegate it might create it right at the beginning and use it to your delegate, right?
+01:03:50 So in this case, you probably created it right before you need it and fired this off.
+01:03:53 Because the actual URL download is happening in yet another queue, right?
+01:03:57 The URL downloading queue, and, in fact, it could be another process if your, use that background session thing.
+01:04:03 So that's all I think, but this queue is probably created right before it calls this handler, it's created by the session, URL session, right before it calls this handler.
+01:04:10 [Inaudible background question] No.
+01:04:12 Because this is totally separate, totally unrelated to it.
+01:04:15 Okay? This is the only time we're touching the main queue, right here, is when we, and even here, this block gets put in line on the main queue, the main queue might be busy, busy doing other things.
+01:04:25 Okay? Pulling other blocks off its cube, because this goes at the end of the line.
+01:04:28 So if there's other blocks, those are going to get executed first and then eventually this block will get executed.
+01:04:34 Okay? So anyway, we have this one warning right here, why do we have this warning?
+01:04:38 That's because this task, we created it, but we never sent it a message, you see, this says unused variable task, and that's a good reminder for us to say task, resume, because if you don't say task resume, this task starts out suspended and it will never actually do anything, just sit it there waiting for someone to resume it.
+01:04:57 Yeah?
+01:04:58 [ Inaudible Background Question ]
+01:05:03 Yeah, so the question is, is there ways to abort tasks, I'm going to talk more generically about blocks on threads, or on queues.
+01:05:13 If a block is taken off a cue, it starts to run, it cannot be stopped.
+01:05:17 It has to stop itself.
+01:05:19 It would have to realize, oh, this no longer makes sense for me to be doing what I'm doing, okay?
+01:05:24 There is some API in the URL session to do things like that, but I want you to understand that for blocks on queues, once they start, they cannot be stopped, they can only stop themselves.
+01:05:33 They can just exit themselves when they realize they're no longer necessary.
+01:05:36 Okay? I, I don't have to time to get into the URL session stuff, but that's the answer to your question.
+01:05:43 Okay, so, let's see if, how this works.
+01:05:46 Hopefully I haven't forgotten anything here.
+01:05:48 [ Background Sounds ]
+01:05:54 Okay, so now if I picked flower, you can already see its different, okay?
+01:05:58 When I click peppers, it immediately goes here, even though it's blank, okay?
+01:06:01 And the photo comes in later, okay?
+01:06:03 But it's immediate and, in fact, I can go back, flower, nah, I don't want peppers, nah, I want jellyfish.
+01:06:09 Okay? And, so the UI is to complete your response, even though I'm downloading these things multiple times, actually, in the background, unnecessarily, but, so this is a way you want your UI to be, very responsive, okay, and just things happening, you know, in, the instant the user wants them, okay?
+01:06:29 Now, there's one thing that's kind of bad about this UI though is when I click here, there's no feedback that's doing anything here, this just looks like oh, well, I clicked on flower, oh, there must not be a flower, right?
+01:06:39 [Inaudible], but he's like oh there's no flower, oh I'll skip it, there's no peppers, because there's no feedback that it's doing anything.
+01:06:48 So let's put some feedback in here that shows something moving or something, you know, a little spinning wheel that shows the user hey I'm doing something for you, in the background, not to worry.
+01:06:58 And there is a UI view that's built into iOS, that's really easy to use for doing exactly that.
+01:07:05 So let's go back to our storyboard here.
+01:07:08 So we have our storyboard, and what I'm going to do is into this view right here, I'm going to drag a UI activity indicator, just towards the top here, it even looks like a spinning wheel, so this is the little spinning wheel that you're seeing, so I'm going to drag it in here.
+01:07:24 Now, this is going to be a good opportunity to talk about document outline.
+01:07:27 So when I drag this in, okay, that's great, it seems like I've done a good thing.
+01:07:31 I've dragged this in here.
+01:07:32 But actually, I didn't do a very good thing here, because dragging that in actually made that a sub view of the scroll view.
+01:07:40 Okay? When you drag a view in, it, on top of another view, it makes a sub view of that.
+01:07:45 And we can see that over here in the document outline.
+01:07:47 Here's the scroll view.
+01:07:48 And see how this is indented a little?
+01:07:50 That means it's a sub view.
+01:07:51 Now, I don't want it to be a sub view, I want this wheel to sit in front of the scroll view, right, and be spinning whenever the scroll view is doing something and go, and to hide itself when it stops, and so I can make this not be sub view by picking it up and moving it to be a sibling.
+01:08:08 Okay? Now, the problem here is I put it in the back, things at the top of the view, sub view are in the back, so I can just put this up here, and now I've got this in front and this in back.
+01:08:19 Okay? And they're siblings.
+01:08:21 So this is in front, okay?
+01:08:22 Another thing I want to do here is set my constraints on this guy, so I'm going to go here and I'm going to set it to be horizontal/vertical centered, and we can just make sure that it did the right thing, which it did.
+01:08:34 Okay? We got a little yellow there, so let's fix that.
+01:08:38 Fix misplacement, put it right in the middle, okay?
+01:08:41 So we got that.
+01:08:42 The other thing I want to do is, I want this little spinning thing, I want it to be large so the style I'm going to use is large white, but I don't want it to be white, because it's on a white background.
+01:08:54 So I'm barely going to be able to see the thing, so let's change the color.
+01:08:57 So let's make the color be, hmm, let's make it be like the blue of the buttons, okay, that's a pretty good color for it to be.
+01:09:04 Also, notice these behaviors.
+01:09:06 Okay? Animating means this thing starts out animating, which I want, because when this view first appears, I want it to be animating, because I'm loading from the start.
+01:09:15 And then here's hides when stops, that says when you stop it in your code, it's going to hide it.
+01:09:20 So it's not going to stop turning and then sit there blocking your control view, it's going to hid itself.
+01:09:25 Okay? So that's a really cool feature, you almost always want hides when stopped on there.
+01:09:29 Okay? You may or may not want it to start out animating, but you always want to hide when stopped.
+01:09:34 Okay? So, now, let's go back to our code, over here, and when do we want to start and stop this thing, okay?
+01:09:43 When's a good time to start and stop?
+01:09:44 Well, a good time to start it is when we're starting to download an image.
+01:09:49 So I'm going to say, oh, well first of all, why don't we make an outlet to it?
+01:09:53 So let's go back to our storyboard, let's get our system editor up here, let's close this, and let's, actually let's leave that open because I'll show you, I promised you that control, drag from the document, document outline would be good and here's an example of when it's really good, because trying to control, drag from this might be a little dicey, but over here, it's really easy.
+01:10:17 So I'm just going to control, drag from here into [pause] my image view controller, oops, missed it.
+01:10:25 Right there.
+01:10:27 Okay? And we'll call it spinner.
+01:10:29 So there's a spinner, see it's a UI activity indicator.
+01:10:33 Alright so now let's go back to here, and our view controller, make it as wide as possible.
+01:10:39 Okay, so now I have this self dot spinner up here.
+01:10:43 And now I'm going to tell it, when I start downloading an image, self dot spinner start animating.
+01:10:50 Okay? So that's the method that you send to a spinner to tell it to start animating, and if it's hidden and you have that hides when animated, it'll unhide itself and start spinning.
+01:10:59 If it's not hidden, it'll just start spinning.
+01:11:01 Now when's a good time to stop it from animating?
+01:11:03 Well, the best part, time, is probably when someone sets an image.
+01:11:09 Okay? Because if an image gets set in here, then we can pretty much be assured that we're setting, that we're done, so we'll stop animating then.
+01:11:18 Okay? So whether this set image happens because that start downloading thing finally finishes, or because someone gets tired of it and sets it to some image that's a local image, either way, boom, we're going to stop doing that spinner.
+01:11:29 Okay? So let's take a look at that.
+01:11:32 [ Background Sounds ]
+01:11:40 Alright, so we got the flower, and see we got the spinner, that is spinning, which is nice, it's telling us that something's happening, and we can still interrupt it, go back, it's not blocked, this is not blocking the main thread in any way to do that spinner, okay?
+01:11:52 But it gives the user some nice feedback that hey I'm working on something.
+01:11:57 Okay? Question?
+01:11:59 [Inaudible background question] Great question.
+01:12:01 So the question is what is the lifetime of this URL.
+01:12:08 In my completion handler, right here, what is the lifetime of this loaded file?
+01:12:11 And the answer is only for the lifetime of this block.
+01:12:15 Okay? So, as soon as this block stops executing, that file will be deleted.
+01:12:19 So if you want to keep it, you got to copy it.
+01:12:22 Okay? And you copy files, by the way, copy URLs using NS file manager.
+01:12:27 Okay? We'll probably talk about NS file manager briefly next week when we talk about persistence, but that's how you copy files, they are API and they're copy from URL to URL and you can copy it away, but that's a very good point.
+01:12:38 This is a temporary file, only here, you know, for this block.
+01:12:42 And once this block is gone, you're done.
+01:12:44 Okay? The other thing I'm going to say, really briefly, I don't know if we'll get to this in slides, when we do multitasking, I'm probably going to ask you to use a background session configuration here instead of femoral [phonetic], which is this one where even if your app's not working, it will keep downloading that thing, and then eventually call your app back, but to know that you have to know how the multitasking works.
+01:13:10 When you do that, you will have to have, when you do the session configuration, sorry, let's do something here.
+01:13:21 [Pause] You will have to use the version of this that has a delegate, okay?
+01:13:24 Because the background session one, you got to use the delegate, you can't use the completion handler.
+01:13:29 Okay? Just putting that out there.
+01:13:31 I'll remind you when we get back to that, but, got to use the delegate for that.
+01:13:36 But for femoral, we can use this nice handler.
+01:13:40 Okay. So, we are not going to start on table view until next time, but let me, this last slide here.
+01:13:52 Talk about what's coming up.
+01:13:54 So on Wednesday it says more table view, but we'll, we'll do all the table view.
+01:13:58 I'm also going to do iPad.
+01:13:59 Okay? Talk about the special UI idioms that are on the iPad.
+01:14:03 Your homework, as I said, there's no homework assigned today, so you get two days off on homework, good job, and then Wednesday you'll have a whole new assignment that will be due a week later, and Friday, we do have section, it's actually going to be a little bit early, and last a little later, it's like a 90 minute instead of a 50-minute section, so watch Piazza for that Stanford people.
+01:14:23 It won't be on iTunes View.
+01:14:25 And then next week we're going to talk about core data and persistence in general, how do we make things stay on the phone, and how do we turn them into a database that we can search for things and stuff like that?
+01:14:36 Okay? So that's what's coming up.
+01:14:38 Thank you all and I'll be here if you have questions.
+01:14:43 >> For more, please visit us at stanford.edu.

@@ -1,0 +1,675 @@
+00:00 [ Music ]
+00:05 >> Stanford University.
+00:08 >> Alright.
+00:08 Well welcome to Lecture number 9 of CS 193p, Fall of 2013/14.
+00:14 Today I'm going to finish the animation demo that we started on Monday, and then the lecture's going to be about auto layout, which is a really cool system for making it so that your user interface cam adapt to changing conditions.
+00:27 And then I'll do a brief auto layout demo at the end, just so you can kind of see it in action.
+00:32 Seeing is believing, especially with auto layout.
+00:35 So this demo, where we left off is the blocks would come down due to gravity and they would collide at the bottom and they'd kind of run into each other, and then when a bottom row was full they would all kind of fly off into outer space.
+00:51 And I think where we left off too was they would stack up and they weren't flying off, okay?
+00:58 And so why weren't they flying off at the end?
+01:00 Well, part of the reason they weren't flying off was because they were, those towers of blocks were so tippy, they were kind of wiggling, they were never coming to rest, okay?
+01:10 So they were never, the animation was never stopping.
+01:13 It was always continuing to move them a little bit, and so we're going to start off our demo by making those stacks a little more solid, a little less tippy, by making it so that the blocks can't rotate.
+01:26 So since they can't rotate, they'll sit on top of each other much nicer and I'm going to turn gravity back up to 1.0, I think I had typed in .9 at some point, just as far as the demo, but let's crank it back up so that they will sit a little bit so they don't float at all, you know, so they sit down strongly on top of each other.
+01:43 Then what I'm going to do is use an attachment behavior so as the block falls, we can grab onto it, okay?
+01:51 And then we can kind of swing it around and pick which stack we want to drop it in and then let it go.
+01:57 And then the last thing I'm going to do is we're going to use the action block of that attachment behavior to animate that and show the attachment, I'm just going to actually draw a little line to show it.
+02:12 So it's quite a bit to show there.
+02:13 I don't think we're going to have time to do this collision delegate thing, but I'll post the code for that so you can see what that's all about.
+02:20 Alright, so, let's get back over to Xcode here and go back into drop it.
+02:27 And, okay, so, remember that we moved all of the behavior of this thing out into its own subclass of UI dynamic behavior, called drop it behavior.
+02:42 Right over here, this guy, and so that's where the gravity and the collision is.
+02:47 And so what I'm going to do there is I'm going to add another behavior to that customer behavior, which lets us control things like whether the blocks rotate.
+02:55 Okay? We can also control friction, resistance, density, those kind of things in there.
+02:59 The kind of behavior that is that controls those things is called a UI dynamic item behavior, because it's specifying the behavior of that item.
+03:11 Okay? So we'll call that, maybe something like animation options, or something like that, you can call them item behaviors, some, you might call them physical characteristics almost, but that's, we'll do that.
+03:27 And let's go down here and lazy instantiate that, so dynamic behavior in the mission options.
+03:36 If not animation options, then mission option equals UI dynamic item behavior alloc init.
+03:44 So I'm just allocating this thing and I'm going to allow rotation, no.
+03:52 So I'm not going to allow these items to rotate.
+03:56 Okay? So the blocks will have to stay as they bounce on each other and collide, they'll have to stay nonrotated.
+04:03 Alright? And return animation options.
+04:07 And, again, we can do other things in here like dot friction equals dot density equals whatever, but we'll keep it simple.
+04:13 I obviously want all items to be added also to this animation options thing and we clearly want to remove all items, [pause] as well.
+04:28 And let's finally add our child behavior.
+04:33 Animation option, so the animation options act like any other behavior, okay?
+04:38 They just specify attributes instead of, you know, applying the forces or whatever, but you can actually think of them somewhat as applying forces too, it's just, you know, like forces to keep them from rotating or forces to make them have higher friction, those kind of things.
+04:56 Okay. Question?
+04:58 [Inaudible background question] What a great question.
+05:00 You mean if, if you had multiple item behaviors that had different conflicting densities or whatever?
+05:06 So that's a great question.
+05:08 There are rules for that if you have, you know, a tree of behaviors and you had some item behaviors in there.
+05:15 There are rules for which one wins, it's kind of the last one wins and how that's happens is all defined in the documentation for it, so if you're going to build a tree so complicated that you have the items in there twice with two different behaviors and different things, I mean, that's pretty, I mean, if you're doing that, you really got to know what you're doing and so you really want to read the documentation, that would be considered advanced behavior to do that, but it can be done.
+05:39 It is legal.
+05:40 Okay. So, now we'll have that.
+05:43 So now when we run this, [pause] we'll get a little less of the tippy stack thing, although I didn't change the gravity, but we'll see what happens here, but you can see they're definitely not twisting, they're staying.
+05:58 They still might bounce slightly to the side if they, for example, if I clicked too fast they might crash into each other on the way down, ones that are in the same column.
+06:08 So here we go.
+06:09 So now, they're going to be flying away a little more reliably.
+06:13 Let's try going really fast, see if we can get them to tip a little.
+06:18 Now I, if I have multiple rows, they should all go together.
+06:22 Notice also I'm starting to get a lot of blocks and it's the performance that's starting to get a little jerky.
+06:27 Okay? And that's something you have to understand with animation, if you have a lot of things animated, it's not free.
+06:33 Okay? Animation is not free.
+06:34 And if you had an application like this where you were dropping these blocks and you allowed the user to drop a lot of them, you might have to start doing some other things, like, for example, instead of having the collision boundary, instead of having all the items collide with each other, what if you just drew a boundary around the top that they top ones could collide to.
+06:55 You see? Then you would keep all those bottom ones from having to calculate where they're going to go, because you'll notice that after they get tamped down a little bit, they don't bounce so much at the bottom anyways, so you could take away that bounce and put a boundary, because your boundary is a UI DesiPath, it can be anything you want.
+07:09 Okay? So you have to think about that only, you know, when you start getting to extreme cases there.
+07:15 Okay everyone.
+07:16 Cool with that?
+07:17 Make sense?
+07:18 Alright, so, the last thing we're going to do is this attachment behavior.
+07:22 So this is just attaching that bar, which can be a springy bar or an iron bar, I'm going to leave mine be an iron bar, you know, a bar that doesn't collapse and expand.
+07:34 And, we will use that bar to grab onto one that's coming down so I can swing it into the right column, because right now it's just whatever column it comes down in, that's the column it goes in and that's a little bit restrictive, it makes it hard for my game to play very, very competitively.
+07:52 And so, what we're going to do to do this, we need a couple of things here, in our view controller.
+07:57 One is we're going to clearly need an attachment behavior, so I'm going to create a new UI Attachment behavior.
+08:03 I'm just going to call it attachment, okay?
+08:07 And, I'm also going to need to know which view is dropping.
+08:16 Okay? The view that's currently falling down because that's the one I'm going to grab on.
+08:19 Because there's a whole bunch of views in my game, right?
+08:23 Tons of them, all of them are stacked up there, which one, when I start grabbing, am I going to grab onto?
+08:28 It's going to be the dropping view, so I'm going to have to keep track of the dropping view and, in fact, that's easy to keep track of, I'll just write down here every time I drop a new one, I'm going to say the dropping view equals the drop view.
+08:40 Okay? So every time a new one comes down, it's going to become the one that gets grabbed.
+08:43 So if I have multiple of them coming down at once, it's the last one that started coming down is going to be the one that gets grabbed, if I grab onto it with this attachment.
+08:51 Okay? So now I have the dropping view.
+08:53 So, I'm going to do the attachment with a pan gesture.
+08:58 Okay? So we're going to see another gesture recognizer here, because I'm going to grab it and then as I move my finger around on the screen, I'm going to keep the attachment attached to my finger.
+09:09 So the block that's being grabbed onto with the [inaudible], it will kind of follow my finger around, right?
+09:15 With the bar behind it.
+09:18 So, that'll be kind of fun.
+09:19 So let's do that.
+09:21 So you'll remember the gestures we set up, right, from our storyboard, right, here's the storyboard.
+09:25 I'm going to go over and grab a gesture, it's a pan gesture, which means follow the finger around, so here's a pan gesture.
+09:32 Drag this out, I'm just going to drag it on top of my game view, right on top here.
+09:37 Here's my tap gesture, here's my pan gesture, so I'm going to drag it out, I'm going to put it down near where my tap gesture is.
+09:44 Here's my tap gesture right here, so I'm going to put my pan gesture right next to it.
+09:48 I'm going to call it pan, I'm probably teaching a bad style here to call these pan and tap, I call them that so that when you see them you realize, oh yeah, that's the pan gesture handler, but again, this could be something like grab drop, that might be a better name for this than pan.
+10:03 Okay?
+10:05 So, there's our gesture, and [pause], let's make some more space and actually we don't even need to see, actually let's go back here.
+10:15 We don't need to see our [pause] storyboard for this.
+10:20 Okay? So I've got my pan right here.
+10:22 So what's going to happen in this pan?
+10:24 Okay, pan gestures, like pinch gestures, and continuous gestures like that, they kind of have a similar sequence of events that goes on, so I have a little snippet that I do the same thing for all these kind of gestures, which is they start out, they begin, then they change as they move around and then they end.
+10:43 So what are the three things we're going to do for our pan gesture when we do our attachment?
+10:48 Well, the first thing I'm going to do, actually the first thing I'm going to do is I'm going to find out where is that pan gesture?
+10:54 Where did that happen in my game view?
+10:56 And I'm going to do that with CGPoint, gesture point equals sender location in view, my game view.
+11:06 Okay, so now I know where in my game view that happens.
+11:08 So this is a gesture recognizer, right?
+11:10 This sender is and this method in fan gesture recognizer, which tells you the location the pan happened or is happening if it's moving around, it tells you the new position.
+11:20 So, the first thing I'm going to do is I'm going to attach the dropping view, that thing we just said, to that point.
+11:28 The gesture point.
+11:29 Okay? So this is a method we're going to have to write, so we'll put it down here so that we remember to do it.
+11:36 Though we might, we might remember better if we don't put this down here, but, because it'll keep complaining.
+11:42 We'll do that.
+11:43 So I'm going to have this attached to dropping view, that's going to the guts of doing an attachment thing.
+11:48 Here, when the pan changes, when it moves to a new spot, I'm just going to have my attachment behavior anchor point, okay, anchor point, remember, the attachment can be either attachment between two items or between an anchor point in an item.
+12:02 This is going to be between an anchor point, that anchor point is going to be following my finger around.
+12:07 I'm going to set that to be the gesture point, okay?
+12:10 So that's all I'm going to do when it changes.
+12:13 And then, when it's done, I'm going to do remove this attachment, remove behavior, this attachment from my animator.
+12:23 So my animator is going to stop doing that animation anymore.
+12:28 Okay? So that's it.
+12:29 You can see this is all pretty easy to do, all this stuff.
+12:32 Even this attach is going to be really straightforward.
+12:35 So let's look at that attach.
+12:36 How do we create an attachment behavior between an anchor point and some item?
+12:42 And it's pretty simple.
+12:43 If we have an item that's currently dropping, okay, hopefully we do, then we're just going to create a new attachment behavior with UI attachment behavior alloc, and it's init, it has a, remember, four different kinds of inits here, depending on whether you're attaching the points or between two items.
+13:02 It also has some ways to attach with an offset so that the iron bar is not connected to the center of the thing, maybe it's centered a little offset, it'll tilt a little bit.
+13:12 So I'm going to do the one which is init with item attached to anchor, which is this one I guess, and the item is going to be that dropping view.
+13:23 Oops, sorry, attach to item, no I wanted a different one, I want attach to anchor.
+13:30 And the anchor is going to be that point, right, where my tap pan gesture went down.
+13:36 So that's it, it's as simple as that, and now I have an attachment between that point and this dropping view, I'm going to be moving that point as the gesture moves, and the dropping view is just going to follow around.
+13:47 After that attachment happens, by the way, I'm not going to allow you to do it again, so I'm going to set the dropping view to nil.
+13:54 Okay? So in other words, I'm not going to let you grab onto that thing, move it a little, oops, grab onto it again, move it again, nope, you get one try, that's just part of the game play, I only want you to get one try dropping that thing.
+14:06 And then I just say, animator, add behavior, and the instance I do this it's going to start animating that.
+14:14 Okay? Animating an anchor, a connection between that point and that, that view.
+14:21 Okay? So, I think that's all that I have to do.
+14:26 So let's run and see if this works.
+14:28 Alright, so we have them dropping down, I grabbed onto it, you see how, you see my mouse, you can see how I kind of have a hold of it and it's like a bar, I can even, whoa, balance it on top?
+14:39 You see? It's a little hard to see, right?
+14:42 So maybe we'll draw a line between the attachment point and the little thing.
+14:46 Okay? Whew.
+14:48 Okay? So that's the next thing I'm going to do is I'm going to draw a line between where I'm panning and the, and the item that I'm dropping.
+15:03 So let's do that.
+15:04 And I'm doing that not as much, partially to show you how the attachment is working, but also because I want to show you how to use this action, this little action block that you can use.
+15:15 So, how am I going to draw that?
+15:17 Okay? How am I going to draw this [pause] this line?
+15:21 Well, what I'm going to do is I'm going to make the game view of my storyboard here be a UI Bezier Path Drawing view.
+15:33 Okay? So I'm going to create a new kind of view, oops, new file.
+15:41 And it's going to be a UI view, subclass a UI view, I'm going to call it BezierPath View, okay?
+15:48 And this is going to be a totally generic, Bezier path drawing view, so it's public API is, it is going to have one property, public property, which is a UI BezierPath, called path.
+16:03 Alright? That's it s entire public API, and all its going to do is in its draw erect, it is going to [pause]
+say path stroke.
+16:14 Okay? And the only other thing I'm going to do is self dot path, and the only other thing I'm going to do here is in set path, the setter for that thing, I'm going to do under our path equals path, and I'm going to say self set needs display.
+16:31 So anytime someone changes the path, it's going to redraw it.
+16:35 Okay? Everyone understand what this class does?
+16:37 I hope, right?
+16:38 It combines everything you know about drawing, right, and one thing.
+16:42 Draw erect, BezierPath stroking, set needs display, the whole thing, so that's it.
+16:47 Now, I'm going to go back to my storyboard and I'm going to have this game view, instead of being a UI view, I'm going to change its class to BezierPath view.
+16:58 Okay? So everyone remember what I told you about, if you have a customer view like this, if it starts out generic, and you drag it out, right, it starts out generic, and you can change its class, just like with the controller.
+17:09 Okay? Now, to match this up in my controller, I better go up here and say that this is a, where is that thing, in my game view, is a BezierPath view, so let's do that.
+17:25 BezierPath view.
+17:26 Alright. So it's BezierPath view, so that I can send it BezierPath messages, okay?
+17:35 Alright, so now my game view can display an arbitrary BezierPath, so now all I have to do is calculate the BezierPath between, that the attachment shows, basically, between the anchor point and the dropping view, and then every time that attachment view changes, I have to redraw, I have to reset that path, recalculate it every time.
+17:53 Okay, so that's where this action block is going to come into play.
+17:57 Alright? So, how are we going to do that?
+17:59 Let's do it right in here, okay?
+18:03 When we attach, when we create this attachment right here, we are going to use the little action block of this guy, action, to update that thing, so, let's go carrot, curly brace, curly brace, okay, this is how we specify a block.
+18:25 So we're going to pass this block of code off to this attachment, and every time it animates, it's going to call this block of code, and what are we going to do in this block of code?
+18:34 Well, we're going to create a BezierPath.
+18:37 [Pause] Just using UI BezierPath alloc init.
+18:41 And this BezierPath needs to have a move to, so let's have it move to the anchor point of the attachment, so that's self dot attachment dot anchor point.
+18:57 And then we're going to path add line to, we need to go to where the dropping view is.
+19:04 That's self dot dropping view dot center.
+19:10 Alright? And now we have that path so I can just say self dot game view dot path equals path.
+19:19 Okay? Any questions about this?
+19:22 Yeah?
+19:23 [ Inaudible Background Question ]
+19:28 Yeah, so the question is couldn't I just say right here anchor point?
+19:31 Because I'm passing anchor point right here.
+19:32 And the answer is no, I can't do that, because I'm changing the anchor point, right?
+19:39 Every time you move that pan, I'm changing that anchor point.
+19:43 So, this block of code gets executed every time it happens, so I can't use this anchor point, which was only passed in here when I first attached it.
+19:51 I have to use self dot attachment dot anchor point.
+19:55 In other words, the anchor, the anchor points current attachment point.
+20:00 Right? So that's why I have to keep calling that.
+20:01 Yeah?
+20:02 [ Inaudible Background Question ]
+20:12 Yeah. Excellent question.
+20:13 So, I'm setting this self dot dropping view to nil and I'm using self dot dropping view in here.
+20:18 Isn't that going to break it?
+20:19 And the answer is absolutely it is.
+20:21 Okay, I did this intentionally, because I wanted to show you that the things that are in here get reevaluated every time, this block gets executed each time animation happens.
+20:30 So how can I deal with that?
+20:32 Well, I can just, how about create a little local variable here called dropping view equals self dot dropping view, and then I will use that right here.
+20:44 Okay? So now I've captured the dropping view, here, in a local variable, and I'm using it here.
+20:51 So this is referring to this local variable, not to self dot dropping view anymore, and the fact that I set this to nil doesn't matter.
+20:57 This one's still going to be pointing to that thing.
+21:00 Okay? So that, I just wanted to kind of show you how blocks capture the local variables that are just outside their scope.
+21:08 Now, we have another problem in here, in fact, the compiler's warning us about it, you see?
+21:12 Capturing self strong in this block is likely to read to a retained cycle.
+21:16 That's a memory cycle like we were talking about.
+21:18 And, in fact, it's going to.
+21:20 Because this action, this block, is inside this attachment, strongly held by it, which is strongly held by us, so we have a strong pointer to the block, and if I put self in here, the block is going to have a strong pointer to us, and that's no good.
+21:35 So we're going to do this trick, underbar, underbar weak [pause]
+UI, what do we call, 21:41 what is the name of this thing?
+21:42 Drop it view controller, that's ourself.
+21:46 Weak self equals self.
+21:49 So now I've created a weak pointer to myself, and now I can use that here.
+21:54 Weak self.
+21:56 Okay? Also down here.
+21:58 Weak self.
+22:00 Alright? So if I ever got dropped out of the heap, and no one had a strong pointer to me, these weak self pointers would all go to nil, but that would be fine, because if I'm not around, then this action doesn't mean anything anyway, right?
+22:13 I'm the controller.
+22:14 So, so it's all perfectly fine to do that.
+22:18 Okay? Any questions about what we did there?
+22:21 Because that's an important thing to understand, as well.
+22:24 Alright. One last thing we have to do is when the gesture ends, the pan gesture ends, and we remove the animator, we're going to want to say self dot game view dot path equals nil.
+22:37 Okay? Because this action, once this thing is removed from here, this action is not going to execute anymore, so we're not going to get that last action that draws nothing, right?
+22:48 We don't want that line to be left there.
+22:51 Okay? In fact, here, just to make sure you understand this, I'll leave this out and we'll see what happens.
+22:58 [Pause] Okay, so I'm dropping here and now, see, look, I've got my bar.
+23:02 Dance this thing around, drop it where I want.
+23:05 Oh, see the bar didn't go away.
+23:07 Okay? Because that action never called, that's because of this line of codes, so let's put this back, now we'll run.
+23:14 Okay, now we drop one, we got it, drop another one, another one, grab onto the side, another one, try and swing it around.
+23:24 Okay, if we swing it around and smash it in there, they'll still collide.
+23:27 Okay? These are still collision, still happening, and you can see also that our game has a little bit of a problem right now, by the way, this not being able to rotate is why it didn't tip off there.
+23:40 Okay? Because it kind of got, with being, some item behavior is keeping it from tipping off, okay?
+23:48 So, this is, by a bad far, game, because how are we ever going to line these blocks up here, right?
+23:53 So the next thing we would want to do, and this is what I'm not going to do because time here is in the collisions, okay, when collisions happen, collisions have a delegate, as well.
+24:03 And in that delegate, what could you do is every time, and the collision delegate tells you when a collision starts and when the collision is ended being processed.
+24:12 Okay? And in that ending handler, the ending message that gets sent by the collision to this collision delegate, in that ending thing, you would then grid the thing up.
+24:23 Probably look at its linear velocity, if it's moving to the right, move it to the right a little more until it lines up.
+24:28 If it's moving to the left, move it to the left a little more until it lines up.
+24:31 See? So, not too many lines of code, but I want to make sure we cover auto layout today so we won't do it, but, any questions about what we did so far or what we did here?
+24:49 Okay. [Pause] Okay.
+24:50 Alright, so let's get on to the lecture about auto layout.
+24:55 Where is my [inaudible], there it is.
+25:01 So what is auto layout?
+25:04 So auto layout is a way of setting the frame of all your views, okay?
+25:09 And these can be frames of views that you make in code or frames that you drag out into your storyboard, okay?
+25:16 Although I'll warn you for your homework, the frames of the cards that you make in code, you're probably not going to want to use auto layout to lay those out, you're going to want to use, like, that grid class I gave you or some class you write.
+25:29 Okay? Because the rules for laying them out are kind of beyond even what auto layout can do.
+25:34 Okay? So that's just a little hint there.
+25:37 But all the other views, every other, every single other view, including the view that contains your cards, you'll want to use auto layout to decide where it gets put on screen.
+25:47 So we're going to decide where to put these frames using rules instead of using numbers, instead of saying, putting it 20, 20, 180 wide by 200 high, we're going to use rules to decide where it goes, okay?
+26:01 And these rules are really flexible and powerful, and the rules are mostly about the relationship between one view to another view or between a view to its super view.
+26:10 Okay, now why do we want to specify these frames as rules instead of as numbers?
+26:14 Because sometimes the bounding rectangle that contains all our views is changing.
+26:19 Either because device rotated, we're on a tall iPhone versus a short iPhone, we're embedded inside of a navigation controller or not, we're in a tab view bar or not, we're on an iPad in some popover controller view or something like that, there's a lot of reasons that are bounds would change size, so we want to build our views so that what's inside of them adjust automatically.
+26:41 Okay? And that's part of, a big part of your assignment, although, your views want to, in terms of your card view, want to adjust automatically anyway, because you're adding and removing cards from them and so they have to adjust anyway, so you kind of get, probably get that for free, but all the rest of your views, the one that says redeal and score and all that, you're going to want to use auto layout to make those fit in the right place when you rotate the phone.
+27:03 Now, there, these rules, by the way, we call them constraints, layout constraints, so that, when I use the constraints, that's what I'm talking about.
+27:10 The rules for how to set the frames of all these views.
+27:12 There's a really powerful API in iOS for this, in other word, a program interface with object and its layout constrained and all these mechanisms, but really, almost all of what we do with auto layout, we do in Xcode, visually, we don't usually go to the code.
+27:28 If you're going to the code, you're doing some pretty advanced layout, okay?
+27:32 I'm sure it's possible, actually with the code, you could lay your cards out using auto layout, but Xcode, probably not.
+27:39 Okay? So since it's all Xcode and it's all graphically, I'm going to do this entire lecture about auto layout with screen shots, okay?
+27:47 And we'll just kind of walk through it, I'm actually going to skip these first few here because I'll show you that in the demo.
+27:54 So what I'm going to do it I'm going to start with a view, controller's view, right here, with a couple of things in it.
+28:01 Thing one and thing two, with apologies to Dr. Seuss, things one and thing two, they can be any kind of view, they're UI labels in this case, but they could be buttons, they could be custom views, whatever, they're just thing one and thing two, and we want thing one and thing two to be in the right place when this bounds changes.
+28:20 Okay? So what happens right now, if we go and try and show this in landscape, well, I could run this and then flip the simulator to landscape to see, but it's actually possible to take your view controller seen, and flip it to landscape in Xcode, okay?
+28:37 Now there are two ways to do, one is Xcode actually has a previewer, a previewer that will preview what your UI's going to look like on different rotations, different iPhones, even between iOS 7 and iOS 6, if you're writing an app that's compatible for both.
+28:51 But another way to do it is just to inspect your controller, so here I've selected my controller, right, it's got a blue boundary around it and I've selected it, and I went to the attributes inspector, you see?
+29:02 Upper right there.
+29:03 And I'm inspecting it.
+29:04 And if you look at the inspector for controller, the top five things there are called simulated metrics.
+29:11 And this is a way to simulate your user interface in different orientations or sizes or with tab bars or not, so that you kind of make sure your UI is working with auto layout, so we're going to go and switch the orientation, alright, so I'm picking on this thing orientation, and I'm switching it to landscape.
+29:29 And when I do that, my scene changes to landscape and I lost thing two.
+29:34 Okay? What happened to thing two?
+29:36 Well, thing two is actually there, I left it there, it's kind of grayed out, you see it?
+29:40 But it's not on screen because unfortunately in landscape it doesn't go down far enough to reach thing two.
+29:47 Okay? So I'm going to switch back.
+29:49 By the way, you notice that the orientation there, there's portrait landscape and there's also inferred.
+29:54 Okay, for all of these things where you change the bounds of your scene, inferred means inferred from what's going on in your storyboard.
+30:03 So if it's this is the thing that makes a bar come across the top if this scene is in a navigation controller, or a bar across the bottom if this scene is a tab bar controller, okay?
+30:13 Portrait is the default inferred orientation, so if you pick inferred, just like you pick inferred for the other things, it will infer that you mean portrait.
+30:22 So whether you say portrait landscape, portrait or inferred are the same for orientation.
+30:27 Landscape means landscape.
+30:29 So let's go back to inferred, or to portrait.
+30:31 We get thing two back.
+30:32 Whew, okay, thing two didn't go anywhere, it was there before, it just wasn't on screen.
+30:36 So, I want to put thing one and thing two in better places.
+30:41 They're kind of in random places, I want to put them in places where I can have a rule that says where they are, and then what I'm going to do is I'm going to put thing one in the upper left corner and I'm going to put thing two in the lower right corner, and I always want thing one and thing two to stay in those corners, no matter where those corners move.
+30:57 Okay? If those corners move up in the landscape or down because it's an iPhone, the tall iPhone, like an iPhone 5, or up, or whatever, I want those things to stick to their corners, so the rules I want is stick in the corners, okay, I'm going to show you three ways to set rules, over the course of this lecture, three different ways.
+31:15 The first way, you have already been doing.
+31:18 Unwittingly, well, not really unwittingly because I've been telling you to do it, which is to use those blue guidelines, okay?
+31:25 When you drag things around and you let the blue guidelines snap to certain locations, you're basically telling Xcode what you want.
+31:35 So when I drag thing one up into this upper left-hand corner and these two blue lines appear, it's really telling Xcode, yeah, I want it to be stuck to this line and stuck to this line, in other words, upper left there.
+31:44 And same thing when I do that for thing two.
+31:46 Okay? I'm kind of telling Xcode.
+31:48 But if I drag these two things then, right, and then I switch over to landscape again, I still don't get thing two.
+31:55 Why not? Okay, I did the blue lines, how come it doesn't work?
+31:59 And the answer is, all the blue lines are is telling Xcode what you intend.
+32:04 You still have to ask Xcode, make those rules for me, make those constraints.
+32:10 Okay? So let's go back to, to the portrait orientation, and the way you do that, is the little buttons at the bottom, you see these buttons at the bottom, those, here I'll click on one.
+32:22 Those all have to do with auto layout, okay?
+32:24 And how you're going to layout the view.
+32:26 And this one, that looked kind of like a Thai fighter, a Star Wars Thai fighter there, that one is kind of for resetting, clearing constraints for the entire view, okay, or for a specific view or number of views that you have selected.
+32:41 So the bottom part of this menu is the entire view, the top part is the same things, but for specific clicked on views, okay?
+32:47 So, we'll go through a few of these things, but a really cool one is reset to suggested constraints, okay?
+32:55 Suggested constraints means Xcode is going to suggest to you the best constraints, the best rules, and it's only going to be very good at that if you use the blue guidelines.
+33:06 Because if you don't use the blue guidelines, it doesn't really know what to suggest.
+33:09 It'll suggest something, but it's not going to be good as we'll see.
+33:11 But in this case, since both thing one and thing two clearly have blue guidelines to say where they want to be, when we do reset to suggested constraints, it's going to work.
+33:20 Now, nothing appears to happen, right?
+33:23 I did reset suggest content and nothing happened.
+33:25 But something did happen, and we can see that by clicking on thing one and going over to the size inspector.
+33:32 Okay, so in the inspector there, I've switched over to size, that thing looks kind of like a ruler, and size inspector has, you know, where the current frame is and all that, but at the bottom, do you see where it says constraints?
+33:43 And I have two constraints.
+33:45 My leading space, okay, the reason that says leading space instead of left space is because some languages, leading is on the right.
+33:55 Okay? So Hebrew, a language like that, it's on the right so you might want your entire user interface oriented towards coming from the right, okay, instead of coming from the left, because all your text is going to be going that way, so you might want all your user interface to flow from that way.
+34:08 So anyway, so leading means whichever leading you're talking about, and I want the leading space to be tied to my super-view, the edge of my super view, by some fixed amount, and that fixed amount is default.
+34:22 Default. Okay?
+34:23 It's not a magic number, its default, it's by the system, the system decides what that default amount is.
+34:28 And then you can see my top space is also tied to my super-view's top edge with the default space.
+34:34 So those two constraints determine exactly where thing one's going to be.
+34:39 Now what about thing one's size.
+34:41 Okay? Is thing one always going to be exactly the width it is right now?
+34:45 No. Thing one, like all labels and buttons, it has what's called an intrinsic size.
+34:52 Okay? That's the size that its text demands that it be.
+34:56 And that could change.
+34:57 If you change the text in thing one, it needs to be wider or it could be shorter if you change it to something shorter.
+35:04 And so, it will change its size as you change its text.
+35:08 Okay? Because you haven't put a constraint on its size.
+35:12 If you put a constraint on its size, it would then be stuck to that size and that is bad.
+35:16 We do not put size constraints, generally, on intrinsically sizable items like labels and buttons, and I'm going to show you, hopefully, if we have time in the demo, why that's bad, okay?
+35:28 So anyway, thing one only has those two constraints, but those two constraints completely determine thing one's location no matter what the super-view does.
+35:35 Same thing with thing two, bobbing space and the trailing space.
+35:40 Okay? So now let's go look in landscape.
+35:42 I'm going to switch over to landscape and see what happens.
+35:44 And you can see, thing two sticks to that corner, kind of exactly what we want.
+35:50 Alright? And that's because thing two's position is totally determined by those rules now, okay?
+35:55 Okay, so let's go back to portrait.
+35:58 So, I'm going to put a bad thing in there, okay?
+36:02 So this bad thing is going to show bad things that can happen, and I tried to put bad thing in the middle, but I didn't use the blue guidelines.
+36:10 That's actually difficult to do, but I did.
+36:12 Okay, I put a bad thing in.
+36:13 Also, you know, this bad thing size, it's too big for itself, it really doesn't want to be that big, it could be a lot smaller if it was just an intrinsic size.
+36:21 So, I just dragged it out and moved the sizing handles.
+36:25 It has no constraints, because I just dragged it out, okay?
+36:29 See how its size inspector there says no constraints, right?
+36:32 You have no constraints.
+36:33 So, what happens if I try to ask Xcode, please give me some suggested constraints for bad thing.
+36:41 Remember, I didn't use the blue guidelines when I dragged bad thing out.
+36:44 And notice, also, I'm using the top half of that menu which is just, just for bad thing.
+36:48 Okay? I'm not resetting thing one and thing two, although I could reset thing one and thing two all day long, because there's always going to reset to the proper constraints because I'm using the suggested constraints for them.
+36:58 But anyway, so I'm just going to reset bad things constraints and, boom!
+37:02 Xcode gives it the old college try, but it's hard, okay?
+37:06 And, in fact, look at the constraints it came up with there.
+37:09 Height equals 62, leading space equals 89, trailing space 68, in other words, these are all magic numbers.
+37:15 Okay? This is horrible, these are terrible constraints.
+37:18 Constraints with magic numbers are almost always bad.
+37:21 There's a few cases where they're okay, but it's almost always bad, and, in fact, if I go and try to switch to landscape, all of those number stay exactly the same, okay?
+37:29 It stays 198 pixels from the top, and whatever it was from the left, it's totally not what I want.
+37:35 Okay? I tried to put bad thing in the middle.
+37:36 I want it to stay in the middle, that's not even close to being in the middle.
+37:39 So suggested constraints aren't going to work if you don't use the big, blue guidelines because it's not really sure what you want.
+37:46 Okay? So, so let's get rid of these constraints.
+37:49 I'm going to go back to that same menu and pick a different item, which is clear constraints, and that clears all the constraints, and goes back to this thing.
+37:57 Notice, by the way, all the constraints draw, you see the blue bars?
+38:02 See them? Every single constraint is drawn.
+38:04 And not only does it draw those constraints, you can click on them, and edit them.
+38:08 A lot of the constraints have attributes, which I'm not going to have time to talk about today, unfortunately, but those constraints are first-class objects inside of your, your storyboard.
+38:19 Alright. So we're going to clear those out of there.
+38:21 And let's put in some constraints in a different way.
+38:24 So this is way number two to add constraints.
+38:26 And way number one was use blue guidelines and say suggested.
+38:30 That's way number one to put constraints on.
+38:32 Number two is you can use some of these other buttons at the bottom.
+38:35 Like this particular button here for aligning things.
+38:38 So if you look in this, there's a lot of choices of how to align things, if I selected multiple views, then all of those things at the top, like leading edges, trailing edges, top edges, I'd be able to pick those and I could line up the leading edges or trailing edges or whatever, of views, make them line up.
+38:53 Okay? It's just alignment things, just like if you're in some drawing program or something.
+38:57 I'm going to pick the bottom two, which lines this thing up with the horizontal center in the super-view.
+39:04 So it's going to be centered in my super-view, both horizontally and vertically, so I'm going to add two constraints here, one for horizontal, one for vertical.
+39:11 And I can also specify an offset from the center, that's what that zero is right there that's selected, but I'm going to have the exact in the center, so I'm going to say zero.
+39:19 And there's also update frames, you see the update frames at the bottom there right above where it says add two constraints.
+39:24 That popup, you can go in there and say, and when you add these constraints, move my view to fit those constraints, but I'm not going to set that because I want to show you what happens if you don't do that, okay?
+39:37 So let's add these two constraints, horizontal and vertical centering.
+39:40 Okay. There they are.
+39:41 You see them, align center X to super-view, align center Y to super-view, awesome.
+39:45 You can see them, they're there.
+39:47 Notice that they're yellow.
+39:49 Okay, yellow is like a warning, okay?
+39:52 Yellow is not good.
+39:53 Blue is good, yellow not so good, red is really bad.
+39:56 Okay? Sometimes your constraints will be red, that's if they conflict.
+39:59 Like you have two constraints sitting, doing opposite things.
+40:02 And we'll talk about how we resolve all this.
+40:05 >> So it's yellow.
+40:06 Also, if you look really closely, you see there's a dashed box, kind of right, it goes right through the word bad over to the thing, you see it right there, dashed box inside of the bigger box?
+40:19 That dashed box, I don't know how well you can see that there, yeah you can see it, that dashed box is where you constraints say this thing should be.
+40:28 Okay? In other words, if you just looked at your constraints, where should bad thing be?
+40:32 Well it should be in that little dashed box, but since we didn't click that thing at the bottom there that said update my frame to where my constraints are it didn't do it.
+40:43 So bad thing is still where it was, and that's why these are yellow.
+40:46 Okay? How can I know why my constraints are yellow?
+40:50 Well one place is that little triangle in the upper corner, the normal triangle where you would look at any other warning in your app, and you can see this as the frame for bad thing will be different at run time.
+41:00 That's because at run time the constraints are going to be applied and it's going to be moved into that little dashed box.
+41:05 Okay? Another place you can see these warnings, if you're constraints are yellow is in the document outline.
+41:11 Now we have not had a chance to talk about the document outline in this class, but there's not really a lot to say about except for that it's really great and what is it?
+41:20 It's every single object in your storyboard that matters in an outline form.
+41:25 Okay? So that's all your views, all your gestures, all your constraints, things like layout guides, which we're really not getting a chance to talk about, but has to do with auto layout system, as well.
+41:36 Those are all listed in this outline, and what's really cool, is you can click on them to select.
+41:43 Because sometimes your view's very crowded and it's hard to click on the thing you want even using the control shift trick that I showed you, and also you can control drag from them.
+41:52 Okay? You can control drag from a gesture, you control drag from a view.
+41:56 It's a really great place to control drag things from, okay?
+41:59 That's pro-tip number one.
+42:00 Drag, control drag from document outline.
+42:03 The document online, also, will show you all the problems with your auto layout and you see the tiny, little, yellow circle up there where it says view controller scene at the top of the document outline and then there's that little yellow circle, I'm going to click on that circle, and it's going to show me all the auto layout problems in this controller, in this scene.
+42:23 And you can see the bad thing, it expects a certain frame and the actual frame is different.
+42:29 And you see the little triangle there, if I click on that triangle, it will offer me to, offer to solve the problem for me.
+42:37 Okay? Now, how can I solve the problem?
+42:39 Well there's a number of ways it could solve the problem.
+42:41 It could change the frame of bad thing to be what the constraints say, that's what update frame is.
+42:47 It could update the constraints instead of being the vertical and horizontal center that I just sent it to, it could set them back to being something that would make, you know, the bad things frame work, or it could try to set it to the suggested constraints, which we already know don't work.
+43:04 So we definitely want update frame in this case.
+43:07 We know we like our constraints, that's the horizontal, vertical centering.
+43:11 So we're going to pick that.
+43:12 So I'm going to leave update frame suggested and click where it says fix misplacement, and watch what's going to happen to bad thing.
+43:18 It moved. Okay, now, everything is no longer yellow, bad things frame has been set to what the constraints demand of it.
+43:27 Okay? And I just hit back to go back to, in the document online.
+43:30 So now let's go look in landscape and see what happens to bad thing.
+43:33 It stays centered.
+43:35 Okay? Bad thing properly stays centered, because the only rules it has, is for it to be in the center.
+43:43 Okay? Alright, so back here.
+43:45 Okay. You can also click on, I told you, you could click on these constraints.
+43:49 So here I clicked on the vertical constraint there, you can see, I just clicked on it, and you see how it's kind of highlighted.
+43:56 Also notice that the attribute inspector started being an inspector that's inspecting the center X alignment constraint.
+44:03 Okay? And there's a lot of things you can set about constraints.
+44:06 Notice there's a priority there, because you might have two constraints in a complicated layout, only complicated ones, you might have conflicting constraints.
+44:15 You want something to be underneath something else, but you want it to try and be in the middle of the screen, but if the screen gets really small, then you want it to just move down out of the way of the thing on top, those kind of conflicting constraints you can set priorities, and say which is more important?
+44:27 Is it more important to be in the middle or is it more important to be underneath this other view?
+44:31 You see what I'm saying?
+44:32 So you can set your priorities between zero and a thousand, so you, up to thousand items could have varying priorities and generally you're going to only use two or three different priorities in your application, but, anyway, the other thing you can do when you have this selected is hit delete.
+44:45 And that deletes that constraint.
+44:48 And now you can see the bad thing only has this center Y constraint.
+44:53 So it no longer specifies where it is horizontally, and that is really bad and now if you look at the document outline, I not only have a little dot up there, but its red.
+45:06 Okay? And if I had a constraint that was bad here, the problem is I have a lack of constraint, I don't have enough constraints to specify where bad thing is horizontally, but if I had two that conflicted, they would be red.
+45:17 Okay?
+45:18 The constraint, the lines on screen would be red and I would have this little red circle.
+45:21 So let's click on that red circle in the document outline and here it's saying missing constraints, okay, bad thing needs constraints for X position, it's saying, which it does.
+45:31 Because how else is it going to know where to put X, bad thing, there's nothing that says where to put it because I took that constraint that was telling it to be in the middle away.
+45:39 So let's click on that red thing, and when we do, it's going to offer to fix that.
+45:43 And it says let me try and add a missing constraint, and it's going to do the best it can to add a constraint or a number of constraints to make it so that at least there's not a missing constraint.
+45:54 This might not be the constraint you want, but, you know, it's probably going to be mostly suggested constraints, but it's going to be some kind of constraint so that there, so the position of this thing, and its size, are completely specified.
+46:07 So, in this case, since we already blue guidelined this thing to the midline, and we know it's exactly in the middle, it, when we hit add missing constraints, it's going to put that thing back.
+46:17 Okay? Now it's not putting it back because it knows I deleted it, it's just thinking ah, that's the best constraint that goes here.
+46:23 Because it knows this thing is dead center, so it's like, hmm, dead center thing, I'm probably going to do that.
+46:28 So it's really smart about what missing constraints it will put in there.
+46:31 Mostly it's going to use suggested constraints, but it's even smarter than just the suggested system.
+46:37 Okay? So now we have no auto layout issues, we're back to having bad thing in a good spot.
+46:42 Now what if I decided I don't want bad thing in the middle, I want bad thing to be stacked on top of thing two all the time?
+46:47 So I just pick up bad thing and drag it down, I'll use the blue guidelines, or not, but I'm using the, I'm just going to drag it down there and I drop it.
+46:57 And what happens?
+46:58 Well, I get the yellow guidelines again, because bad thing, once again, is misplaced.
+47:04 That's because when you drag things to new positions, it does not change the constraints.
+47:09 That's important to understand.
+47:10 When you drag things somewhere new, the constraints stay the same.
+47:13 So bad things constraints are still align center X and align Y, you see?
+47:17 See them right there?
+47:19 And that's no good.
+47:20 So, what can we do about that?
+47:22 Well, we probably want to delete these constraints, because they no longer apply, and I showed you how to delete them by doing clear constraints, and I told you how to delete them by clicking on them and hit delete.
+47:33 Here's another way to delete them, you see the little cog, right there, where it says align center Y and align center X, there's a little cog, if you click on that there's a little menu, you can edit it, which is exactly the same as attributes inspector on it, or you can delete it.
+47:47 So I'll delete that one and I'll delete that one.
+47:49 So now I got rid of those constraints, bad things back to having no constraints.
+47:52 I just did that because I wanted to show that there's multiple ways to get at this thing.
+47:56 You can also delete them by selecting them in the document outline and hitting delete.
+48:00 Okay? So now I have bad thing, but where it is there, it's not tied to thing two.
+48:06 If I were to go landscape right now, it would not stick with thing two because there's no constraint that ties it to thing two.
+48:12 Okay? So, let's put a constraint.
+48:14 Here's way number three, okay, do you remember what ways number one are?
+48:19 Number one is blue guideline suggested constraint, that's way number one, alright?
+48:24 Everybody got that?
+48:25 Number two is to use the little menu things at the bottom.
+48:28 Click, bring up the little thing, type in, click horizontal, whatever, click the things that you want.
+48:33 Way number three is to control drag, control drag, just like you're making an outlet, between two items that you want to have some sort of constrained relationship.
+48:44 So I'm going to control drag from bad thing to thing two.
+48:48 Okay? And when I do, I get a little black box just like if I was making an outlet, but this time it's saying what do you want to tie between these two items?
+48:57 What do you want to be fixed between these two?
+49:00 So, you can actually select multiple of these using shift, that's what it says at the bottom there, hold shift to select multiple.
+49:07 So I'm going to pick the vertical spacing, I want bad thing to always be a fixed vertical space above thing two, and I'm also going to pick right edge, okay?
+49:16 And this is saying left and right, but it's really trailing and leading, it just, right now it knows which is your left and right so it's saying right to be nice to you.
+49:24 So I'm going to pick both vertical spacing and the right edges, okay?
+49:27 When I do that, you can see I get two constraints.
+49:31 You can see them on screen, two little blue lines in the IB, between bad thing and thing two, that is lining up the right edges and fixing the space between them to the default space.
+49:42 Okay, that's because I used the blue guidelines.
+49:44 If I hadn't used the blue guidelines and had put bad thing, you know, 40 pixels above, then it would have fixed it to 40 pixels, but we would have seen in the constraints 40, and we said a magic number is in constraints, we better fix that.
+49:56 Okay? Which you could do by editing the constraint and just, there's a button actually that says put it, make it the default.
+50:02 Alright?
+50:03 So now I have these two things tied in that way, again, this is totally enough to specify all of their positions exactly, because thing two is tied to the corner and bad thing is tied to the right edge and just above thing two.
+50:15 So, if we go to landscape again, bad thing will always stay that distance and always to the right edge of thing two.
+50:23 Okay? So that's way number three to attach things is to control drag between them and you control drag between items, between views, you can also control drag from a view to its super-view, that's what I'm doing here.
+50:38 Bad thing to its super-view and you'll get a different set of options, like horizontal and vertical container.
+50:44 Or you could also control drag to yourself.
+50:48 Okay? Why would you ever control drag to yourself?
+50:51 I have a bad thing, why would I control drag bad thing to itself?
+50:55 Well then I'll get the option to do things like fix bad things width, okay?
+50:59 Which I told you was bad anytime you have a button or a label of anything that has, you know, an intrinsic size like that.
+51:05 It'll also, if there's some nearby thing it could do, like fix the trailing space to its container, it could do that for you too, but you can control drag to yourself too, which sounds crazy, but you'll get used to, to doing that.
+51:16 So control drag is way number three to set up constraints.
+51:20 Okay? So, there is a lot to this system.
+51:24 I've just tried to kind of show you where to look for everything.
+51:27 How to click on things, where to inspect them, where to see the constraints, how to go on the document outline to resolve problems, whether they'd be red or yellow, it would take me many lectures to cover all the different kinds of constraints that you can set up, and, you know, for example, do you see on the, in the inspector there where it says content hugging priority, and content compression resistance priority?
+51:50 That hugging priority, that's not because these views love each other, but sometimes they do, but mostly the hugging priority is because you have sometimes views that are sharing some horizontal or vertical space.
+52:02 And when they share, and that space gets removed from them, or gets taken away, or they get more space added to them, they need to know which of those views wants to keep its size the most and which of them wants to get extra, and which is willing to be compressed and which is not willing to get compressed, thus you have compression resistance priority and content hugging priority.
+52:25 Okay? So, that's as much as I'm going to say about this, you've got to read up on those if you're going to do that.
+52:29 You don't need, you're not going to be building UI's, I don't think, like that in your homework, if you are, more power to you to go look up content hugging and content compression resistances.
+52:39 Okay? The last thing there you see is intrinsic size.
+52:42 Again, a bunch of iOS things have an intrinsic size, like labels and buttons, but you could actually have your own custom views, again, not for your homework, you could have your own custom views that have their own intrinsic size, they just have to implement a little API that reports their intrinsic size, and that little popup there lets you tell Xcode how to handle that, because it doesn't really know how to handle that [inaudible]
+system objects, 53:05 like labels and buttons.
+53:07 Okay? So the demo I'm going to do is I'm going to take attributor, which I, hopefully, you still remember attributor from three lectures ago, or whatever it was.
+53:17 And we're going to make attributor so it auto-rotates and looks good.
+53:21 Attributor is the thing that had the text and we could outline it and pick the colors, remember that?
+53:25 So we're going to make that do that.
+53:27 We used the guidelines when we built attributor, so it's going to be really easy to make this work.
+53:32 Okay? But I just want to show you what it all looks like, to make it go.
+53:35 And I'll do this slide because we'll finish with the demo.
+53:37 On Friday, I'm still hoping to get this university developer thing going, again, I'm not going to require any of you to get the thing working on your device until I can get you into this program, so, no worries there.
+53:49 And those of you who are doing the 99 dollar program, you're all good to go, hopefully it's all just working for you.
+53:55 Your homework, as you know, is due on Monday, and next week we're going to do a scroll view and table view, actually we probably won't do collection view, the more I think about, and the other thing we're going to do next week is iPad.
+54:05 Because everything we've done so far is iPhone, it's time to start doing some iPad.
+54:10 Okay? So let's go back to attributor.
+54:13 So I'm going to get Xcode up here and let's close drop it.
+54:19 Stop that task, [inaudible], and so alright, let's go back here, and I'm just going to bring up attributor, as, as we last left it here.
+54:31 Remember this is what attributor's user interface looks like here, we don't need to see the code at all today, because we're going to do all of this auto layout stuff in Xcode.
+54:41 And let's see what attributor does right now.
+54:43 So let's run attributor, just as we left it off.
+54:46 And here it is, here's attributor, remember we can do this kind of stuff, pick these things, and if we rotate, and everyone saw on [inaudible], the way we rotate is we hold down the command key, it's basically this right here.
+54:59 Command, arrow.
+55:01 Okay? So I'm going to do command arrow.
+55:03 That looks pretty bad.
+55:04 Okay?
+55:05 In fact, that's horrible.
+55:06 Because we've lost all of our control with no outline, no colors, we can't really do anything here.
+55:12 Stats still looks okay, but it's kind of cutoff, that's not so good, dot, dot, dot, so, really this whole UI did not react well, and so, let's try and fix it so that it stops doing that, and this is going to be in some ways almost too easy, because we dragged all these things out using the guidelines, so I'm just going to go down here, to the Thai fighter, and I'm going to say reset to suggested constraints.
+55:41 And pretty much that's going to do it.
+55:42 So let's just rerun.
+55:44 Okay, we could make a quick look at some of these constraints just to see what's it doing, but like this, let's get this out of the way in here.
+55:51 So, you can see that this thing is tied to the super-view on the left, it's lined up with the buttons.
+55:57 It makes a little space in between the buttons, a little space at the top, so it's pretty much doing what we want.
+56:04 Let's see what happens when we rotate now.
+56:06 So we got this, it's still all working, nothing has broken because of our, putting those constraints in, and so we'll rotate, ooh, that looks pretty good!
+56:14 I can still, for example, set my outline, I can set colors, that's great, stats, ooh, much better.
+56:22 However, this is not so good.
+56:25 Okay? I like purple, but not that much [laughter].
+56:27 Okay? So we've got to make these things all the same size, we want these four buttons to be the same size, okay?
+56:34 Nothing that we did when we dragged it in, evidently, was enough to let Xcode know that.
+56:39 However, so simple to make that happen, I'm just going to select these four buttons, I'm going to go down here to this little [pause]
+constraint adder right here, 56:51 and I'm going to just click this button that says I want these four buttons to have equal widths.
+56:55 In other words, I'm adding the constraint that their widths be the same.
+56:59 Okay? So, I just, when I hit add three constraints, it's going to add one constraint to each of them, probably, each of these first three, saying, be the same as the next one over.
+57:11 We'll do that.
+57:12 You can even see the, see, here's what they look like, equals.
+57:15 See? So let's go and run and see if that fixed it.
+57:19 And it did.
+57:20 Okay? So, whichever way, by the way, why does it not rotate here?
+57:24 Because this is the upside down, portrait upside down, and in our [pause]
+project settings, 57:30 we said we don't support portrait upside down, so that's why it just does nothing.
+57:34 When you go to portrait upside down, it does nothing.
+57:36 But when we stay with portrait right-side up, or between either the two of the landscapes, it seems to be doing exactly what we want here in this view.
+57:45 And, the only problem is, if we look at our console, we're getting all kinds of errors here.
+57:53 Okay? This doesn't look too good.
+57:55 Okay? And what is this primary error we're getting.
+57:58 Unable to simultaneously satisfy constraints.
+58:03 Okay? So, this looked all good over here, there was no, I don't see anything, there's no yellow things.
+58:10 If I bring up my document outline, there's nothing yellow here.
+58:14 My auto layout constraints are good!
+58:16 Well, actually they're not.
+58:18 Okay? Because it's unable to satisfy the constraints at run time.
+58:23 Okay? Well why is that happening?
+58:24 Well, it'd actually give you a lot of help as to why that's happening, let me make this wider.
+58:30 Here, and it gives you even kind of ASCII text, kind of descriptions of the layouts.
+58:39 You see? How everything's laid out?
+58:41 But I can probably guess already that since I just introduced this error, it has something to do with what I just did.
+58:48 Okay? Which is to make those widths be the same.
+58:51 So, let's take a look at the constraints of these buttons and see if we can see something obvious.
+58:56 Okay? Anyone see anything obvious in here?
+59:00 That doesn't look very good?
+59:05 [Pause] Speak up.
+59:07 [Inaudible background comment] Yeah, the width equals 64 here is hardcoded, okay, that's a magic number, that's bad.
+59:12 And, in fact, we know that when we go to landscape, the width's not going to be 64 anyway!
+59:17 Right? They all get a little wider in landscape.
+59:19 So this is the problem.
+59:21 It's trying to make those buttons all the same width, but you're trying to keep them all 64, or at least to keep this one and this one and this one 64, this one seems to not have that 64, which is nice.
+59:33 So this is easy to fix.
+59:35 I'm just going to delete these width equals 64's, it's not the height equals 64.
+59:40 So let's delete the width equals 64, let's delete this width equals 64, and we'll delete this one.
+59:47 Okay? So, this height, nothing turned yellow, okay?
+59:51 Nothing was like missing constraints, okay, it's all completely still specified, and now if we run.
+59:59 Okay, and we rotate back and forth.
+01:00:02 Still working, still making the buttons wider, and we're not getting anything in our console here.
+01:00:08 So sometimes you'll get the constraints, you won't have any problems in Xcode, but you still might have some conflicts, so you should be looking at your console to see if there's conflicts.
+01:00:17 Question? [Inaudible background question] Okay, so the question, why did I keep the height equals 64 magic number, and that's a super good question.
+01:00:25 Now, it's okay that I have a magic number here.
+01:00:28 And why is that okay here?
+01:00:30 That's because there's no text in that button.
+01:00:32 It's almost like an image, right?
+01:00:34 So, what size would it be otherwise?
+01:00:37 There's nothing, if you look from top to bottom in this view, there's nothing that would specify what size because this is not a fixed width, or height rather, this is a fixed height and so is this and this, but then how much space goes to this and how much goes to this?
+01:00:52 By fixing this one at 64, this one gets the rest.
+01:00:56 Now, I actually could do this another way.
+01:00:58 If I kind of wanted, you know, the text view to have most of the space and this, some of it, and I want it to be a minimum layer, minimum size, I could actually set the size here to be greater than or equal to some particular size, and I could use the content hugging priority and compression priority between these two to make sure that whichever I wanted to get the extra space, when it got taller, like this, okay?
+01:01:26 I could make that be defined, but by fixing this one, I'm guaranteeing this one gets all the extra space.
+01:01:31 So when you have an image, I said that sometimes a magic number's okay, usually it's when you have an image, some artwork that somebody has drawn has a size to it that that's it size.
+01:01:42 And here, these squares, I want them to be this size, so, like I said, I'm glad you brought that up because that's a good question.
+01:01:48 Okay, the other thing I'm going to do here is play around with this, so this is working fine, nothing to change here.
+01:01:54 What about this guy over here?
+01:01:55 Well, this one's pretty bad.
+01:01:57 I kind of dragged these in here without using the, the lines or something, so they're kind of in random spots.
+01:02:03 So here's a good chance to show you how to put these things in their place, not using suggested constraints.
+01:02:10 Okay? In other words, actually specifying.
+01:02:14 So I'll show you both ways to do it.
+01:02:17 The both non-suggested constraints.
+01:02:19 So let's put outline text in this corner down here, and, or we'll color it, put color down there, whichever, and then we'll have the other one stacked on top of it.
+01:02:29 So I eventually want it to look like this and this, but I'm not going to use the guidelines, okay?
+01:02:34 Because I want to show you a different way to do it.
+01:02:36 So, here I have colorful characters.
+01:02:38 So it has no constraints, currently, because when I said reset suggest constraints, I was doing that for this guy only, right?
+01:02:44 When you go here to the Thai fighter, it says in attributor view controller, it doesn't say stats view controller, so it only did it in that one, and I didn't reset it here, so these things have no constraints.
+01:02:56 So let's set this one to be in this lower left-hand corner without using the guidelines.
+01:03:01 So I'm going to do that with this guy.
+01:03:05 Okay? So this little button right here, it lets you specify, this is where we did equal widths, but here I only have one thing selected, so I can't even pick equal widths, I'd have to pick two things for that, but up here at the top, you'll notice, you can specify that this thing is tied to views around it.
+01:03:23 Either its super-view or its other views.
+01:03:25 Okay? And also, I can pick the standard value here.
+01:03:29 So I'm using the default value, okay?
+01:03:33 Which you generally want to do, you don't want to have a magic number, like 100 and 71, in here, but I'm not picking these high beams, so those are not going to be affected.
+01:03:41 And do you see, it wants to add those two constraints, that's this one and this one.
+01:03:44 I'm also going to show you this, update frames.
+01:03:48 You can update the frames, in other words, move the view as it currently is showing the scene, either all the frames in the entire container, or just the frames that got new constraints.
+01:03:58 Usually you're going to pick this one, items with new constraints.
+01:04:01 So I'm going to hit this, and watch what's going to happen, that colorful thing, it's going to jump to lower left-hand corner, standard distance away, automatically.
+01:04:10 Okay? So that's another way to set the constraints, see it put standard distances here, it's got these standard constraints, and how about this guy?
+01:04:20 We want this guy to be lined up on top of this one.
+01:04:24 We could do that, also, with this, okay?
+01:04:27 We could set the high beam here and all that stuff, but I'm going to use the control dragging to do that, so I'm going to hold down control, and I drag from this guy to this guy, and I'm going to have the vertical spacing, I'm suing shift, by the way, vertical spacing, and left, in this case, the left edge, I want those lined up, and then I'm just going to hit return, and it created me two constraints for that.
+01:04:50 Bottom space and colorful character.
+01:04:52 So let's go see what that looks like.
+01:04:54 Alright, so we have this, we do stats, it stays in the lower left.
+01:04:59 Whether we're portrait or landscape.
+01:05:01 So that worked perfectly, and they stay stacked on each other.
+01:05:04 One thing I want to show you is this, watch this.
+01:05:07 Let's pick a whole bunch of text here and make it outlined and colored.
+01:05:12 And go to stats.
+01:05:13 And you see how these, these nicely show the whole word, two [inaudible] colorful characters.
+01:05:19 In other words, they don't get cut off.
+01:05:21 That's because these two things are their intrinsic size.
+01:05:25 What happens if, instead, I fix the size of one, and this is why you're going to see these intrinsic size being fixed is bad.
+01:05:32 So I'm going to take this colorful character one, I'm going to fix its width and I'm going to do that by control dragging to itself, okay?
+01:05:39 And saying width, I could also do it with these buttons down here.
+01:05:43 And there it is, width equals 157, which is its current width, I'm just going to leave it that way.
+01:05:48 Okay, not let's run and see what happens.
+01:05:51 Okay, so it seems like no problem, everything's good.
+01:05:54 But let's select a lot of text again.
+01:05:58 Oh, not so good.
+01:06:00 You see? Since this thing is not its intrinsic size, it couldn't fit when I went to 127 characters instead of 0.
+01:06:08 Right? So it just went dot, dot, dot, I can't fit.
+01:06:10 Okay? It always does, you can control this, but by default it does this dot, dot, dot, if it can't fit.
+01:06:16 Okay, so do you see the hazards of having these hardwired widths in here?
+01:06:22 So if I take this and delete it, and run again, now when we go to the stats, even if we have a lot of stuff, it'll fit.
+01:06:37 Okay? Alright, one other thing I guess I'll show you real quick is [pause] what happens, let me show you the document outline piece of this.
+01:06:46 Okay, so nothing's wrong in here, but I'm going to make something wrong, let me go to this guy and let's delete it's aligned leading, okay, so it's no longer lined up with this.
+01:06:55 Okay? When I do that, notice this one turns yellow, because it is a constraint for an object that has problems, okay?
+01:07:05 So anytime you have an object that has problems, all its constraints will be yellow, or even red, if they're conflicting.
+01:07:10 So you can see we've got this little red guy here saying that there's a problem with this guy, and we know what the problem is, right?
+01:07:16 We don't know where it is horizontally, we only know where it is vertically, okay?
+01:07:22 So let's go do that.
+01:07:23 And it says needs constraint for X position, again, I can click on this little red thing.
+01:07:29 It'll say add missing constraints, it's smart, it knows these two were lined up on the left it said, it's nearby, it said, oh, it probably wants to be left-aligned, so it put a left align in there.
+01:07:42 Okay? One other thing I'll show you real quick, you see it moved this guy.
+01:07:45 Okay? You see how now these are yellow, because this doesn't match up, this is where the dotted box is, again, in the outline, if I click this, I have these choices up here, I'll update the frame to put it back.
+01:07:58 One other thing, notice that in all this moving around this got set to 8, instead of the standard space, that sometimes happens, I'm not really sure why it lost its default space we didn't really do anything to specify that, but you can edit, select and edit, or you can even, okay, so we could edit here and change this to standard, or watch this little trick, You see that little guy?
+01:08:19 I'm going to double click on that.
+01:08:21 Okay, if you double click on a constraint, all this stuff will appear right you are.
+01:08:27 So, in this case, I'm going to switch from 8 to the standard value.
+01:08:32 Okay? When I hit return, 8 is the standard value it turns out, so nothing changed, but just wanted to show you there how you can double click on a constraint to set things like it's priority and stuff like that.
+01:08:44 Okay? So that's it!
+01:08:46 For your homework, you only have a little bit of auto layout to do because you only have a, besides the card-containing view, you may have redeal, add more cards, score, I don't know, because I let you delete some of the other stuff from previous assignment.
+01:09:00 So, auto layout should be pretty simple for this, but for the rest of this class, all quarter-long, you should always be using auto layout.
+01:09:06 Your app should always work in landscape and portrait for the rest of this class, okay, all assignments.
+01:09:11 It'll be in the assignments, but, just so you know.
+01:09:15 Thank you very much!
+01:09:18 >> For more, please visit us at standford.edu.

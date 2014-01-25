@@ -1,0 +1,794 @@
+00:00 [ Music ]
+00:04 >> Stanford University.
+00:08 >> Welcome to the lecture 14 of CS193P for Fall of 2013 and 14.
+00:16 Today I'm going to talk a little bit about miscellaneous topics, UI application and network activity indicator, and then I'm going to follow up a little bit on the demo we did last time, then I'm going to continue that demo, and we're going to take Photo Mania that we built last week and we're going to make it work on the iPad, and we're going to add a popover segue to it, because I talked about popovers a couple weeks ago, but I never showed you how to do it, and you know, all this stuff if I just tell you about it, it's really not real probably for you until I show you how to do it, so we'll do a popover.
+00:48 And then we're going to dive into maps, so I'll be doing the lecture today on maps.
+00:53 Hopefully, I'll get all the way through it.
+00:55 And then on Wednesday, I will do a demo with the maps, and also then on Wednesday, I will demo some more segues, especially the embed segue.
+01:02 Okay? So that's what we're talking about today.
+01:05 So let's talk about a couple of miscellaneous topics.
+01:08 So UI application is my first one.
+01:11 What is UI application?
+01:12 It sounds important.
+01:14 It's not really that important, we dive right into using the application delegate last week, where we did things like application, did finish launching with options and, you know, handling background URLs coming in, and background fetching and all that.
+01:29 That was all in the applications delegate.
+01:30 So the applications delegate is actually set by a property on another object called UI application.
+01:37 So UI application, this class, it only has one instance in your entire application.
+01:41 You get it by calling this UI application shared application, and there's really not a lot of really interesting stuff in this thing, you can go check out the documentation, but all the real stuff is in applications delegate.
+01:54 Alright? So it has a property on your application called delegate, that gets automatically set for you, and then your application delegate object, which we did a lot in last Wednesday, that's where all the action is.
+02:05 Okay? So you can check out UI application if you want.
+02:08 I did want to point out one particular property on UI application, however, which is the network activity indicator visible property.
+02:16 This is a Boolean property.
+02:17 If you set it to yes, then the little spinner that shows up on the status bar, have you ever seen that?
+02:23 When you're doing network stuff, there's a little spinner that's spinning, that turns that on when your application is the active application.
+02:30 And this thing, you know, it's Boolean, yes or no, that spinner is either on or it's off, it's totally your responsibility to turn this thing on and off.
+02:40 It's a little bit difficult to deal with because A, it's global, it's in UI application, so all the threads in your application are all using this same spinner, and number two, it's a Boolean, it's not like a push and pop or a count, and so imagine that you fire off a big FLickr fetch that's going to take ten seconds.
+03:01 And you start the app, this network activity indicator, turn it to yes.
+03:05 Then, in another thread, you fire off a little FLickr fetch, it's only going to take one second, okay?
+03:10 So it fires off, it turns this on, one second goes on, it finishes, it turns it back off.
+03:16 Now it's off, but the ten second one is still running.
+03:19 Okay? So that's bad.
+03:20 So it's totally up to you, unfortunately, to put mechanism in your app for dealing with that unfortunate simplicity of API.
+03:30 I'm sure, I mean, I don't know, but I'm guessing that Apple tried to put more complicated API on top of this, and it just didn't work for all different kinds of ways people, you know, are doing network activity in different threads, so they just kind of said, okay we'll give you this and we'll leave it to you.
+03:44 But you should turn this on.
+03:46 I'm not sure if Apple would reject an application submitted to the App Store that didn't turn this on, and did do network activity, but they might.
+03:52 Okay? And they'd probably be within their rights to doing it.
+03:55 Why do we have this thing?
+03:57 Because a lot of users might be on cellular, and they only have 300 megabytes a month or something, and they want to know when apps are using that up, right?
+04:06 So they want to see that little thing spinning.
+04:08 So that's why it's important to turn this thing on.
+04:10 Only when you're doing network activity, this is not a spinner for please wait, okay.
+04:14 Your app first of all should never be doing please wait, because as we know, we do everything off the main thread, but this is just to tell them network activity is happening, even in the background in my app.
+04:23 Question back there?
+04:24 >> Is there a reason why I always [inaudible]
+04:26 when you're doing network activity and doing that on its own?
+04:30 >> Yeah, so the question is can't iOS know that I'm doing network activity in my app and turn it on for me?
+04:36 And the answer is, I'll be it could figure it out most of the time, okay, but not 100 percent of the time, because when you do a network activity, you fire something off, maybe you're doing that URL session, things like that, I think if you do the URL session where it's actually happening I bet they do turn it on, or they might.
+04:52 I really don't know what they do, but then the bottom line is they can't reliably 100 percent do it, so they're asking you, you can do it here.
+04:59 So, this is the best to my knowledge, that's the answer.
+05:02 Um, okay so that was just a little aside.
+05:04 So now, a little follow up on our demo that we did last Wednesday.
+05:08 Two things that I want to clarify and that I did clarify if you downloaded the posted code and read the comments, one is, as I was going through my demo, sometimes I forget things, and I did forget this one line of code, which is you have to send a message if you want to get these background fetches to happen, to your shared application, you shared your application called set minimum background fetch interval.
+05:31 Okay? So that interval, and it's time interval, it's the number of seconds that is the minimum between the times that iOS will send you the opportunity to do a background fetch, right?
+05:43 So you're in the background, remember, the iOS can send you a thing, it says "Hey, wake up, you can do a background fetch if you want," and this says the minimum.
+05:50 Now, this minimum, you can't set it to one second, it's going to wake you up every second because there's a UI application background fetch interval minimum and that's the minimum you can set it to, and so if you want to set it to that, then you'll get woken up as much as the system is willing to wake you up, remember that only the minimum.
+06:09 It could take much longer to wake you up, depending on what's happening.
+06:13 One thing about these background fetches, the system is quite smart about when it wakes you up to do a background fetch, it's probably waking up a whole bunch of other apps doing background fetches too, and doing it all at one time because all of this multi-tasking in iOS is all about saving the battery.
+06:27 Okay? Why, you might ask?
+06:29 Can't I have four apps on the screen at the same time?
+06:32 Well that would be a lot of processor, a lot of network activity, a lot of battery drain.
+06:36 Okay? And so when an application is in the background and it's not running, we want minimum battery drain going on, so if it's going to wake, and a lot of the battery drain is not necessarily what your app is doing, it's just the fact that the phone or the iPad is awake, right?
+06:50 It's up and running, it's OS is running.
+06:52 So mostly the phone and iPad are sleeping when you're not using it.
+06:56 Okay? So you want it to stay that way.
+06:58 So if you are going to wake it up from sleep and start using battery, you want to get as many apps going with their background fetches and all at once.
+07:04 Plus, there's a lot of very battery intensive things like the radio antennas, right?
+07:08 The wi-fi and the cellular, those things use power.
+07:12 So if you're going to do a background fetch, you're probably going to fire up the wi-fi, that's going to use power, we'd better get everybody who wants to do a background fetch doing it all at once.
+07:20 So this is just a minimum.
+07:21 Now, the reason I'm mentioning this is because the default is UI background fetch, application background fetch interval never which means you'll never get background fetch, so you definitely need to call this.
+07:33 It also, notice, means you have to run your application at least once.
+07:37 Your user has to run your application at least once, and this gets called if you want background fetching to happen.
+07:42 Once you've called this, system knows you want to do that, you know, once you go to the background, then after that, the launch, then it will not only wake you up, but if you were to exit or crash, it will fire you back up once it kind of gets you into the background fetch world.
+08:00 Users might find that they don't like your application running in the background because you use a lot of resources, their battery gets drained when they let you fetch in the background, because you're a bad background citizen, maybe.
+08:11 They can actually go into settings and turn you off when it comes to background.
+08:17 Okay, there's actually a switch, it says "don't let Photo Mania or Shutterbug fetch in the background." Don't do it.
+08:24 And if you set that off, then you won't be able to do it.
+08:26 And you can find out if the user has done that, using this property in UI application called background refresh status, and it will return the refresh status.
+08:34 It actually has three different states.
+08:36 One can be you're good to go, two can be the user turned you off, third can be restricted.
+08:42 What restricted means, and you're going to see this in various things.
+08:45 You'll see this with the map stuff, restricted means you can't do it, it's off, but your user didn't turn it off, and they can't turn it back on.
+08:54 Okay? Because they're restricted in some way.
+08:57 How would this happen?
+08:58 Parental controls, for example.
+09:00 It's possible in parental controls to make it so this app is not allowed to run in background mode in parental controls.
+09:08 Corporate environment.
+09:09 A corporation might not want to allow a certain app to run in the background because of what it fetches or whatever.
+09:14 Okay? So you've got to check all three of those states, and if it's in that restricted state, not just this thing, but anything that's in a restricted state like that, you don't want to say to the user, "I want to do background fetches, but you haven't turned me on," because then they won't be able to go turn you on, and they'll be like, "What?" Okay, they'll be confused, so I just want to make-- this is a good opportunity to talk about those three states, right?
+09:34 Okay, it's on, it got turned off by the user, and it's restricted, meaning it can't be turned on.
+09:40 Go ahead. Question.
+09:41 >> [Inaudible] if I want to do something in the background, but I don't want to do a fetch?
+09:46 >> So the question is what if I want to do something in the background, but not a fetch?
+09:49 And the answer is, you can do that.
+09:50 This background fetch mechanism doesn't mean you can only fetch on the network, you can do other things.
+09:55 But it's called background fetch and all that, I think, for a reason by Apple, is that they're kind of implying "this is kind of what we imagine you're doing with this," so they don't really want you to wake up and then just use a lot of resources somehow doing something else, but you are allowed to do something else.
+10:10 There's no law that says when the background fetch is called you couldn't make some mathematical calculation or something like that.
+10:16 As you can imagine, what really would you be calculating mathematically?
+10:19 Kind of, when you wake up in the background it's kind of like you want to check what's going on in the world, okay?
+10:23 And we're going to talk about checking things like "where am I in the world?" That's a different thing.
+10:28 There's another mechanism for that, and we're going to talk about that.
+10:30 Yeah. Question?
+10:31 >> Is there-- let's say our Facebook or snapchat users to know that like someone sent you an E-mail or whatever?
+10:37 >> So the question is, is this what, you know, Facebook or some social media app, that you know people are sending you messages, is this what it's using to say "someone sent you a message," >> [ Inaudible Comment ]
+10:49 >> Yeah, the little notification line, and the answer is no, this is not what it's doing.
+10:53 There's another mechanism for that called push notifications, which we're probably not going to get to talk about, unfortunately.
+10:59 So that's how they're doing it.
+11:01 There is a way to basically have a user of an app sign up and say, with the server somewhere, saying "hey, I'm willing to accept push notifications from Facebook," and then the Facebook server can send notifications, little tiny JSON packets, basically, to the phone saying "Oh, here's a message" or something like that, and the message might be this guy's got a message.
+11:23 When you get those, there's a way to get woken up in the background.
+11:26 So it's a different mechanism for waking up in the background.
+11:28 However, if you're doing something, let's say you're in "Read It" or in Facebook, and you have your little page up, the last time you were in Facebook and you want that to update.
+11:38 No one is sending you a message, per se, like not a Facebook messaging thing, but it's just like people are posting on their wall, you're watching or whatever is going on, and you want that to, when you go to the app switcher, you want to see kind of what's happening there.
+11:51 Not in real time, but kind of like...you know, that's what this would be great for.
+11:55 So wake up in the background, fetch the current contents of the page, update it, now if someone looks in app switcher, they can quickly see "Oh, I've got new stuff there!" and they can go click and look.
+12:05 You see? So it's different kinds of things, but sending a message and notification, that's push notifications, which we're not going to talk about.
+12:12 Good question though.
+12:14 Okay one other follow up from that demo is, I kind of use a little demo ware in that, when we got the background fetch, when we got a chance to do a background fetch, I called start FLickr fetch, okay, just to make it a one-liner there, that was almost a conceptual thing I was doing, just to kind of say "Okay, we can have a chance to do a fetch, let's do it." But actually calling start FLickr fetch there would not be good, and probably would not work, okay?
+12:40 And why was that?
+12:41 That's because start FLickr fetch starts a background session, URL session, okay?
+12:46 Background session meaning it's the kind of URL session that if the URL comes back and you're not running, you get a chance to handle it.
+12:54 Right? That whole handle URL background session other one we looked at.
+12:58 Those kind of background session URL fetches are discretionary.
+13:03 Okay? Meaning that the system can determine, can decide, if you're in the background, I'm not even going to do that fetch.
+13:08 Okay? So those are fetches that generally you issue them in the foreground, they might complete in the background.
+13:14 Okay? When you get a chance to fetch, okay?
+13:16 Because of this fetch thing?
+13:17 You want to do that fetch right there, using ephemeral session like we did everywhere else in Shutterbug and stuff, ephemeral normal session.
+13:25 Not a background session.
+13:27 That way, it won't be discretionary and it will actually do the fetch.
+13:30 And since the system is saying, by sending you this message, "Okay it's your turn to do a fetch, I've fired up all the radios, I'm ready to do some network activity, go ahead and do it." So the code that I posed after lecture last time is doing the right thing, it's doing actual fetch, so you can go take a look at the background fetch message that gets sent by iOS and you'll see that I'm doing an actual ephemeral fetch, I'm not calling start FLickr fetch.
+13:53 I just want to make it clear why that code was different there.
+13:56 Question?
+13:56 >> [Inaudible] like update a UI in the background so that the task manager showed the current view?
+14:02 How do we handle that in terms of using the main queue or not the main queue, because we can't [inaudible].
+14:08 >> Great. Great question.
+14:10 Okay, so the question is something's happening and I'm in the background, and my UI needs to get updated.
+14:16 Like, a URL comes back or I get offered to do a background fetch, I'm doing all these things, and isn't there a problem there because I need to do all my UI in the main queue?
+14:25 That's the question, and that's a great question.
+14:26 But the answer is, when you're running in the background, you're not on a different queue.
+14:31 That background just means that you are not the app that the people are looking at.
+14:36 But every otherwise, it's just like you're running in the foreground.
+14:39 You can draw, you can do everything.
+14:41 Your main queue is running, okay?
+14:43 When you get the opportunity to run like this, it's your main queue that's running, so you can do graphics, you can do drawing, anything you want, right?
+14:50 So the difference between foreground and background is not main queue/some other queue, it's am I the active app?
+14:56 Am I not the active app?
+14:57 That's the difference between foreground and background.
+14:59 Normally, when you're in the background, you don't get to run.
+15:02 Your main queue gets no cycles, because none of your app gets any cycles, okay, normally, but then occasionally you'll get the background fetch or URL will come back, or if you're a location thing, like I was saying we were talking about today, you can get messages that "Hey the phone has moved to a new location," um, you get a push notification that I was talking about earlier.
+15:21 You know, Facebook sent you a message.
+15:22 Those things will wake you up in the background, and you can get a little time to process.
+15:26 Any time you're given an opportunity to run in the background a little, you only get a little bit of time.
+15:30 Understandably.
+15:31 You can't sit there and run for ten minutes, okay?
+15:34 The whole point is to kind of keep you when you're not the app the user is using, we want to keep you, you know, not using a lot of resources so the battery doesn't drain.
+15:42 Okay? So good question.
+15:44 Yeah?
+15:44 >> If you do happen to start something that takes ten minutes to finish, is the system just going to cut off your processor to pause you or?
+15:52 >> So the question is, what if I get an opportunity to run in the background here from one of these many mechanisms, and I do start doing something that takes ten minutes.
+16:00 What's going to happen?
+16:01 And the answer is, the system is going to just stop you, your process is going to stop, you're not going to get to finish, and that will create all kinds of bad things, your user will be like "what's going on?" you know? And that's bad for you if things will timeout, if you're accessing the network, all kinds of bad things, so the answer is you don't want to do that, and the answer is, the system will not let you do it.
+16:24 Good question.
+16:25 Alright, anything else?
+16:26 Great question, this is a great slide, because we basically got to talk about multi-tasking here.
+16:31 Alright, so let's talk about, continuing our Photo Mania demo here, and like I said, I'm going to make it into an iPad app, actually I'm going to make it a universal app, okay?
+16:42 Believe it or not, and this is going to be a fairly short demo.
+16:45 And we've kind of built so much reusable parts here and so much knowledge that you have that we can really quickly now make these apps do much more sophisticated things, and then I'm going to demo a new thing that you've never seen before, which is how to make a popover segue way.
+17:02 Okay? This is a new kind of segue way, we talked about it in lecture, a few lectures ago, but I never asked you to do it on homework, and I never demoed it, so I'm going to demo it here.
+17:12 Oh yes, okay, let's quit that.
+17:17 Alright, so, let's go run Photo Mania.
+17:20 This is exactly the way it was when I posted it, okay?
+17:24 So this is the posting, and you can see here, this is the perform fetch, and you can see how I'm just doing a normal ephemeral URL fetch, I'm not calling start FLickr fetch here.
+17:34 And this guy is not...how, okay, I know how it is, okay we'll deal with iTunes when we get there.
+17:41 Alright, so um, so anyway, so this is exactly what I posted last week, okay?
+17:45 Last Thursday or whatever.
+17:47 So what did this do?
+17:48 Let's run this, just so we can remind ourselves what Photo Mania does, it's been more than half a week, and there it is, it just fetches in the background, and also when it launches, kind of a bunch of recent photos from Flickr, then it basically makes a table of all the photographers who took the photos, so these are all photographers, not photos, photographers.
+18:15 But we'd love to be able to click on these and see the photos by that photographer, right?
+18:19 But we can't because we never put any segue ways in here, we never did anything, and plus our app doesn't work at all on iPad, in fact, let's go look at our iPad storyboard, you can see it right here, it's just this big blank screen.
+18:31 So if I ran this on the iPad, it would be a big, blank screen.
+18:34 So let's get rid of that.
+18:35 Now, I want to build my iPad UI here, but I'm going to do it in a way that I showed you a little bit before, but it's really powerful, which I'm just going to copy and paste it from another app, because Shutterbug, if you remember, had a UI on the iPad that's very similar to what we want in Photo Mania, so I'm going to go over to Shutterbug.
+18:53 This is Shutterbug as we last left it.
+18:55 And if you look at Shutterbug's iPad UI, this, it's kind of almost what we want.
+19:02 Shutterbug just shows the list of photos here, if we could just insert the list of photographers here in the middle, we'd have pretty much what we want on the iPad, so I'm just going to copy all of this.
+19:13 Go back over here to Photo Mania, and I'm in my iPad storyboard here, and paste.
+19:19 Oops, I guess maybe select all over here?
+19:21 Okay, select all, copy, over here, and paste.
+19:27 Okay? So put it in here.
+19:29 As usual it's a little bit of a search party to find anything, oh, there it is!
+19:34 So here is that Shutterbug iPad UI.
+19:39 And like I said, basically I want to insert in between the list of photos a thing here where I can choose the photographer.
+19:48 The same thing, the thing I just showed you, that we were running in Photo Mania.
+19:51 While I'm here in Shutterbug, let's grab the image view controller.
+19:55 We're going to need that obviously, our storyboard uses that, so we'll put that over here.
+19:59 Copy that in.
+20:00 And that's all we need from Shutterbug.
+20:02 So this storyboard is pretty much exactly what we want, there's a couple of minor things we need to fix here.
+20:11 One thing is we don't want this list of photos to be the root view controller of our split view, we want the photographer thing to be that.
+20:21 So where can we get our photographer's table?
+20:23 Well, we actually have that too, that's here in our iPhone storyboard.
+20:27 That's what I just ran and showed you, right?
+20:28 This is the list, this table if you inspect its identity is this photographer's core data table view controller, right?
+20:35 So this is showing that list of photographers.
+20:38 So let's just copy this.
+20:40 Put this in our...oops, and where did it go?
+20:44 Whoops? Er!
+20:46 Sorry. Sometimes hard to find all this, there it is.
+20:50 Okay? Notice that it looks really big.
+20:52 That's because I haven't segued to it yet, so it doesn't know that it's going to be in a master of a split view and be inside of a navigation controller like that.
+21:06 So let's go ahead and put that root view controller in there.
+21:08 Where is it?
+21:09 Okay so here's the root of our navigation controller.
+21:11 This thing is also probably called Shutterbug, let's change this to Photo Mania or maybe photographers, because that's what's going to show up in our root view controller.
+21:21 So I'm just going to control drag to the photographer's one, and reset that to be the root view controller.
+21:28 Okay? So now, let's get more space here, alright?
+21:33 So now our API or our UI is a little more what we want, okay?
+21:42 We have this photographer's thing here, and now we want, if each time we click on a photographer, one of these rows, then we want to go to a list of photos.
+21:53 Alright? So let's do that.
+21:54 I'm just going to control drag from here to here.
+21:57 And this is inside our navigation control, so I'm going to push.
+22:00 Okay? Now we're really getting close to what we want.
+22:04 Okay? This is Shutterbug, but that's okay, that's going to be the title, we're going to reset that title anyway.
+22:09 And what is the problem with this UI?
+22:11 This UI is actually exactly what we want except for one thing, which is that if we inspect this guy right here, it is a just posted Flickr photo CDTVC, right?
+22:25 Because I copied it from Shutterbug, and that's what Shutterbug shows, right?
+22:27 The just posted photos.
+22:29 So really we want this to be something like photos by photographer CDTVC, right?
+22:34 Because we're going to click on a photographer here, and we want this to show the photos by that photographer.
+22:39 Does everybody understand why I'm saying that?
+22:42 So let's just set it to be that, and we're going to have to create this view controller right here, so let's just do that.
+22:47 File, new file, the class, it's going to be a core data table view controller.
+22:54 We're going to call it photos by photographer CDTVC, we've got to make sure this equals this, because I just set that to be the class in here.
+23:05 So let's put this - I'll bring that, let's put this in Photo Mania.
+23:12 Huh, that's kind of weird, okay...alright put in there.
+23:16 Alright. So here's our new photos by photographer core data table view controller.
+23:22 I'm going to not have you distracted by all this junk, let's get rid of all that.
+23:27 When we create a new view controller, what do we do?
+23:30 We always kind of think of what is this thing's API?
+23:33 What's it's public interface?
+23:35 So let's look at the public interface of photos by photographer, and probably some of you are imagining that what this is, it's really simple, it's just going to be non-atomic strong.
+23:45 We need to pass the photographer in that we want to show the photos of.
+23:50 So I'd better import, import photographer, and then I can have a photographer.
+23:59 Okay so this is basically our public model, this is our model and it's public, so if someone sets this photographer, we'd better show the photos by that photographer.
+24:12 So this is a table that shows photos, photographer determines which photos we show.
+24:18 Okay? Now before we go off and implement this, I'm actually going to go down to our photographer's coordinated table view controller.
+24:24 This is the thing that shows the list of photographers.
+24:27 Okay? That I started off this lecture showing you.
+24:30 Hopefully you remember this code from last Wednesday, you can see that it's doing a fetch to the photographer, showing them by name, it's fetching all of them right?
+24:37 I'm going to put in the navigation code to navigate from this photos one right here, this is the list of photos, sorry, list of photographers.
+24:50 This little segue right here.
+24:53 So let's give that little segue a name, we'll call it the show photos by photographer segue, because that's what it does, right?
+25:02 When we click on a photographer here, it's going to show the photos.
+25:05 And then let's go back to our photographer's core data table view controller and let's do the navigation.
+25:13 Now, I'm going to show you something that I think you should probably do for your development process, which is to start use code snippets.
+25:21 Now we talked about this in one of the Friday sections, so I'm not going to go over it again, but I have a code snippet that I've created, for example, which is a kind of generic table view navigation code snippet.
+25:32 So I start typing what I called it, table view navigation, and I'm going to hit return, and it's going to put it in.
+25:38 So put this code in here for me, and this is fairly generic okay?
+25:42 And what does it do?
+25:43 Well, it does prepare for segue and it also does did select row add index path.
+25:49 Okay? So this can work for a table view that is the master of a split view, and it will also work for something that it's just going to segue via navigation control or whatever.
+26:00 So how does it work?
+26:01 Well if we prepare for segue, it just gets the index path from the sender, which is a UI table view cell.
+26:07 You've already seen this code before, so it's nothing new.
+26:10 And then it calls this prepare up here, and we'll talk about what the prepare does in a second.
+26:14 And then the did select row at index path, it does the trick where it's looking at the detail control of the split view, if it's a navigation controller it looks inside for its root view controller, and then is preparing that.
+26:26 Okay? Everyone understand what these two methods do?
+26:30 Okay. So now we've got to look at this prepare, because this is the thing that's actually doing the prepare.
+26:35 So here's that.
+26:36 And what this is going to do, it's going to get the managed object in the row on the table that we're talking about, okay, and then it's going to check the class of the view controller we're segueing to, maybe it's going to check the segue identifiers as well, that's not going to be-- you know, did select row at index path is not a segue, so it's not going to be applicable there, but I check here and see if there is a segue identifier, and if there's not, then I'd ignore this part.
+27:01 And then I'd prepare that view controller for being segued to or if it's the detail of the split view controller.
+27:07 Okay? So this case, we have photographers segueing to photos, so let's see what this looks like.
+27:13 Well, the index manage object we have here that we're going to be looking for is a photographer, so I'm just going to replace this with photographer.
+27:21 Photographer.
+27:22 Okay? Just getting my object in index path out of my fetched results controller, you know what that is, and then what kind of view controller are we segueing to?
+27:31 Well, we're going to be segueing to photos by photographer core data view controllers that we just created.
+27:37 We haven't done the implementation of this yet, but we know what his public API is, to set the photographer, which is exactly what we would want.
+27:44 So let's go ahead and import that.
+27:47 Import, m, import photos by photographer, and then let's go down here and check that that's the class, photos by photographer.
+27:59 Okay, so now we know that that's the class that we want.
+28:03 Here, this segue identifier we can check that here, and if you remember, I set it to be show photos by photographer, right?
+28:11 That's, everyone know what that is, right?
+28:13 That is this thing right here.
+28:16 This little segue.
+28:18 Okay. It's identifier is this.
+28:20 That's got to match what we're doing in here.
+28:23 Alright, so we're taking that, and again, if we're doing the did select row at index path case where it's just the detail view, then the segue identifiers can be nil, so it's length is going to be nil, and so I use length there just in case to check for empty string and nil equally, either of them, and I'm doing not, so if there's no segue identifier, then as long a we're going to a photos by photographer CDTVC, then we know we're going to, what we're going to do.
+28:51 Now, some people would argue the checking this segue identifier that you should almost never do that.
+28:57 Okay? Because if you're segueing to photos by photographer CDTVC from a photographer's CDTVC, you know what you're doing, you don't need a segue identifier to tell you what you're doing.
+29:07 That's what some people would say.
+29:09 And I see that argument, it's not a bad argument, I even buy that argument that really you only when you segue identifiers if for some reason you had two different segues, and we'll talk a little bit later in this demo an example of where you might actually have that.
+29:22 So one could argue just delete that, okay, just get rid of that entirely, don't even check that.
+29:27 And here we know that this is a, if it's photos by photographer CDTVC, photos by photographer CDTVC equals photos by photographer CDTVC, start, VC, alright, so we have that.
+29:42 So now we're going to prepare this view controller.
+29:44 Photos by photographer dot photographer equals the photographer that was selected in our row.
+29:51 Okay?
+29:52 >> [ Inaudible Question ]
+29:52 >> Uh, yeah, we'll talk about that.
+29:58 So the question is, don't I have to pass the context to this new controller?
+30:04 And the answer is yes, and I'm doing that in this line of code right here.
+30:09 So let's go look at photos by photographer.
+30:12 So photos by photographer, it's going to get this photographer.
+30:15 What do we need to do in photos by photographer.
+30:17 Well, really the main thing we need to do is fetch the photos by that photographer.
+30:20 So let's go ahead and look at that.
+30:24 Every time I set the photographer, and you're noticing, by the way, any time you have a public model set, you almost always are going to use the setter to update your view when someone sets your model.
+30:37 That's kind of an obvious thing.
+30:38 One thing I might do here, by the way, is set my title to be the photographer's name.
+30:43 That would be a good thing, right?
+30:45 I'm a controller that's showing a bunch of photos by photographer, so my title might want to be that.
+30:50 But the real thing I need to do here is set up my fetched results controller.
+30:55 That's the main thing that CDTVCs need to do, is set up their fetched results controller, and then they just kind of work automatically right?
+31:03 So to save some time, I have that ready to go here, this is what it looks like.
+31:08 Let me, I'm going to go through every line of this, don't worry.
+31:12 So first is answering your question, how do I get my context?
+31:15 I need a context, I can't fetch without a context.
+31:18 And the answer is, I'm just going to ask the photographer what context it's in.
+31:22 Okay? Someone gave me a photographer, and I'm going to go find out what the context is from it.
+31:27 That photographer came from some database, I want to get the photos in the same database.
+31:30 Okay? So I don't need to pass the context separately, it comes along with the photographer.
+31:35 If the context is nil, so either the photographer is nil, or for some weird reason the photographer didn't come from a context, that's impossible, but mostly this will be the photographer is nil, then I'm going to set my fetch controller results to nil, that blanks out my table.
+31:48 If you set your fetch results code to nil, then your table's going to be blank.
+31:51 Which I want in this case, if someone gives me a photographer with no context, or gives me nil photographer.
+31:56 But otherwise, I'm going to set up a fetch request for all the photos where my predicate is who took equals that photographer, okay?
+32:08 Everyone understand that line of code, hopefully?
+32:10 If you started on your homework, then you understand it.
+32:12 And then I'm going to show short the photos by the photos title.
+32:17 So they're going to be in alphabetical order by the title of the photo.
+32:19 So this is a property on photo, if you'll recall, and we're going to sort by that.
+32:24 Use this kind of finder like sorting order, and then that's it.
+32:28 I just create this fetch, self dot fetch results controller, it's got the request right here that I just created, and the context, which I got from the photographer, and I'm not doing any sections, and there's no cache.
+32:40 Any questions about that?
+32:41 Hopefully everyone understands that from last time.
+32:44 Now, what else does this photos by photographer table need to do?
+32:47 Well, not much else, okay, by sending the fetch results controller, it's getting the results, but it has to display those results, so it has to do self row at index path.
+32:56 Okay? That's the one thing that core data table view controller cannot do for you, because it doesn't know what attributes of the object you want to show in the row, so we've got to do that.
+33:04 The other thing it needs to do is navigation.
+33:07 Because when I click on a photo, I want to have that image view controller show its image, right?
+33:12 So it needs to do those two things.
+33:13 But I'm not going to put those in this class, okay?
+33:17 Why am I not going to put these in the class?
+33:18 Because those two things every core data table view controller that shows photos wants to do.
+33:23 Okay? Every single one of them.
+33:25 So I'm going to create a generic photos core data table view controller that knows how to do that.
+33:31 Alright? And then I'm going to have this class inherit from it.
+33:34 So I'm doing this to really emphasize because a couple of you, a few of you, are still struggling a little bit with this concept of using object oriented design to build your controllers.
+33:43 Okay, so we're going to do it again right here.
+33:45 So I'm going to create a new controller.
+33:49 Okay? It's going to be a new core data view control, it's going to be called photos, core data table view controller, and its job in life is to show a bunch of photos.
+34:01 Okay? So let's do that.
+34:03 Let's find out what its public API is, okay, here's its public API.
+34:07 This turns out to have no public API because all you need to do to make this thing work is hook up fetched results controller to any photo fetch request.
+34:21 Okay? This thing is a core data table view controller, so it has this fetched results controller thing.
+34:27 As long as you set that fetch results controller to any photo request, then the job of this class is going to be to display it and let you navigate from it as well.
+34:37 Okay? Generic.
+34:38 Work for any photos, you don't even have to set anything except for the fetch results controller.
+34:44 Alright, so let's look at this guy's implementation, pretty straightforward here.
+34:48 Don't need any of this, alright, so here we got to just implement those two things, self row at index path and navigation.
+34:57 So let's look at self row at index path.
+35:01 Looks like this, table view, self row at index path, and of course, we'll just get the cell.
+35:08 Okay this code should be very, very familiar to you.
+35:10 Go to the table view, we DQ, okay, I'm going to call this photo cell.
+35:16 Now it's interesting, this is a generic class, and it's using photo cell as it's reuse thing, so I probably want to put that information into its public header file.
+35:26 So I'm probably here going to say use photo cell as your table view cells reuse ID.
+35:36 Okay? That way anyone who is using my class doesn't have to go look at its implementation, they can just get this information from the header file and do it.
+35:43 So let's make sure we do that.
+35:44 Let's go back here, here's our photos by photographer cell.
+35:49 Let's see what its cells reuse identifier is, and the answer is, oooh, Flickr photo cell.
+35:56 Because we stole this from Shutterbug, and Shutterbug is a Flickr thing, whereas we are a core database thing.
+36:00 So I'm going to get rid of that word Flickr, and make sure that this is what it's supposed to be, photo cell.
+36:06 Okay? Everyone understand that?
+36:09 So back to here.
+36:10 So now I've got this photo cell, okay, what am I going to do with it?
+36:15 Well, I need to get the photo that I'm supposed to show in this cell.
+36:19 So that's photo star and of course we need to import photo.
+36:26 Photo equals self dot fetch results controller, object at index path, the index path.
+36:34 Okay? This argument right here.
+36:35 This, hopefully, is completely you understand this.
+36:39 Now, I just need to set the text label.
+36:41 I'm going to set it's text to be the photo's title, and let's set the detail, the subtext, the subtitle thing, to the photo's subtitle.
+36:50 And return the cell.
+36:52 Okay? So you can see that writing cell for row index path is pretty easy when it's a core data table view cell, because usually the object in the row which you can get one line of code has what you want, you just display it.
+37:04 Okay? Now, let's talk about the navigation.
+37:07 I told you I have this generic table view navigation thing, I'm going to use it again right here.
+37:11 Okay? So it's the exact same thing that I put in the other one, I just have to make sure this is appropriate to what we're doing here.
+37:19 So this is photos, again, so the managed objects are going to be photo star photo, okay, so now I got the photo out of the row.
+37:25 What does this thing do in terms of navigation?
+37:28 Well, it will navigate to an image view controller and show the image.
+37:32 Alright? So let's import image view controller, because that's what we're going to be navigating to.
+37:38 Okay? Get down here, kind of class image view controller, again I could probably skip the segue thing here, because if I'm navigating to an image view controller from this photos view controller, I almost certainly want to show my image.
+37:50 There's really nothing else I might want to do.
+37:52 So we'll just do that.
+37:53 So image view controller IVC equals image view controller VC, and we just need to set the IVC's image URL equal to an NSURL with the photos image URL.
+38:09 The reason I have to do this, of course, is because you can't store an image URL in the database, we stored it as a string, so this converts it into a URL because image view controller takes a URL as it's public API.
+38:21 I could also do something here, title equals the photo's title.
+38:26 Okay? Because really the image view controller, since it only has an image URL, it doesn't have enough information to set its own title, like the other one did, the photographer, this one-- this guy's subclass that we created, it knew how to do it, but this one really can't so we'll help it out and set its title.
+38:45 Okay? Everyone understand that?
+38:48 So now we have this nice generic photos showing thing.
+38:51 Let's go ahead and make our photos by photographer inherit from it, instead.
+38:57 Photos CDTVC, photos CDTVC, okay?
+39:03 So now it just inherited the ability to do self row index and navigation.
+39:08 Okay, and it still does the fetch itself.
+39:11 So its the one determining what photos show up, it super classes the one, putting them in the rows.
+39:16 Everyone understand what I'm doing there?
+39:19 Okay. Okay, so that's awesome.
+39:22 Everybody kind of knows how to navigate, everyone knows how to load themselves up, and might be that's all we need to do?
+39:30 Let's see if I can remember anything else.
+39:32 I think that's it.
+39:32 So let's go see if we're working.
+39:34 Let's try this on the iPad, because we just built...whoops, let's do it on the real iPad.
+39:38 We just built this, so let's go ahead and do that and see if we have any bugs, things not working.
+39:46 Maybe we didn't forget, we didn't set some of our segues right or something like that, so we can see what's going on here.
+39:53 So here it's Photo Mania, so hopefully it's fetching from Flickr right now into this photography table, and it is, that's very good.
+40:01 So here, we have photographers, right?
+40:02 That's what Photo Mania does.
+40:04 Shutterbug fetched the photos and showed you the photos titles, Photo Mania fetches the photos and then shows you the photographer.
+40:10 And we can look and see, some of our photographers have three photos, some nine, so let's pick this guy, he has nine.
+40:16 Let's pick this guy, he has three.
+40:18 And we can click on one of these.
+40:20 Again, hopefully nothing, this is Rio De Janeiro, maybe we'll pick somewhere else.
+40:24 No, there's no titles.
+40:26 Uh, how about this one?
+40:27 Nah, there's no titles.
+40:28 Okay, we'll do Rio.
+40:30 Hopefully Rio is not going to do anything bad.
+40:32 Here we go [chuckles].
+40:33 There's Rio.
+40:34 Oh, good! Not bad [laughter].
+40:35 Okay, so there's our image view controller, so this all worked great.
+40:39 So hopefully it works here in porcher mode too and it does seem to be working there too.
+40:44 Okay? Oh - there, okay [laughter].
+40:46 Okay, so that's that.
+40:50 Okay? You guys all got that?
+40:53 It worked perfectly.
+40:54 So now we can quickly move on to the next thing we're going to show, which is we're going to show how to put a little-- put it in landscape mode just to show here-- so right above where this duck's nose is, okay, I'm going to put a little button called URL, and when I click on it, it's going to do a popover, and in that popover, it's going to show me the URL that's showing here, the text of it, you know, http slash something.
+41:22 Okay, so this is mostly to show you how to do popovers.
+41:25 So let's go back and see how we would do that.
+41:28 This turns out to be quite straightforward.
+41:31 So here we are, here's our UI, and what we want to do is add a little button here that does URL.
+41:39 Okay. So we're going to drag this bar button item into the bar here, and we're going to call it URL.
+41:45 Okay, so this is going to be a bar button item that when you click on it, it's going to bring up a popover here, a little view or view controller that's going to appear, overlapping everything else.
+41:56 So how do we do that?
+41:59 And the answer for that is that we create an entirely new view controller.
+42:05 Okay? A popup, a popover segue is a normal segue.
+42:09 You segue to a new view controller.
+42:11 So we're going to create a new view controller that's going to display the URL that's showing here in image view controller.
+42:17 Alright? So how do we create a new view controller, you all know how to do that.
+42:20 We go into here, we go up to the top, we grab a view controller and we drag it out.
+42:25 Okay? Now this view controller is quite big, let's make it so we can see a little better.
+42:30 So here's our view controller.
+42:32 So this is the view controller, it's going to pop over.
+42:34 Okay? And we then just create a segue by control dragging, so I'm holding down control, and dragging, just like any other segue, and this is going to be a popover segue.
+42:46 So this is the first time we've ever done popover.
+42:48 Okay? So now once you create a popover segue, you can now kind of create this view controller how ever you want, it's a look, to pop over.
+42:58 And one of the things you might want to set it its size.
+43:01 Because if this is our popover size, that's not going to be good.
+43:05 It's going to cover our whole screen, that's going to be horrendous.
+43:07 So display URL, we only need it to be small.
+43:11 And it's nice to have URL on one line so it's not wrapping because URLs have all those slashes.
+43:15 So let's try to make a really wide one that will hopefully fit in one line.
+43:19 So how do we change the size of a view controller?
+43:22 Okay? Because all our other view controllers have kind of inferred their size using these simulated metrics right here, you see this inferred size?
+43:30 But a pop up view, a popover's controller is special in that you can change its size, notice that you won't be able to do this until X code knows that this is a pop up view, popover view controller, or at least knows that this view controller is going to be in a popover context because of this segue right here, this popover segue.
+43:49 Once you do that, if you go to your view controller and select its view, self dot view, then you can go dimensions and these will be editable.
+43:58 The width and height.
+43:59 So, for example, we could make this 600 wide, and maybe 40 pixels high.
+44:04 Okay? Which is probably a pretty good looking thing.
+44:07 So that means when we press this URL button it's going to pop over and be something like that, that's pretty good size, 600 is the widest they will allow you to make a popover, okay?
+44:18 So I think if you specify more than 600, it's only going to show up 600.
+44:24 Alright, and you can make it any height you want, although obviously you wouldn't want it too big, cover up all content underneath.
+44:30 It doesn't really make a-- a popover that would cover up everything, you would want to use a different kind of segue, a modal segue in that case.
+44:36 So we have this, and then this is just a normal view controller otherwise, this little view controller thing.
+44:43 So we need to create a subclass of view controller to be its subclass.
+44:47 So let's do that.
+44:49 And what does this view controller do?
+44:52 Well, it's a normal UI view controller.
+44:59 And it displays a URL, that's all it does, so I'm going to call it URL view controller, because that's what it does, displays the URL.
+45:07 Okay? We'll put it in the place we usually put it.
+45:09 Actually let's put it down here, eh, somewhere like here.
+45:13 What's it's public API?
+45:15 Very simple, property, non-atomic strong, NSURL, URL.
+45:21 That's the URL it's going to display.
+45:24 Okay? What's its implementation?
+45:26 Also really, really easy.
+45:28 Let's get rid of this.
+45:30 It's going, when you set its URL, it's going to update its UI, now this is not a table view controller, so we're going to have to write the update UI, also when it's view did load happens, also wants to update its UI, don't forget this part.
+45:51 Okay, when you have non-table view, table view controllers, this set URL might be called before your outlets are set.
+45:58 Okay? So update UI might do nothing because you have no outlets.
+46:02 So if you want to do it again, view did load.
+46:04 This is very inexpensive to do, so I'm just going to do it, possibly twice, if someone were to set this and my outlets were set, and view did load happened after that, it might happen twice, but it's very inexpensive to update my UI, so I can do that.
+46:17 So we need to write update UI.
+46:19 To update UI, we need a UI, so let's go back to our storyboard and give this thing a UI.
+46:23 And what I'm going to do for this UI is just drag out a text view, so I'm going to go down here, find a text view right here, we saw a text view from before, so I'm going to put the text view in here.
+46:36 I'm going to line it up, let's go ahead and get its auto layout going, so I'm going to reset to suggest a constraints, I'm going to check to see if it did something good, which, it definitely did.
+46:48 You see that it's going to stick to the size of its super view, I like that.
+46:52 Let's inspect the text view, I don't want all this code, I'm going to put like http slash, slash, www dot Stanford dot edu, okay, in there, that looks terrible, let's make it a little bigger.
+47:07 18 point, that looks better.
+47:09 Let's make it be centered, let's make it be selectable but not editable, so someone could select this and then copy and paste it into their browser and look at it that way, so that's good, we definitely like that.
+47:22 So that looks pretty good.
+47:24 That's a pretty good looking view of URL or UIL, and so now let's go ahead and wire this up to an outlet.
+47:31 Notice that when I do that, it's trying to do UI view controller, why is that?
+47:35 That's because we need to set the identity of this thing to be a URL view controller, right?
+47:41 This thought it was a general view controller, as soon as I do that, you can see that now it understands that this is a URL view controller.
+47:47 So I'm going to go ahead and drag to create an outlet to that text view.
+47:51 I'll call it URL text view.
+47:56 There it is.
+47:57 Normal ID outlet.
+47:58 Let's go ahead and go full screen on the code here, like that.
+48:05 And now we can do our update UI, which is that, let's just have our URL text view's text be the URLs, its path basically and there's a method in URL called absolute string, which will return the absolute path of that URL.
+48:24 Sorry, self dot URL.
+48:26 The absolute path as a string, which is what we want, because text is a string.
+48:30 Okay? And we can do a lot more fun things, attribute a text view, you can set fonts, colors, whatever, but we're just going to do a very, very simple update UI.
+48:37 So now we have this URL view controller, okay, that we're going to segue to.
+48:41 Right? This is a segue.
+48:42 We are segueing...man, I should put my doc somewhere else.
+48:46 We are segueing from this view controller, which is an image view controller, right, to this which is a URL view controller, via this segue right here.
+48:59 Okay? So let's go ahead and give that segue a name.
+49:04 We'll call it show URL, that's probably a good name for it.
+49:07 Okay? And let's do the prepare for segue for this.
+49:10 That's the last piece we have to do.
+49:12 So how are we going to prepare for this segue?
+49:13 It's a normal segue.
+49:15 This image view controller is where it happens, right?
+49:18 That's where the UI is, so that's where we have to put the prepare for segue.
+49:23 So we're going to do that.
+49:24 Let's put it right down here.
+49:27 So I'm going to put a nice pragma mark navigation, and I'm just going to do void prepare for segue.
+49:37 And so here, I'm just going to say if the segue's destination view controller is kind of class a URL view controller, okay, then I'm going to segue to it.
+49:57 And yeah, I could also say if the identifier equals show URL, but for speed here, we're just going to go ahead and not do that.
+50:06 View, controller, class.
+50:08 Okay. So now I have the URL view controller.
+50:12 URLVC equals URL view controller, uh, the segue dot destination view controller.
+50:20 Okay? I've got the URL view controller, and I can just set the URL view controller's image, or sorry, URL to be my image URL.
+50:28 I am an image view controller, so image view URL happens to be my model, right?
+50:34 So I have it handy dandy, and I'm just going to set that.
+50:38 Okay? So now, I'm totally prepared to segue to this thing, so let's go ahead and give this a try and see if it works.
+50:47 [ Background Sounds ]
+50:59 >> Okay, so let's pick a photo here.
+51:02 Let's pick a better one than that, let's pick, okay, let's go back to Rio De Janeiro.
+51:06 Okay, there we go.
+51:06 So what is the URL for this?
+51:08 It's going to be something Flickr URL.
+51:10 So we click on URL and it shows it to us.
+51:13 Some farm, some server farm at Flickr.
+51:15 Excellent.
+51:16 Now, this looks like, oh, good, it's all working.
+51:19 But actually there's a problem here.
+51:20 Watch this.
+51:21 I'm going to press the UR button again.
+51:23 Oh, the smog is building in Rio here, look at it, oh, it's getting so you can't even see.
+51:27 What's happening there?
+51:29 Actually, that segue is happening over and over, it's putting up more and more popovers.
+51:33 So there's actually four or five popovers over the top of each other, that's why it's getting darker and darker, because the popover kind of darkens the rest of the screen when it puts it up.
+51:40 So if I click somewhere else, which is how you dismiss a popover, it's slowly getting rid of them all, all the way back to the other one.
+51:47 Needless to say, this is not a great UI, for the user, so we don't want this.
+51:51 Okay, why is this?
+51:52 How are we going to stop this?
+51:54 Well, we're going to stop this when this segue, when someone clicks on URL, we are going to check to see if we already have a popover up, and if we do, we're not going to do that segue.
+52:03 So let me show you how to do that.
+52:06 So first of all, we have to keep track of whether this popover is up.
+52:10 So I'm going to do that by adding a property here to my image view controller.
+52:15 I'm going to make it weak.
+52:18 Here's one of the first times we've used a weak property outside of outlets, okay, but it's going to be in UI popover controller, URL popover controller, and the reason it's going to be weak is because I want to use the weakness so that when the popover controller is gone, no one else will have a strong pointer to it, my pointer will get set to nil.
+52:39 Get it? So now I'm always going to know whether that popover controller is up, but I've got to set it initially, though.
+52:47 I've got to set this thing to the popover when the segue happens, okay?
+52:51 So let's do that.
+52:52 And how do we do that?
+52:54 I said this in the slide, but you're probably like "what?" but now you'll see it, which is this segue, if this is a popover segue, will be a subclass of UI storyboard called UI storyboard popover segue.
+53:11 Okay? Popover segue equals UI popover storyboard popover segue, segue.
+53:21 Now I could just do this, but I'm going to be a little safe and say if my segue is kind of class UI popover storyboard popover segue way class, okay, then I'll get it, then I'll do this.
+53:35 I just don't like to do casts like that without, you know, checking first.
+53:39 Although if I got to here, it probably is going to be a popover, but, you know, it should be a popover, but I'm going to check anyway.
+53:45 And now I'm just going to set my URL popover controller equal to that popover segue's popover controller property.
+53:53 If you look at popover segue, here's popover segue, I'm going to go to its documentation, okay, for UI storyboard popover, and you'll see that UI storyboard popover only has one property, which is the popover controller.
+54:06 Okay? So we're basically getting the popover controller from the segue.
+54:11 It's a special kind.
+54:12 Okay? So it's a little-- hopefully you understand that-- everyone understand that?
+54:17 Question? No?
+54:18 >> So it's the same as destination view controller?
+54:21 >> Um, it's not, this is not the destination view controller, this is the segue itself.
+54:25 Okay? We're not saying segue dot destination view controller here.
+54:28 >> Popover controller is the same as [inaudible].
+54:29 >> Okay, great question.
+54:31 Is the destination view controller, this thing, is that a popover controller?
+54:35 And the answer is, it is not.
+54:37 It is a URL view controller.
+54:39 Okay? Popover view controller is another class, not a UI view controller, that controls that popover, okay?
+54:46 So it is not.
+54:47 So the segue is a storyboard popover segue, out of which we get the popover controller, and the destination view controller is a URL view controller.
+54:57 Everyone got all that?
+54:59 Alright, so now we have a pointer to this URL popover controller, and it's automatically going to get set to nil as soon as it goes off screen, because it's weak.
+55:06 It's a weak pointer to it.
+55:08 There's only one other thing we need to do, which is not do this segue if that thing is up.
+55:15 And I actually talked about this in the lecture, how we do this, there's a method in UI view controller called should perform segue with identifier.
+55:24 Okay? And this is the system asking, someone clicked on something that's supposed to cause a segue.
+55:29 Should I do it?
+55:30 And right here we're going to say if the segue in question here, it's identifier, is equal to string show URL, which is what it is in our storyboard, and this is the reason why maybe we want to check it here as well, okay?
+55:51 I skipped over that demo mode, but you know, if we're going to check it here, we might want to check it up here as well.
+55:57 But anyway, we've got this, I'm going to return, in this case, so if it's a URL, then if I have URL popover controller, then no, do not perform this segue, because there's already a popover up.
+56:08 Otherwise, I could just say yes, but actually I'm going to do something a little trickier, I'm going to say if I have a image URL, then put it up, otherwise, also don't put it up.
+56:20 See what I did there?
+56:22 Two reasons not to put, do that URL segue.
+56:25 If I don't have any photo showing, then that's one reason.
+56:29 Or if I have a popup already up.
+56:32 Else, now this is interesting, I have an else case here, which is super should performs.
+56:38 Okay? So if I am not preventing it, then I'm going to let my super class UI view controller decide whether it should do this segue.
+56:45 Which it's always going to say yes, pretty much, but...okay?
+56:49 This should be return.
+56:51 Okay? So let's see if that fixes all our problems [background sounds].
+56:55 Alright, so let's go back to Rio.
+57:07 Here we are, in Rio, let's click URL, excellent, URL again, again, again, again, it's not doing it, click away, going to fix all our problems.
+57:18 Okay? There is a subtle problem still here, which I'm not going to fix because of time, I need to get to the maps here, but if I go to portrait mode and show the URL, watch what happens if I click photographer over here to show those photographers.
+57:31 Oh! The URL thing didn't go away.
+57:33 I thought if I clicked away from it, it's supposed to go away.
+57:36 And the answer is, if you click in the same bar that the URL thing is, then it does allow you to click.
+57:43 That's the thing in the slides that I talked about, called pass through views.
+57:47 So this whole bar is part of the pass through views, and the real bad thing about this is, if I click on a different photo, it's showing me a different photo, but it's not updating the URL.
+57:57 So this is really bad.
+57:58 So I'm going to fix this in the code I post, actually let's just fix it right now, easier to show you.
+58:03 I'm going to do this.
+58:05 Whenever someone sets my image to something new, okay?
+58:08 Call set image, I'm going to, in my image view controller, I'm going to dismiss any popover controller that I have.
+58:18 Okay? So that way if someone brings up that thing on the right and they click, at least I'll put away my URL.
+58:25 Okay? I could actually have some code here that updated the URL view controller and made it change, that wouldn't be that hard, I'd just keep track of it.
+58:33 The only problem is then that would be inconsistent between this portrait mode and this mode, because here, when I'm clicking, if I had URL up here, if I click over here, it makes the URL go away.
+58:44 Okay? Because over here is now no longer in the same bar as the URL.
+58:49 So I want my behavior to be at least somewhat consistent.
+58:52 So I'll make it so that when I click on something new, it makes the URL go away.
+58:57 Okay? Okay!
+58:59 Nice big long demo, I will, of course, post all of this.
+59:02 Now you know how to do popover controllers, you should really have a good handle on using those core data table view controllers by now, I hope.
+59:08 Oh! I promised I would do universal app, look how easy this is, okay?
+59:13 I'm going to do my iPhone, here's my iPad, I'm going to take this, copy it, go over here to my iPhone, get rid of this thing, paste, okay?
+59:25 Go back to iPad, get this image view controller, which I need, go over here, paste it.
+59:33 If I can find space for it.
+59:36 Paste. Alright there it is, put it up here.
+59:41 Just need to make the segue to it.
+59:45 Control, drag.
+59:47 It's a push segue.
+59:48 Boom. We're done.
+59:49 Now iPhone will work.
+59:51 Okay? You can come up after class if you want to see it working, but that's all there is.
+59:55 So a lot of times when you're working on iPhone and iPad UIs you'll get one working and then you'll just copy and paste back to the other one.
+01:00:02 Get that one maybe working with some new feature, copy and paste it in the appropriate things back to the other one.
+01:00:06 See what I mean, you can kind of go back and forth between, pretty straightforward.
+01:00:11 Okay! Back to the slides.
+01:00:13 Here we go.
+01:00:14 Lecture 14, there it is.
+01:00:19 Okay. So we're not going to get all the way through the maps stuff today, which is fine, because I have a little bit of time at the beginning of the next lecture, and then I'm going to be doing the map demo in the next lecture anyway, so it will be kind of fresh in your mind.
+01:00:30 So any questions about all that big demo I just did?
+01:00:34 All sounds good?
+01:00:35 Understandable?
+01:00:37 Okay. Alright.
+01:00:39 Map kit. Basically I'm going to be talking about map kit here, but before I talk about map kit, I have to talk about another framework, which is a non-UI framework, which kind of underlies the map kit framework, called core location.
+01:00:50 So core location is a framework, has a bunch of objects in it, that have to do with where is this device in the universe?
+01:00:58 Okay? Where on the planet, you know, where, in terms of GPS or other factors determining where it is, where is it?
+01:01:06 Okay? Where on earth.
+01:01:08 So, its basic object is a CL location that it concludes a coordinate which is, you know, latitude and longitude, altitude, okay?
+01:01:18 Horizontal and vertical accuracy, we'll talk about why that's important, time stamps, speed, course, things like that, okay?
+01:01:23 That's the CL location object.
+01:01:26 This object has this very important property called coordinate, and that is a C-struct, CL location coordinate 2D, and inside is just CL location degrees, which is essentially a double, which is latitude, and another one which is longitude.
+01:01:43 Okay? And then the altitude is in meters.
+01:01:46 Okay, so this is the basic object in core location.
+01:01:50 So the question is how do...oh!
+01:01:52 sorry, let me talk about accuracy, very important.
+01:01:55 So when you get a location, you got it in a certain way that might have varying accuracy.
+01:02:02 If you got that location from GPS, it could be very accurate.
+01:02:06 If you got it by looking at local cell towers, it might be pretty inaccurate.
+01:02:12 Right? It could be a mile off, actually.
+01:02:14 If you got it that way.
+01:02:16 And there's ways in between.
+01:02:17 On Stanford campus, you can actually get it by using wi-fi.
+01:02:22 It can look around, see what wi-fi things are near you and tell by that where you are.
+01:02:27 Kind of scary, huh?
+01:02:28 So it knows where you are.
+01:02:29 And that works even if you're indoors or whatever, so.
+01:02:32 Now, it only works for public wi-fi nodes, et cetera, but at Stanford, these wi-fi nodes are all well-known, so it knows where you are.
+01:02:41 And you specify this accuracy using one of this KCL location accuracy constants, and so there's best for navigation, if you want that kind of accuracy, that's going to use your battery because it's going to be constantly doing GPS.
+01:02:54 So that would be only if your phone was plugged in, like you're in your car, and it's plugged into the cigarette lighter or whatever, or I guess they have USB ports nowadays in cars, but anyway, you would want power there.
+01:03:04 Then there's best, which is also GPS, but not quite as power hungry, and then all the way down using wi-fi and these other things to less and less accuracy, but how ever the location was found, it will also report to you what accuracy it used.
+01:03:18 Okay? Both in terms of horizontally and then altitude wise, vertically.
+01:03:23 Understand that accuracy means power.
+01:03:27 The more accuracy you ask for, the more power you're going to use.
+01:03:30 So ask for the least accuracy your application can deal with so that you use as little power as possible.
+01:03:37 Very important point.
+01:03:39 Okay, some other properties there, I'm not really going to talk about them, you have the slides for them.
+01:03:43 Obvious things, speed is calculated by seeing all the points that you're moving through time, and it can calculate your speed, things like that.
+01:03:51 So how do you get one of these core location guys?
+01:03:54 Okay? I want to get a core location object, it says where I am right now.
+01:03:58 And the answer is, you use this class called CL location manager.
+01:04:01 Okay? So you instantiate a core location manager, CL location manager, and you're going to set some things up about it, and then you're going to tell it to start telling you where you are, and it's got a delegate, and it's going to start telling that delegate where you are.
+01:04:14 So that's basically how it works.
+01:04:15 Now, you can simulate where you are, by the way, in the debugger.
+01:04:19 With this little thing down by the debug bar, place where the pause and all that, you can just simulate where you are, you can even add places that you are, if you want to like have a whole series of locations that you want to check running through to see if your application is working.
+01:04:34 So this is a really cool way to simulate being somewhere.
+01:04:39 Alright, so CL location manager, how do we use this thing to get our location?
+01:04:43 You create it, you check to see what hardware you have, because every different device, iPhone 4, iPhone 5, iPads, have different hardware in them for figuring out where they are, and so you're going to check to see what's available.
+01:04:58 Then you're going to add, set this delegate to be any object you want, and then you're going to configure it for what kind of location updates you want, accuracy, things like that, and then you're going to start it running.
+01:05:09 And it's going to start reporting to you where you are.
+01:05:13 So what kinds of location monitoring are available?
+01:05:16 There is accuracy based reporting, okay?
+01:05:19 So you specify an accuracy and it will tell you to that accuracy where you are.
+01:05:25 Okay? There's updates that you can get where it will send you a message only when a significant change in position has happened.
+01:05:32 Okay? Imagine maybe it's using cell towers or something there, or if wi-fi is fired up for other reasons, it might be able to be using wi-fi, right?
+01:05:40 But it's probably not going to use GPS.
+01:05:43 Only when significant changes occur.
+01:05:45 You also have region based updates.
+01:05:47 Put a little circle around the dry cleaners, when you walk by or drive by, it will tell you, "Oh, you're by the dry cleaner," okay?
+01:05:54 So that's region.
+01:05:55 So you can set up a little region, circular regions, beacons, we'll talk about those.
+01:05:58 And then you can also monitor your heading.
+01:06:01 Okay? So which way am I walking?
+01:06:03 Okay, so that might be using a compass, might be using GPS, just depends on what the device has.
+01:06:08 So the first thing I said was, you've got to check the capabilities.
+01:06:12 So here's a whole bunch of methods, I'm not going to go through them for time reasons, but you need to check these, okay?
+01:06:17 Because, for example, the user might have turned off location services for you.
+01:06:22 Okay? So you've got to know, you've got to deal with that, either ask them to turn it back on, okay, there's this restricted thing for this too.
+01:06:29 Or whatever you want to do, or do some different thing in your app, if you work with all those location updates or whatever, you might be on a device that doesn't have the hardware you need to do what you want, so you need to all check all this when you first create your location manager.
+01:06:42 So then getting it, you can ask a location manager, "where am I right now?" Okay? Kind of poll it?
+01:06:50 We never do that.
+01:06:51 We use this delegate thing.
+01:06:52 So let's talk about how the delegate thing works.
+01:06:53 First, you specify the accuracy.
+01:06:56 Okay? This is location manager property, desired accuracy, I showed you the accuracies before.
+01:07:01 Specify that.
+01:07:02 And also you can specify a distance filter, in other words, until the user moves at least this far, don't even tell me.
+01:07:09 Okay? So if they don't go at least 100 meters, or a kilometer, don't tell me about it, so that saves battery too.
+01:07:16 The chip, the GPS chip in these devices, especially newer ones, really awesome.
+01:07:21 A lot of this stuff that you specify here gets loaded into the chip, and the chip by itself is calculating where you are and whether you went far enough and all that stuff, and then waking the phone back up.
+01:07:30 The whole phone can sleep and the GPS is still watching, and so if you can tune these to be as minimal as possible, you will save a ton of battery in the device, because only that GPS chip will be watching, you know, what's going on.
+01:07:44 Okay so then you start getting the updates by just calling start updating location, and your delegate will start getting sent messages based on the accuracy and the filter that you specify for distance, okay?
+01:07:56 What does that delegate method look like?
+01:07:58 Location manager did update to location from location, is one of the ones.
+01:08:02 There's actually some other ones that you could get sent, so you want to check the documentation on this one, but this is the basic one, where it's saying "Okay, I got a new location, here it is," that location of course will have accuracy and time stamp, all these other things in there, and it just gives you the fun location just for your own convenience, so you don't have to keep it if you just want to see the difference, okay?
+01:08:24 So that's it.
+01:08:25 It's quite simple, actually to use this location manager.
+01:08:27 It's also quite simple to drain the user's battery in about an hour, okay, so be careful and know what you're doing here.
+01:08:34 There's a similar API for heading, for tracking the heading.
+01:08:38 The delegate can report errors, and this is one case.
+01:08:41 A lot of times you see me in my demos, I just say nil for the NS error, and I ignore errors, and sometimes that's okay, like if I'm doing a Flickr fetch and if it fails, I just don't care because I know I'm going to be doing another fetch in 20 minutes, so I'll just let it fail, although even there, I probably want to check it, and if it keeps failing over and over, then I need to maybe get the user involved, okay?
+01:09:00 But here, you really want to check the errors.
+01:09:02 Okay, and again for time reasons, I don't have time to go through the details more than just that these errors can occur, but there are certain things you need to do in certain errors if you really want to be a good core location getting app.
+01:09:16 Um, background, can you get these location updates in the background?
+01:09:19 Okay, I promised I was going to talk about this, and I even have a slide about it.
+01:09:22 And the answer is, you can.
+01:09:24 Okay? You can even sign up to be the kind of app that gets the location manager will just run in the background normally, okay?
+01:09:33 It's the same place, remember when we went and did the background fetches, we had to go to our project settings, and we clicked that switch?
+01:09:39 There's another switch there that's just location, and when you do that, you'll start getting this, okay?
+01:09:44 But that's really for apps like, you know, a fitness app where you're going off to do a mile run and your phone is in the pocket and it's tracking your progress, and you've tuned it to, you know, coalesce things and to keep track of it and report it to you.
+01:10:00 You know, when you do a fitness app, you can really drain the battery fast.
+01:10:03 So if you're doing a fitness app, by the way, which don't do that for your final project, but, if you're doing a fitness app, for the real, for real, then you really got to know what you're doing.
+01:10:13 So really investigate that because you really want to be low power, but you can still do lots of cool things when it comes to tracking where the user's running.
+01:10:20 However, running in the background like that, since it uses a lot of battery, is generally only for very, very, very, very small number of apps.
+01:10:29 But there are two ways to get background notifications about where you are, okay, that are very low power, and they're a little coarser granularity, they're not going to be running down the trail telling me exactly where I went on the trail, but they are telling you kind of where you are and are really useful for a lot of apps.
+01:10:46 So let's talk about the two ways that you can get notified in the background and in the foreground, okay?
+01:10:50 If you can get notified in the background, then you're going to get notified in the foreground automatically.
+01:10:55 Here's a way that background and foreground, you can get notified.
+01:10:58 Okay? The first one is called significant location change monitoring, and you just get a CL location manager and you can say start monitoring significant location changes, and then when the user moves a significant amount of distance, you will get notified via your delegate.
+01:11:14 Okay? It's as simple as that.
+01:11:16 And this works even if you're in the background.
+01:11:19 Even if your application is not running.
+01:11:22 You will get launched to be told that the person moved to a new space.
+01:11:27 Okay? This is an awesome API, okay, very power efficient because it knows how to manage tracking where you are in an efficient way and still super useful for you.
+01:11:37 The only downside of it is significant distance, right?
+01:11:40 You have to be going significant distance.
+01:11:41 Question?
+01:11:42 >> Do we have any control over the definition of significant distance?
+01:11:44 >> The question is do we have any control of the definition of significant, the answer is no.
+01:11:50 So yeah, so when you get launched in the background, if you get launched, like you're not running, your application did finish launching with options thing will be sent, but there will be a dictionary there, and one of the things in the dictionary will be UI application launch options location key, and if that key is in there, that means you got launched because a significant change happened, so that's how you know, "Oh, that's why I got launched," okay?
+01:12:12 Because of that key.
+01:12:13 Okay? Another way to find out in the background is region based launch, region based monitoring, very similar, except for here you actually specify either a circular region or you can also specify a beacon, okay?
+01:12:28 And I'll talk about that in a second.
+01:12:30 So you specify circular region on the planet, you know, coordinate, and then a radius around it, and if the user goes into that region, you'll get notified, your delegate will send a message, or you'll get launched if necessary, and you'll find out.
+01:12:44 Now, yes, there's a limit to how many of these you can have, I don't know what it is, 40 or something like that, your app, and but this is also incredibly efficient.
+01:12:52 So this is happening at a very lower, power-efficient level as well.
+01:12:56 Okay? The circular region is obvious to create, you just create a CL circular region.
+01:13:03 The beacon is a little more interesting, and I don't really have time to talk about the beacon, but a beacon is basically not a place on earth, but it's another device.
+01:13:13 It's possible to write an application that essentially is a beacon, and it's broadcasting all the time, and if your app comes close to it, you'll get woken up and told that you went into the region of that broadcasting device.
+01:13:26 This is new for iOS 7, incredible.
+01:13:28 Okay, I'm really interested to see what people come up with this technology.
+01:13:31 Becoming a beacon is, here, by the way, is the delegate method you get, did enter region and did exit region, and you'll get launched.
+01:13:43 Okay? The beacon is becoming a-- sorry, I'm fast forwarding here-- uh, yeah, regions are tracked by name, that's because they have to exist when you're not launching, there are maximum monitoring distances.
+01:13:58 Uh, okay so beacons.
+01:13:59 To become a beacon, you need to use the core bluetooth library, it's not part of CL core location library.
+01:14:08 So you want to look up CB, core bluetooth, peripheral manager, and find out if you want to become a beacon.
+01:14:15 Like you want to be the beacon, not detect a beacon, but if you want to detect a beacon, you use this.
+01:14:19 You create a region, which is a beacon region, CL beacon region, and you specify it's special identifier that identifies that beacon, and it just tells you when you get close, it will even tell you how close you are to the beacon, okay?
+01:14:32 Are you near it, or far, or right on top of it, okay?
+01:14:36 So it's pretty darn cool.
+01:14:38 So that's regions.
+01:14:39 Region monitoring.
+01:14:39 So both region and significant changes will notify you in the background.
+01:14:44 So map kit, I'm going to talk about next time.
+01:14:46 And it is basically a user interface for putting these beautiful maps, but obviously we needed that core location stuff to know about how to find out about where we are, and where things are, and stuff like that.
+01:14:58 So we'll pick that up on Wednesday, and I will see you then.
